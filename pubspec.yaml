@@ -1,0 +1,59 @@
+name: hlbmerge
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  #路径
+  path: ^1.9.1
+  # 路由
+  get:
+    git:
+      url: "https://gitcode.com/openharmony-sig/fluttertpc_get.git"
+  # 文件选择
+#  file_picker:
+#    git:
+#      url: "https://gitcode.com/openharmony-sig/fluttertpc_file_picker.git"
+  file_picker: ^8.3.2
+
+  # ffmpeg_hl
+  ffmpeg_hl:
+    path: ./ffmpeg_hl
+  # 弹窗 https://pub-web.flutter-io.cn/packages/flutter_smart_dialog
+  flutter_smart_dialog: ^4.9.8+7
+  # 数据存储
+  shared_preferences:
+      git:
+        url: "https://gitcode.com/openharmony-sig/flutter_packages.git"
+        path: "packages/shared_preferences/shared_preferences"
+
+
+dev_dependencies:
+#  flutter_test:
+#    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/custom-fonts/#from-packages

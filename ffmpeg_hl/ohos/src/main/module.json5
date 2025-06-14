@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "ffmpeg_hl",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet"
+    ]
+  }
+}
