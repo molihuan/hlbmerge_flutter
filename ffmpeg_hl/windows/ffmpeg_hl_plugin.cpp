@@ -70,8 +70,8 @@ void FfmpegHlPlugin::HandleMethodCall(
 
       std::cout << "Win C++ Received:" << audioPath << ", " << videoPath << ", " << outputPath << std::endl;
 
-//      bool bool_ret = merge_audio_video(videoPath, audioPath, outputPath);
-//      std::cout << bool_ret << std::endl;
+      bool bool_ret = merge_audio_video(videoPath, audioPath, outputPath);
+      std::cout << bool_ret << std::endl;
 
       flutter::EncodableMap response;
       response[flutter::EncodableValue("success")] = flutter::EncodableValue(true);

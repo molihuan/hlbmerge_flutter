@@ -32,7 +32,7 @@ class MethodChannelFfmpegHl extends FfmpegHlPlatform {
       "outputPath": outputPath
     });
 
-    debugPrint(result);
+    print(result);
 
     if (result is! Map) {
       return Future.value(Pair(false, "未知错误"));

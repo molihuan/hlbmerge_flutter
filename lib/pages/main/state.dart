@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../../models/cache_group.dart';
+
 class MainState {
   MainState() {
     ///Initialize variables

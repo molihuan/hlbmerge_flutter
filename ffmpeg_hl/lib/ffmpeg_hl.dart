@@ -17,15 +17,15 @@ class FfmpegHl {
   Future<Pair<bool, String>> mergeAudioVideo(
       String audioPath, String videoPath, String outputPath) {
     //判断路径中是否有空格
-    if (StrUtil.containsAnySpace(audioPath)) {
-      return Future.value(Pair(false, "音频路径中不能包含空格"));
-    }
-    if (StrUtil.containsAnySpace(videoPath)) {
-      return Future.value(Pair(false, "视频路径中不能包含空格"));
-    }
-    if (StrUtil.containsAnySpace(outputPath)) {
-      return Future.value(Pair(false, "输出路径中不能包含空格"));
-    }
+    // if (StrUtil.containsAnySpace(audioPath)) {
+    //   return Future.value(Pair(false, "音频路径中不能包含空格"));
+    // }
+    // if (StrUtil.containsAnySpace(videoPath)) {
+    //   return Future.value(Pair(false, "视频路径中不能包含空格"));
+    // }
+    // if (StrUtil.containsAnySpace(outputPath)) {
+    //   return Future.value(Pair(false, "输出路径中不能包含空格"));
+    // }
 
     return FfmpegHlPlatform.instance
         .mergeAudioVideo(audioPath, videoPath, outputPath);

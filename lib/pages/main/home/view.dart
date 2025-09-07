@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../models/cache_group.dart';
 import 'logic.dart';
 import 'state.dart';
 
@@ -13,18 +16,369 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // child: ListView.builder(
-      //   itemCount: 1,
-      //   itemBuilder: (context, index) {
-      //     final item = loadedItems[index];
-      //
-      //     return CheckboxListTile(
-      //       title: Text(item.name),
-      //       value: true,
-      //       onChanged: (bool? selected) {},
-      //     );
-      //   },
-      // ),
+      child: Obx(() {
+        return Column(
+          children: [
+            _buildTopBar(context),
+            Expanded(
+                child: ListView.builder(
+              itemCount: state.cacheGroupList.length,
+              itemExtent: 100,
+              itemBuilder: (context, index) {
+                var item = state.cacheGroupList[index];
+
+                return InkWell(
+                  onTap: () {
+                    if (state.isMultiSelectMode) {
+                      logic.changeGroupListChecked(index, !item.checked);
+                    } else {
+                      showCacheItemListDialog(context, index);
+                    }
+                  },
+                  onLongPress: () {
+                    logic.changeMultiSelectMode(!state.isMultiSelectMode);
+                    logic.changeGroupListChecked(index, true);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Obx(() {
+                          return state.isMultiSelectMode
+                              ? Container(
+                                  margin: const EdgeInsets.only(right: 10),
+                                  child: Checkbox(
+                                      value: item.checked,
+                                      onChanged: (v) {
+                                        var checked = v ?? false;
+                                        logic.changeGroupListChecked(
+                                            index, checked);
+                                      }),
+                                )
+                              : const SizedBox.shrink();
+                        }),
+                        Container(
+                          width: 160,
+                          height: 100,
+                          margin: const EdgeInsets.symmetric(vertical: 5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            image: DecorationImage(
+                              image: FileImage(File(item.coverPath ?? "")),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(left: 10),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Align(
+                                  child: Text(item.title ?? "",
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      )),
+                                ),
+                              ),
+                              Container(
+                                  margin: const EdgeInsets.only(bottom: 5),
+                                  child: Text(
+                                    '路径:${item.path}',
+                                    style: const TextStyle(color: Colors.grey),
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ))
+          ],
+        );
+      }),
+    );
+  }
+
+  //topbar
+  Widget _buildTopBar(BuildContext context) {
+    List<Widget> optionWidgets;
+    if (state.isMultiSelectMode) {
+      optionWidgets = [
+        // 操作按钮
+        TextButton(onPressed: () {
+        }, child: const Text("提取音频")),
+        TextButton(onPressed: () {}, child: const Text("提取视频")),
+        TextButton(onPressed: () {}, child: const Text("合并音视频")),
+        // 全选按钮
+        Container(
+          margin: const EdgeInsets.only(right: 10),
+          child: InkWell(
+            onTap: () {
+              logic.changeAllGroupListChecked(
+                  !state.isAllGroupListChecked);
+            },
+            child: state.isAllGroupListChecked
+                ? const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [Icon(Icons.check_box), Text("取消全选")],
+            )
+                : const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(Icons.check_box_outline_blank),
+                Text("全选")
+              ],
+            ),
+          ),
+        )
+      ];
+    }else{
+      optionWidgets=[
+
+      ];
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            "转换",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+
+          Row(
+            children: [
+              ...optionWidgets,
+              //编辑按钮
+              Container(
+                decoration: BoxDecoration(
+                  color: state.isMultiSelectMode
+                      ? Colors.red.withOpacity(0.7)
+                      : Colors.transparent,
+                  shape: BoxShape.circle, // 圆形
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.edit,
+                    color:
+                        state.isMultiSelectMode ? Colors.white : Colors.black,
+                  ),
+                  onPressed: () {
+                    logic.changeMultiSelectMode(!state.isMultiSelectMode);
+                  },
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showCacheItemListDialog(BuildContext context, int cacheGroupIndex) {
+    showDialog(
+      context: context,
+      barrierDismissible: true, // 点击空白关闭
+      builder: (context) {
+        return Dialog(
+          insetPadding: EdgeInsets.zero, // 取消默认边距
+          backgroundColor: Colors.transparent, // 背景透明
+          child: Container(
+            width: double.infinity,
+            height: double.infinity, // 全屏
+            color: Colors.black.withOpacity(0.5), // 蒙层效果
+            child: Obx(() {
+              var cacheItemList =
+                  state.cacheGroupList[cacheGroupIndex].cacheItemList;
+              return Stack(
+                children: [
+                  // 居中内容
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      margin: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            "请选择需要合并的缓存项",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Expanded(
+                              child: ListView.builder(
+                            itemCount: cacheItemList.length,
+                            itemExtent: 100,
+                            itemBuilder: (context, index) {
+                              var item = cacheItemList[index];
+
+                              return InkWell(
+                                onTap: () {
+                                  logic.changeCacheItemListChecked(
+                                      cacheGroupIndex, index, !item.checked);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        margin:
+                                            const EdgeInsets.only(right: 10),
+                                        child: Checkbox(
+                                            value: item.checked,
+                                            onChanged: (v) {
+                                              var checked = v ?? false;
+                                              logic.changeCacheItemListChecked(
+                                                  cacheGroupIndex,
+                                                  index,
+                                                  checked);
+                                            }),
+                                      ),
+                                      Container(
+                                        width: 160,
+                                        height: 100,
+                                        margin: const EdgeInsets.symmetric(
+                                            vertical: 5),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          image: DecorationImage(
+                                            image: FileImage(
+                                                File(item.coverPath ?? "")),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: const EdgeInsets.only(left: 10),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: Align(
+                                                child: Text(item.title ?? "",
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    )),
+                                              ),
+                                            ),
+                                            Container(
+                                                margin: const EdgeInsets.only(
+                                                    bottom: 5),
+                                                child: Text(
+                                                  '路径:${item.path}',
+                                                  style: const TextStyle(
+                                                      color: Colors.grey),
+                                                )),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          )),
+                          const Divider(thickness: 0.4),
+                          //全选按钮
+                          Row(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(
+                                    right: 10, left: 15, bottom: 15),
+                                child: InkWell(
+                                  onTap: () {
+                                    logic.changeAllCacheItemListChecked(
+                                        cacheGroupIndex,
+                                        !state.isAllCacheItemListChecked);
+                                  },
+                                  child: state.isAllCacheItemListChecked
+                                      ? const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.check_box),
+                                            Text("取消全选")
+                                          ],
+                                        )
+                                      : const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.check_box_outline_blank),
+                                            Text("全选")
+                                          ],
+                                        ),
+                                ),
+                              )
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {},
+                                child: const Text("提取音频"),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {},
+                                child: const Text("提取视频"),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  logic.mergeAudioVideoByCacheItem(cacheGroupIndex);
+                                },
+                                child: const Text("合并音视频"),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text("关闭"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ),
+        );
+      },
     );
   }
 }

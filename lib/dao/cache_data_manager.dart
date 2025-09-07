@@ -214,6 +214,8 @@ class CacheDataManager {
         //存在则添加到对应缓存组
         for (var group in cacheGroupList) {
           if (group.groupId == item.groupId) {
+            //更新缓存组的路径为它们的父目录
+            group.path = item.parentPath;
             group.cacheItemList.add(item);
             break;
           }
@@ -222,6 +224,7 @@ class CacheDataManager {
         //不存在则创建缓存组
         var cacheGroup = CacheGroup();
         cacheGroup.groupId = item.groupId;
+        cacheGroup.path = item.path;
         cacheGroup.title = item.groupTitle;
         cacheGroup.coverPath = item.groupCoverPath;
         cacheGroup.coverUrl = item.groupCoverUrl;
