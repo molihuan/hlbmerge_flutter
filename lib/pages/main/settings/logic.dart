@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ffmpeg_hl/ffmpeg_hl.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:hlbmerge/dao/cache_data_manager.dart';
 import 'package:hlbmerge/dao/sp_data_manager.dart';
@@ -24,16 +25,28 @@ class SettingsLogic extends GetxController {
     // var result = await ffmpegHlPlugin.mergeAudioVideo("1", "2", "3");
     // if (result.first) {}
 
-
+    //获取文件夹路径
     String? dirPath = await FilePicker.platform.getDirectoryPath();
+    if(dirPath == null){
+      return;
+    }
 
     var manager = CacheDataManager();
-    List<CacheGroup> cacheGroupList = manager.loadCacheData(dirPath!);
-
+    List<CacheGroup> cacheGroupList = manager.loadCacheData(dirPath);
     print(cacheGroupList);
 
 
   }
+
+  //解析缓存数据
+  parseCacheData() async {
+    String dirPath = "C:/Users/moli/FlutterProject/hlbmerge_flutter/testRes/电脑缓存文件";
+
+    var manager = CacheDataManager();
+    List<CacheGroup>? cacheGroupList = manager.loadPcCacheData(dirPath);
+    // print(cacheGroupList);
+  }
+
 
   //选择输出路径
   selectOutputPath() async {

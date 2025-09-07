@@ -1,9 +1,7 @@
 import 'package:get/get.dart';
-import 'package:hlbmerge/pages/home/view.dart';
-import 'package:hlbmerge/pages/progress/view.dart';
-import 'package:hlbmerge/pages/settings/view.dart';
-
-
+import 'progress/view.dart';
+import 'settings/view.dart';
+import 'home/view.dart';
 import 'state.dart';
 
 class MainLogic extends GetxController {

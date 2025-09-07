@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:ffmpeg_hl/beans/Pair.dart';
+import 'package:get/get.dart';
 import 'package:hlbmerge/models/cache_group.dart';
 import 'package:hlbmerge/utils/FileUtil.dart';
 import 'package:hlbmerge/utils/JsonUtils.dart';
@@ -15,15 +18,25 @@ enum CachePlatform {
   Phone,
 }
 
+//m4s文件类型
+enum M4sFileType {
+  //视频
+  video,
+  //音频
+  audio,
+}
+
 class CacheDataManager {
   //缓存平台
   CachePlatform cachePlatform = CachePlatform.PC;
 
   List<CacheGroup> loadCacheData(String targetPath) {
+    //缓存组列表
     List<CacheGroup> cacheGroupList = [];
 
     var rootDir = Directory(targetPath);
     if (!rootDir.existsSync()) {
+      // 目录不存在
       return cacheGroupList;
     }
 
@@ -121,16 +134,183 @@ class CacheDataManager {
         }
       }
     }
+
     if (pcCacheGroup.cacheItemList.isNotEmpty) {
       cacheGroupList.add(pcCacheGroup);
     }
 
     //解析json
-    if(cacheGroupList.isNotEmpty){
-      var jsonInfo = JsonUtils.parseCacheJson(cacheGroupList[1].cacheItemList[0].jsonPath);
+    if (cacheGroupList.isNotEmpty) {
+      var jsonInfo =
+          JsonUtils.parseCacheJson(cacheGroupList[1].cacheItemList[0].jsonPath);
       print(jsonInfo);
     }
 
     return cacheGroupList;
+  }
+
+  List<CacheGroup>? loadPcCacheData(String targetPath) {
+    //判断路径是否存在并且是否是文件夹
+    var rootDir = Directory(targetPath);
+    if (!rootDir.existsSync()) {
+      // 目录不存在
+      return null;
+    }
+
+    List<CacheItem> cacheItemList = [];
+
+    List<File> m4sFiles = [];
+
+    //遍历获取子目录
+    var firstDirs = rootDir.listSync();
+    for (var firstDir in firstDirs) {
+      m4sFiles.clear();
+      if (firstDir is Directory) {
+        //创建缓存item
+        var cacheItem = CacheItem();
+        //缓存项父路径
+        cacheItem.parentPath = targetPath;
+        //缓存项路径
+        cacheItem.path = firstDir.path;
+        var files = firstDir.listSync();
+        for (var file in files) {
+          if (file is File) {
+            if (file.path.endsWith(".videoInfo")) {
+              //json信息文件
+              // print(file.path);
+              cacheItem.jsonPath = file.path;
+              //解析json文件信息
+              cacheItem = _parsePcJsonFile(cacheItem);
+            } else if (file.path.endsWith("dm1")) {
+              //弹幕文件
+              cacheItem.danmakuPath = file.path;
+            } else if (file.path.endsWith(".m4s")) {
+              //m4s文件
+              // print(file.path);
+              //收集m4s文件
+              m4sFiles.add(file);
+            }
+          }
+        }
+        //判断并设置音频文件, 视频文件
+        var audioVideoM4s = _judgeM4sFile(m4sFiles);
+        if (audioVideoM4s != null) {
+          cacheItem.audioPath = audioVideoM4s.first;
+          cacheItem.videoPath = audioVideoM4s.second;
+          // print(cacheItem);
+          //添加缓存项
+          cacheItemList.add(cacheItem);
+        }
+      }
+    }
+
+    //缓存组列表
+    List<CacheGroup> cacheGroupList = [];
+
+    //遍历cacheItemList并按groupId进行分组
+    for (var item in cacheItemList) {
+      var groupIdList = cacheGroupList.map((group) { return group.groupId;});
+      if (groupIdList.contains(item.groupId)) {
+        //存在则添加到对应缓存组
+        for (var group in cacheGroupList) {
+          if (group.groupId == item.groupId) {
+            group.cacheItemList.add(item);
+            break;
+          }
+        }
+      } else {
+        //不存在则创建缓存组
+        var cacheGroup = CacheGroup();
+        cacheGroup.groupId = item.groupId;
+        cacheGroup.title = item.groupTitle;
+        cacheGroup.coverPath = item.groupCoverPath;
+        cacheGroup.coverUrl = item.groupCoverUrl;
+        cacheGroup.cacheItemList.add(item);
+        cacheGroupList.add(cacheGroup);
+      }
+
+    }
+
+    print(cacheGroupList);
+    return cacheGroupList;
+  }
+
+  //解析电脑json文件信息
+  CacheItem _parsePcJsonFile(CacheItem item) {
+    final jsonPath = item.jsonPath;
+    if (jsonPath == null) {
+      //抛出异常
+      throw Exception("json路径不存在,请先设置");
+    }
+    //判断json文件是否是正常的json格式
+    try {
+      // 读取文件
+      String content = File(jsonPath).readAsStringSync();
+      final Map<String, dynamic> data = json.decode(content);
+      // 获取标题
+      item.title = _getFirstNonNull([
+        () => _getMapString(data, 'title'),
+        () => _getMapString(data, 'tabName'),
+        () => _getMapString(data, 'cid'),
+        () => _getMapString(data, 'itemId'),
+        () => _getMapString(data, 'p'),
+      ]);
+
+      item.coverPath = _getMapString(data, 'coverPath');
+      item.coverUrl = _getMapString(data, 'coverUrl');
+
+      item.groupId = _getMapString(data, 'groupId');
+      item.groupCoverPath = _getMapString(data, 'groupCoverPath');
+      item.groupCoverUrl = _getMapString(data, 'groupCoverUrl');
+      item.groupTitle = _getMapString(data, 'groupTitle');
+
+    } catch (e) {
+      print("解析${item.jsonPath} json文件错误:");
+      e.printError();
+    }
+
+    return item;
+  }
+
+  //获取Map中的字符串值
+  static String? _getMapString(dynamic data, String key) {
+    if (data is Map && data.containsKey(key)) {
+      final value = data[key];
+      return value is String ? value : value?.toString();
+    }
+    return null;
+  }
+  // 获取第一个非空的值
+  static String? _getFirstNonNull(List<String? Function()> getters) {
+    for (var get in getters) {
+      final value = get();
+      if (value != null && value.trim().isNotEmpty) return value;
+    }
+    return null;
+  }
+
+  //判断电脑缓存文件m4s文件
+  //返回的Pair<音频文件, 视频文件>
+  Pair<String, String>? _judgeM4sFile(List<File> m4sFiles) {
+    if (m4sFiles.length != 2) {
+      return null;
+    }
+    var file1 = m4sFiles[0];
+    var file2 = m4sFiles[1];
+
+    //根据文件名判断音频文件
+    if (file1.path.endsWith("30280.m4s")) {
+      return Pair(file1.path, file2.path);
+    }
+    if (file2.path.endsWith("30280.m4s")) {
+      return Pair(file2.path, file1.path);
+    }
+
+    //根据文件大小判断音频文件
+    if (file1.lengthSync() < file2.lengthSync()) {
+      return Pair(file1.path, file2.path);
+    } else {
+      return Pair(file2.path, file1.path);
+    }
   }
 }
