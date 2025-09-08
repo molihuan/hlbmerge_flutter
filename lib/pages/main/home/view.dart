@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hlbmerge/utils/FileUtil.dart';
 
 import '../../../models/cache_group.dart';
 import 'logic.dart';
@@ -115,9 +116,14 @@ class HomePage extends StatelessWidget {
       optionWidgets = [
         // 操作按钮
         TextButton(onPressed: () {
+         logic.exportFileByCacheGroup(FileFormat.mp3);
         }, child: const Text("提取音频")),
-        TextButton(onPressed: () {}, child: const Text("提取视频")),
-        TextButton(onPressed: () {}, child: const Text("合并音视频")),
+        TextButton(onPressed: () {
+          logic.exportFileByCacheGroup(FileFormat.mp4);
+        }, child: const Text("提取视频")),
+        TextButton(onPressed: () {
+          logic.mergeAudioVideoByCacheGroup();
+        }, child: const Text("合并音视频")),
         // 全选按钮
         Container(
           margin: const EdgeInsets.only(right: 10),
@@ -350,11 +356,15 @@ class HomePage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  logic.exportFileByCacheItem(cacheGroupIndex,FileFormat.mp3);
+                                },
                                 child: const Text("提取音频"),
                               ),
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  logic.exportFileByCacheItem(cacheGroupIndex,FileFormat.mp4);
+                                },
                                 child: const Text("提取视频"),
                               ),
                               ElevatedButton(
@@ -364,7 +374,13 @@ class HomePage extends StatelessWidget {
                                 child: const Text("合并音视频"),
                               ),
                               ElevatedButton(
-                                onPressed: () => Navigator.of(context).pop(),
+                                onPressed: () {
+                                  //取消全选
+                                  logic.changeAllCacheItemListChecked(
+                                      cacheGroupIndex,
+                                      false);
+                                  Navigator.of(context).pop();
+                                },
                                 child: const Text("关闭"),
                               ),
                             ],

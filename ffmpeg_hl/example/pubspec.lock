@@ -95,11 +95,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_web_plugins:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
   fuchsia_remote_debug_protocol:
     dependency: transitive
     description: flutter
@@ -275,14 +270,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "14.2.1"
-  web:
-    dependency: transitive
-    description:
-      name: web
-      sha256: "97da13628db363c635202ad97068d47c5b8aa555808e7a9411963c533b449b27"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.5.1"
   webdriver:
     dependency: transitive
     description:

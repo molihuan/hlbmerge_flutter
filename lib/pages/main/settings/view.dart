@@ -16,12 +16,6 @@ class SettingsPage extends StatelessWidget {
       child: ListView(
         children: [
           ListTile(
-            title: const Text("测试按钮"),
-            onTap: () async {
-                logic.parseCacheData();
-            },
-          ),
-          ListTile(
             title: const Text("Avcodec配置"),
             onTap: () async {
               String? avcodecCfg = await logic.getAvcodecCfg();
@@ -30,12 +24,18 @@ class SettingsPage extends StatelessWidget {
           ),
           Obx(() {
             return ListTile(
-              title: Text("输出路径:${state.outputPath}"),
+              title: Text("输出路径:${state.outputDirPath}"),
               onTap: () async {
                 logic.selectOutputPath();
               },
             );
           }),
+          ListTile(
+            title: const Text("测试按钮"),
+            onTap: () async {
+              logic.parseCacheData();
+            },
+          ),
         ],
       ),
     );

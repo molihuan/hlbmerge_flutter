@@ -63,8 +63,9 @@ class SettingsLogic extends GetxController {
       Get.snackbar("提示", "路径中不能包含空格,请重新选择");
       return;
     }
-    state.outputPath = dirPath;
-    SpDataManager.setOutputPath(dirPath);
+    state.outputDirPath = dirPath;
+    //持久化
+    SpDataManager.setOutputDirPath(dirPath);
     Get.snackbar("提示", "已选择输出路径:$dirPath");
   }
 

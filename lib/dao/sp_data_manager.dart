@@ -13,16 +13,16 @@ class SpDataManager {
   }
 
   //输出目录key
-  static const String outputPathKey = 'outputPath';
+  static const String outputDirPathKey = 'outputDirPathKey';
 
 
   //输出目录
-  static setOutputPath(String path) {
-    prefs.setString(outputPathKey, path);
+  static setOutputDirPath(String path) {
+    prefs.setString(outputDirPathKey, path);
   }
 
-  static String? getOutputPath() {
-    return prefs.getString(outputPathKey);
+  static String? getOutputDirPath() {
+    return prefs.getString(outputDirPathKey);
   }
 
 }

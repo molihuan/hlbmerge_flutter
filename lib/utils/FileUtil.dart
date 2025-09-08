@@ -26,4 +26,26 @@ class FileUtil {
 
     return dir.listSync().whereType<File>().map((e) => e).toList();
   }
+
+  //当前exe所在文件夹
+  static Directory getCurrExeDir() {
+    String exePath = Platform.resolvedExecutable;
+    Directory exeDir = File(exePath).parent;
+    //print('程序所在目录: $exeDir');
+    return exeDir;
+  }
+
+}
+
+//文件格式枚举
+enum FileFormat {
+  //mp4
+  mp4("mp4"),
+  //mp3
+  mp3("mp3");
+  // 属性
+  final String extension;
+
+  // 构造函数
+  const FileFormat(this.extension);
 }

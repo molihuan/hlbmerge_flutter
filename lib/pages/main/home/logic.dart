@@ -7,33 +7,150 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../dao/cache_data_manager.dart';
+import '../../../dao/sp_data_manager.dart';
 import '../../../models/cache_group.dart';
 import '../../../models/cache_item.dart';
+import '../../../utils/FileUtil.dart';
 import '../../../utils/PlatformUtils.dart';
 import 'state.dart';
+import 'package:path/path.dart' as path;
 
 class HomeLogic extends GetxController {
   final HomeState state = HomeState();
 
   late final ffmpegPlugin = FfmpegHl();
 
-  mergeAudioVideoByCacheItem(int cacheGroupIndex) async{
+  exportFileByCacheGroup(FileFormat fileType) {
+    for (int i = 0; i < state.cacheGroupList.length; i++) {
+      CacheGroup cacheGroup = state.cacheGroupList[i];
+      if (cacheGroup.checked) {
+        exportFileByCacheItem(i, fileType, alwaysExport: true);
+      }
+    }
+  }
+
+  //导出
+  exportFileByCacheItem(int cacheGroupIndex, FileFormat fileType,
+      {bool alwaysExport = false}) async {
     //获取缓存组
     CacheGroup cacheGroup = state.cacheGroupList[cacheGroupIndex];
-    //过滤出需要合并的缓存项
-    List<CacheItem> needMergeCacheItemList = cacheGroup.cacheItemList.where((element) {
-      return element.checked;
-    }).toList();
+
+    List<CacheItem> needExportCacheItemList;
+    if (alwaysExport) {
+      needExportCacheItemList = cacheGroup.cacheItemList;
+    } else {
+      //过滤出需要导出的缓存项
+      needExportCacheItemList =
+          getNeedHandleCacheItemList(paramCacheGroup: cacheGroup);
+    }
+
+    for (int i = 0; i < needExportCacheItemList.length; i++) {
+      CacheItem item = needExportCacheItemList[i];
+      await exportFile(item, fileType, groupTitle: cacheGroup.title);
+    }
+  }
+
+  //导出
+  exportFile(CacheItem item, FileFormat fileType, {String? groupTitle}) async {
+    var title = item.title;
+
+    var exportTargetPath;
+    switch (fileType) {
+      case FileFormat.mp4:
+        exportTargetPath = item.videoPath;
+        break;
+      case FileFormat.mp3:
+        exportTargetPath = item.audioPath;
+        break;
+    }
+
+    if (exportTargetPath == null) {
+      return;
+    }
+
+    var result = await runPlatformFuncFuture<Pair<bool, String>?>(
+      onWindows: () async {
+        // 输出目录
+        var outputDirPath = getOutputDirPath(groupTitle: groupTitle);
+        //文件名
+        var outputFileName = title == null
+            ? "${DateTime.now().millisecondsSinceEpoch}_only${fileType.extension}.${fileType.extension}"
+            : "${title}_only${fileType.extension}.${fileType.extension}";
+        var outputAudioPath = path.join(outputDirPath, outputFileName);
+        //解密m4s
+        var result =
+            await decryptPcM4sAfter202403(exportTargetPath, outputAudioPath);
+        if (result) {
+          return Pair(true, "");
+        }
+        return Pair(false, "解密失败");
+      },
+      onDefault: () => null,
+    );
+    if (result == null) {
+      print("${title}导出未知错误");
+      return;
+    }
+    if (result.first) {
+      print("${title}导出完成");
+    } else {
+      print("${title}导出错误${result.second}");
+    }
+  }
+
+  mergeAudioVideoByCacheGroup() {
+    for (int i = 0; i < state.cacheGroupList.length; i++) {
+      CacheGroup cacheGroup = state.cacheGroupList[i];
+      if (cacheGroup.checked) {
+        mergeAudioVideoByCacheItem(i, alwaysMerge: true);
+      }
+    }
+  }
+
+  mergeAudioVideoByCacheItem(int cacheGroupIndex,
+      {bool alwaysMerge = false}) async {
+    //获取缓存组
+    CacheGroup cacheGroup = state.cacheGroupList[cacheGroupIndex];
+
+    List<CacheItem> needMergeCacheItemList;
+    if (alwaysMerge) {
+      needMergeCacheItemList = cacheGroup.cacheItemList;
+    } else {
+      //过滤出需要合并的缓存项
+      needMergeCacheItemList =
+          getNeedHandleCacheItemList(paramCacheGroup: cacheGroup);
+    }
 
     //遍历并进行合并
     for (int i = 0; i < needMergeCacheItemList.length; i++) {
       CacheItem item = needMergeCacheItemList[i];
-      await mergeAudioVideo(item);
+      await mergeAudioVideo(item, groupTitle: cacheGroup.title);
     }
   }
 
+  //过滤出需要处理的缓存项
+  List<CacheItem> getNeedHandleCacheItemList(
+      {CacheGroup? paramCacheGroup, int? cacheGroupIndex}) {
+    CacheGroup cacheGroup;
+    if (paramCacheGroup != null) {
+      cacheGroup = paramCacheGroup;
+    } else if (cacheGroupIndex != null) {
+      //获取缓存组
+      cacheGroup = state.cacheGroupList[cacheGroupIndex];
+    } else {
+      //抛出异常
+      throw Exception("paramCacheGroup 和 cacheGroupIndex 不能同时为空");
+    }
+    //过滤出需要合并的缓存项
+    List<CacheItem> needMergeCacheItemList =
+        cacheGroup.cacheItemList.where((element) {
+      return element.checked;
+    }).toList();
+    return needMergeCacheItemList;
+  }
+
   //合并音视频
-  mergeAudioVideo(CacheItem item) async {
+  mergeAudioVideo(CacheItem item, {String? groupTitle}) async {
     var audioPath = item.audioPath;
     var videoPath = item.videoPath;
     var title = item.title;
@@ -42,11 +159,10 @@ class HomeLogic extends GetxController {
       return;
     }
 
-    var tempAudioPath = "${audioPath}.temp.mp3";
-    var tempVideoPath = "${videoPath}.temp.mp4";
-
     var result = await runPlatformFuncFuture<Pair<bool, String>?>(
       onWindows: () async {
+        var tempAudioPath = "${audioPath}.temp.mp3";
+        var tempVideoPath = "${videoPath}.temp.mp4";
         //解密m4s
         await decryptPcM4sAfter202403(audioPath, tempAudioPath);
         await decryptPcM4sAfter202403(videoPath, tempVideoPath);
@@ -54,21 +170,22 @@ class HomeLogic extends GetxController {
         var outputFileName = title == null
             ? "${DateTime.now().millisecondsSinceEpoch}.mp4"
             : "${title}.mp4";
+        // 输出目录
+        var outputDirPath = getOutputDirPath(groupTitle: groupTitle);
         //完成文件路径
-        var outputPath =
-            "C:/Users/moli/FlutterProject/hlbmerge_flutter/testRes/合并完成目录/${outputFileName}";
+        var outputPath = path.join(outputDirPath, outputFileName);
 
-        return await ffmpegPlugin.mergeAudioVideo(
+        //合并
+        var resultPair = await ffmpegPlugin.mergeAudioVideo(
             tempAudioPath, tempVideoPath, outputPath);
+        //删除临时文件
+        File(tempAudioPath).delete();
+        File(tempVideoPath).delete();
+
+        return resultPair;
       },
       onDefault: () => null,
     );
-
-    //删除临时文件
-    runPlatformFunc(onDefault: () {}, onWindows: () {
-      File(tempAudioPath).delete();
-      File(tempVideoPath).delete();
-    });
 
     if (result == null) {
       print("${title}合并未知错误");
@@ -77,9 +194,31 @@ class HomeLogic extends GetxController {
 
     if (result.first) {
       print("${title}合并完成");
-    }else{
+    } else {
       print("${title}合并错误${result.second}");
     }
+  }
+
+  //获取输出目录
+  String getOutputDirPath({String? groupTitle}) {
+    var outputRootPath = SpDataManager.getOutputDirPath();
+    if (outputRootPath == null) {
+      throw Exception("请设置输出目录");
+    }
+
+    var outputDirPath;
+    if (groupTitle == null) {
+      outputDirPath = outputRootPath;
+    } else {
+      outputDirPath = path.join(outputRootPath, groupTitle);
+    }
+
+    // 创建目录
+    if (!Directory(outputDirPath).existsSync()) {
+      Directory(outputDirPath).createSync(recursive: true);
+    }
+
+    return outputDirPath;
   }
 
   // 解析缓存数据
@@ -168,7 +307,7 @@ class HomeLogic extends GetxController {
   }
 
   // 解密电脑缓存文件2024.03之后的
-  Future<void> decryptPcM4sAfter202403(
+  Future<bool> decryptPcM4sAfter202403(
     String targetPath,
     String outputPath, {
     int bufSize = 256 * 1024 * 1024, // 256MB
@@ -197,10 +336,14 @@ class HomeLogic extends GetxController {
         if (chunk.isEmpty) break;
         await output.writeFrom(chunk);
       }
+    } catch (e) {
+      e.printError();
+      return false;
     } finally {
       await target.close();
       await output.close();
     }
+    return true;
   }
 
   @override
