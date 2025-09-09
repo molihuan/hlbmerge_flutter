@@ -35,6 +35,15 @@ class FileUtil {
     return exeDir;
   }
 
+  //判断路径是否为文件夹
+  static bool isDir(String path) {
+    return FileSystemEntity.isDirectorySync(path);
+  }
+  //判断路径是否为文件
+  static bool isFile(String path) {
+    return FileSystemEntity.isFileSync(path);
+  }
+
 }
 
 //文件格式枚举

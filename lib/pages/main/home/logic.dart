@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:ffmpeg_hl/beans/Pair.dart';
 import 'package:ffmpeg_hl/ffmpeg_hl.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,10 +14,11 @@ import '../../../models/cache_group.dart';
 import '../../../models/cache_item.dart';
 import '../../../utils/FileUtil.dart';
 import '../../../utils/PlatformUtils.dart';
+import '../../../utils/StrUtil.dart';
 import 'state.dart';
 import 'package:path/path.dart' as path;
 
-class HomeLogic extends GetxController {
+class HomeLogic extends SuperController with WidgetsBindingObserver {
   final HomeState state = HomeState();
 
   late final ffmpegPlugin = FfmpegHl();
@@ -202,9 +205,6 @@ class HomeLogic extends GetxController {
   //获取输出目录
   String getOutputDirPath({String? groupTitle}) {
     var outputRootPath = SpDataManager.getOutputDirPath();
-    if (outputRootPath == null) {
-      throw Exception("请设置输出目录");
-    }
 
     var outputDirPath;
     if (groupTitle == null) {
@@ -221,10 +221,46 @@ class HomeLogic extends GetxController {
     return outputDirPath;
   }
 
+  onInputCacheDirPathDragDone(List<DropItem> dropItemList){
+    if(dropItemList.length != 1){
+      Get.snackbar("", "只能拖入一个路径");
+      return;
+    }
+    DropItem dropItem = dropItemList.first;
+    var isDir = FileUtil.isDir(dropItem.path);
+    if(!isDir){
+      Get.snackbar("", "请拖入一个目录");
+      return;
+    }
+    state.inputCacheDirPath = dropItem.path;
+    // 解析缓存数据
+    parseCacheData();
+  }
+
+  //选择输入缓存文件夹路径
+  pickInputCacheDirPath() async {
+    String? dirPath = await FilePicker.platform.getDirectoryPath();
+
+    if (dirPath == null) {
+      Get.snackbar("提示", "您未选择路径");
+      return;
+    }
+
+    print(dirPath);
+    //判断路径中是否有空格
+    if (StrUtil.containsAnySpace(dirPath)) {
+      Get.snackbar("提示", "路径中不能包含空格,请重新选择");
+      return;
+    }
+    state.inputCacheDirPath = dirPath;
+    parseCacheData();
+    //持久化
+    //SpDataManager.setInputCacheDirPath(dirPath);
+  }
+
   // 解析缓存数据
   parseCacheData() {
-    String dirPath =
-        "C:/Users/moli/FlutterProject/hlbmerge_flutter/testRes/电脑缓存文件";
+    String dirPath = state.inputCacheDirPath;
 
     var manager = CacheDataManager();
     List<CacheGroup>? cacheGroupList =
@@ -306,6 +342,10 @@ class HomeLogic extends GetxController {
     state.isAllCacheItemListChecked = value;
   }
 
+  changeTextFieldDragging(bool value){
+    state.isTextFieldDragging = value;
+  }
+
   // 解密电脑缓存文件2024.03之后的
   Future<bool> decryptPcM4sAfter202403(
     String targetPath,
@@ -346,6 +386,23 @@ class HomeLogic extends GetxController {
     return true;
   }
 
+
+  // 监听生命周期变化
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState appState) {
+    if (appState == AppLifecycleState.detached ||
+        appState == AppLifecycleState.inactive) {
+      SpDataManager.setInputCacheDirPath(state.inputCacheDirPath);
+    }
+    super.didChangeAppLifecycleState(appState);
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
   @override
   void onReady() {
     parseCacheData();
@@ -354,6 +411,27 @@ class HomeLogic extends GetxController {
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     super.onClose();
+  }
+
+  @override
+  void onDetached() {
+
+  }
+
+  @override
+  void onInactive() {
+
+  }
+
+  @override
+  void onPaused() {
+
+  }
+
+  @override
+  void onResumed() {
+
   }
 }

@@ -1,12 +1,21 @@
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 
+import '../../../dao/sp_data_manager.dart';
 import '../../../models/cache_group.dart';
 import '../../../models/cache_item.dart';
 
 class HomeState {
   HomeState() {
     ///Initialize variables
+    inputCacheDirPath = SpDataManager.getInputCacheDirPath() ?? '';
   }
+
+  //输入缓存文件夹路径
+  final _inputCacheDirPath = ''.obs;
+
+  String get inputCacheDirPath => _inputCacheDirPath.value;
+
+  set inputCacheDirPath(String value) => _inputCacheDirPath.value = value;
 
   final RxList<CacheGroup> _cacheGroupList = <CacheGroup>[].obs;
 
@@ -22,7 +31,8 @@ class HomeState {
     refreshGroupList();
   }
 
-  void changeCacheItemListCheckedAndRefresh(int cacheGroupIndex,int index, bool value) {
+  void changeCacheItemListCheckedAndRefresh(
+      int cacheGroupIndex, int index, bool value) {
     changeCacheItemListChecked(cacheGroupIndex, index, value);
     refreshGroupList();
   }
@@ -31,14 +41,13 @@ class HomeState {
     _cacheGroupList[index].checked = value;
   }
 
-  void changeCacheItemListChecked(int cacheGroupIndex,int index, bool value) {
+  void changeCacheItemListChecked(int cacheGroupIndex, int index, bool value) {
     _cacheGroupList[cacheGroupIndex].cacheItemList[index].checked = value;
   }
 
   void refreshGroupList() {
     _cacheGroupList.refresh();
   }
-
 
   //缓存组是否为多选模式
   final _isMultiSelectMode = false.obs;
@@ -49,12 +58,23 @@ class HomeState {
 
   // 缓存组是否全选
   final _isAllGroupListChecked = false.obs;
+
   bool get isAllGroupListChecked => _isAllGroupListChecked.value;
+
   set isAllGroupListChecked(bool value) => _isAllGroupListChecked.value = value;
 
   //缓存项是否全选
   final _isAllCacheItemListChecked = false.obs;
-  bool get isAllCacheItemListChecked => _isAllCacheItemListChecked.value;
-  set isAllCacheItemListChecked(bool value) => _isAllCacheItemListChecked.value = value;
 
+  bool get isAllCacheItemListChecked => _isAllCacheItemListChecked.value;
+
+  set isAllCacheItemListChecked(bool value) =>
+      _isAllCacheItemListChecked.value = value;
+
+  //输入框是否拖拽中
+  final _isTextFieldDragging = false.obs;
+
+  bool get isTextFieldDragging => _isTextFieldDragging.value;
+
+  set isTextFieldDragging(bool value) => _isTextFieldDragging.value = value;
 }

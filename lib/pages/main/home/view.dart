@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hlbmerge/utils/FileUtil.dart';
@@ -115,56 +116,110 @@ class HomePage extends StatelessWidget {
     if (state.isMultiSelectMode) {
       optionWidgets = [
         // 操作按钮
-        TextButton(onPressed: () {
-         logic.exportFileByCacheGroup(FileFormat.mp3);
-        }, child: const Text("提取音频")),
-        TextButton(onPressed: () {
-          logic.exportFileByCacheGroup(FileFormat.mp4);
-        }, child: const Text("提取视频")),
-        TextButton(onPressed: () {
-          logic.mergeAudioVideoByCacheGroup();
-        }, child: const Text("合并音视频")),
+        TextButton(
+            onPressed: () {
+              logic.exportFileByCacheGroup(FileFormat.mp3);
+            },
+            child: const Text("提取音频")),
+        TextButton(
+            onPressed: () {
+              logic.exportFileByCacheGroup(FileFormat.mp4);
+            },
+            child: const Text("提取视频")),
+        TextButton(
+            onPressed: () {
+              logic.mergeAudioVideoByCacheGroup();
+            },
+            child: const Text("合并音视频")),
         // 全选按钮
         Container(
           margin: const EdgeInsets.only(right: 10),
           child: InkWell(
             onTap: () {
-              logic.changeAllGroupListChecked(
-                  !state.isAllGroupListChecked);
+              logic.changeAllGroupListChecked(!state.isAllGroupListChecked);
             },
             child: state.isAllGroupListChecked
                 ? const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [Icon(Icons.check_box), Text("取消全选")],
-            )
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [Icon(Icons.check_box), Text("取消全选")],
+                  )
                 : const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(Icons.check_box_outline_blank),
-                Text("全选")
-              ],
-            ),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [Icon(Icons.check_box_outline_blank), Text("全选")],
+                  ),
           ),
         )
       ];
-    }else{
-      optionWidgets=[
-
-      ];
+    } else {
+      optionWidgets = [];
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
-            "转换",
+            "缓存路径:",
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-
+          Expanded(
+              child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            child: DropTarget(
+              onDragDone: (detail) {
+                logic.onInputCacheDirPathDragDone(detail.files);
+              },
+              onDragEntered: (detail) {
+                logic.changeTextFieldDragging(true);
+              },
+              onDragExited: (detail) {
+                logic.changeTextFieldDragging(false);
+              },
+              child: TextField(
+                controller: TextEditingController(text: state.inputCacheDirPath),
+                onChanged: (value) {
+                  state.inputCacheDirPath = value;
+                },
+                decoration: InputDecoration(
+                    labelText: '请输入缓存文件夹路径(支持拖拽),如果加载数据失败请查看设置中的教程',
+                    border: OutlineInputBorder(),
+                    hintText: '请输入缓存文件夹路径(支持拖拽)',
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: state.isTextFieldDragging
+                          ? const BorderSide(color: Colors.blue, width: 2)
+                          : const BorderSide(
+                              color: Colors.grey,
+                            ),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Colors.blue, width: 2), // 聚焦状态边框颜色
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                    suffixIcon: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ElevatedButton(
+                            onPressed: () {
+                              logic.pickInputCacheDirPath();
+                            }, child: const Text("选择")),
+                        const SizedBox(width: 5),
+                        FilledButton(
+                            onPressed: () {
+                              logic.parseCacheData();
+                            }, child: const Text("加载数据")),
+                        const SizedBox(width: 5),
+                      ],
+                    )),
+              ),
+            ),
+          )),
           Row(
             children: [
               ...optionWidgets,
@@ -357,19 +412,22 @@ class HomePage extends StatelessWidget {
                             children: [
                               ElevatedButton(
                                 onPressed: () {
-                                  logic.exportFileByCacheItem(cacheGroupIndex,FileFormat.mp3);
+                                  logic.exportFileByCacheItem(
+                                      cacheGroupIndex, FileFormat.mp3);
                                 },
                                 child: const Text("提取音频"),
                               ),
                               ElevatedButton(
                                 onPressed: () {
-                                  logic.exportFileByCacheItem(cacheGroupIndex,FileFormat.mp4);
+                                  logic.exportFileByCacheItem(
+                                      cacheGroupIndex, FileFormat.mp4);
                                 },
                                 child: const Text("提取视频"),
                               ),
                               ElevatedButton(
                                 onPressed: () {
-                                  logic.mergeAudioVideoByCacheItem(cacheGroupIndex);
+                                  logic.mergeAudioVideoByCacheItem(
+                                      cacheGroupIndex);
                                 },
                                 child: const Text("合并音视频"),
                               ),
@@ -377,8 +435,7 @@ class HomePage extends StatelessWidget {
                                 onPressed: () {
                                   //取消全选
                                   logic.changeAllCacheItemListChecked(
-                                      cacheGroupIndex,
-                                      false);
+                                      cacheGroupIndex, false);
                                   Navigator.of(context).pop();
                                 },
                                 child: const Text("关闭"),
