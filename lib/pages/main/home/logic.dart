@@ -12,6 +12,7 @@ import '../../../dao/cache_data_manager.dart';
 import '../../../dao/sp_data_manager.dart';
 import '../../../models/cache_group.dart';
 import '../../../models/cache_item.dart';
+import '../../../service/ffmpeg/ffmpeg_task.dart';
 import '../../../utils/FileUtil.dart';
 import '../../../utils/PlatformUtils.dart';
 import '../../../utils/StrUtil.dart';
@@ -23,7 +24,10 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
 
   late final ffmpegPlugin = FfmpegHl();
 
-  exportFileByCacheGroup(FileFormat fileType) {
+  // 任务控制器
+  final FFmpegTaskController taskController = Get.put(FFmpegTaskController());
+
+  void exportFileByCacheGroup(FileFormat fileType) {
     for (int i = 0; i < state.cacheGroupList.length; i++) {
       CacheGroup cacheGroup = state.cacheGroupList[i];
       if (cacheGroup.checked) {
@@ -33,7 +37,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   }
 
   //导出
-  exportFileByCacheItem(int cacheGroupIndex, FileFormat fileType,
+  void exportFileByCacheItem(int cacheGroupIndex, FileFormat fileType,
       {bool alwaysExport = false}) async {
     //获取缓存组
     CacheGroup cacheGroup = state.cacheGroupList[cacheGroupIndex];
@@ -101,16 +105,22 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     }
   }
 
-  mergeAudioVideoByCacheGroup() {
-    for (int i = 0; i < state.cacheGroupList.length; i++) {
-      CacheGroup cacheGroup = state.cacheGroupList[i];
-      if (cacheGroup.checked) {
-        mergeAudioVideoByCacheItem(i, alwaysMerge: true);
-      }
+  void mergeAudioVideoByCacheGroup() {
+    //过滤出需要合并的缓存组索引
+    List<MapEntry<int, CacheGroup>> indexCacheGroupList = state.cacheGroupList
+        .asMap()
+        .entries
+        .where((entry) => entry.value.checked)
+        .toList();
+
+    for (int i = 0; i < indexCacheGroupList.length; i++) {
+      int index = indexCacheGroupList[i].key;
+      mergeAudioVideoByCacheItem(index, alwaysMerge: true);
     }
+    Get.snackbar("", "已添加任务,请前往进度页面查看");
   }
 
-  mergeAudioVideoByCacheItem(int cacheGroupIndex,
+  void mergeAudioVideoByCacheItem(int cacheGroupIndex,
       {bool alwaysMerge = false}) async {
     //获取缓存组
     CacheGroup cacheGroup = state.cacheGroupList[cacheGroupIndex];
@@ -127,7 +137,9 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     //遍历并进行合并
     for (int i = 0; i < needMergeCacheItemList.length; i++) {
       CacheItem item = needMergeCacheItemList[i];
-      await mergeAudioVideo(item, groupTitle: cacheGroup.title);
+      // await mergeAudioVideo(item, groupTitle: cacheGroup.title);
+      taskController.addTask(
+          FFmpegTaskBean(cacheItem: item, groupTitle: cacheGroup.title));
     }
   }
 
@@ -152,58 +164,9 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     return needMergeCacheItemList;
   }
 
-  //合并音视频
-  mergeAudioVideo(CacheItem item, {String? groupTitle}) async {
-    var audioPath = item.audioPath;
-    var videoPath = item.videoPath;
-    var title = item.title;
-
-    if (audioPath == null || videoPath == null) {
-      return;
-    }
-
-    var result = await runPlatformFuncFuture<Pair<bool, String>?>(
-      onWindows: () async {
-        var tempAudioPath = "${audioPath}.temp.mp3";
-        var tempVideoPath = "${videoPath}.temp.mp4";
-        //解密m4s
-        await decryptPcM4sAfter202403(audioPath, tempAudioPath);
-        await decryptPcM4sAfter202403(videoPath, tempVideoPath);
-        //文件名
-        var outputFileName = title == null
-            ? "${DateTime.now().millisecondsSinceEpoch}.mp4"
-            : "${title}.mp4";
-        // 输出目录
-        var outputDirPath = getOutputDirPath(groupTitle: groupTitle);
-        //完成文件路径
-        var outputPath = path.join(outputDirPath, outputFileName);
-
-        //合并
-        var resultPair = await ffmpegPlugin.mergeAudioVideo(
-            tempAudioPath, tempVideoPath, outputPath);
-        //删除临时文件
-        File(tempAudioPath).delete();
-        File(tempVideoPath).delete();
-
-        return resultPair;
-      },
-      onDefault: () => null,
-    );
-
-    if (result == null) {
-      print("${title}合并未知错误");
-      return;
-    }
-
-    if (result.first) {
-      print("${title}合并完成");
-    } else {
-      print("${title}合并错误${result.second}");
-    }
-  }
 
   //获取输出目录
-  String getOutputDirPath({String? groupTitle}) {
+  static String getOutputDirPath({String? groupTitle}) {
     var outputRootPath = SpDataManager.getOutputDirPath();
 
     var outputDirPath;
@@ -221,14 +184,14 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     return outputDirPath;
   }
 
-  onInputCacheDirPathDragDone(List<DropItem> dropItemList){
-    if(dropItemList.length != 1){
+  void onInputCacheDirPathDragDone(List<DropItem> dropItemList) {
+    if (dropItemList.length != 1) {
       Get.snackbar("", "只能拖入一个路径");
       return;
     }
     DropItem dropItem = dropItemList.first;
     var isDir = FileUtil.isDir(dropItem.path);
-    if(!isDir){
+    if (!isDir) {
       Get.snackbar("", "请拖入一个目录");
       return;
     }
@@ -238,7 +201,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   }
 
   //选择输入缓存文件夹路径
-  pickInputCacheDirPath() async {
+  void pickInputCacheDirPath() async {
     String? dirPath = await FilePicker.platform.getDirectoryPath();
 
     if (dirPath == null) {
@@ -259,7 +222,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   }
 
   // 解析缓存数据
-  parseCacheData() {
+  void parseCacheData() {
     String dirPath = state.inputCacheDirPath;
 
     var manager = CacheDataManager();
@@ -342,12 +305,12 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     state.isAllCacheItemListChecked = value;
   }
 
-  changeTextFieldDragging(bool value){
+  changeTextFieldDragging(bool value) {
     state.isTextFieldDragging = value;
   }
 
   // 解密电脑缓存文件2024.03之后的
-  Future<bool> decryptPcM4sAfter202403(
+  static Future<bool>  decryptPcM4sAfter202403(
     String targetPath,
     String outputPath, {
     int bufSize = 256 * 1024 * 1024, // 256MB
@@ -386,7 +349,6 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     return true;
   }
 
-
   // 监听生命周期变化
   @override
   void didChangeAppLifecycleState(AppLifecycleState appState) {
@@ -416,22 +378,14 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   }
 
   @override
-  void onDetached() {
-
-  }
+  void onDetached() {}
 
   @override
-  void onInactive() {
-
-  }
+  void onInactive() {}
 
   @override
-  void onPaused() {
-
-  }
+  void onPaused() {}
 
   @override
-  void onResumed() {
-
-  }
+  void onResumed() {}
 }

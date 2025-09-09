@@ -189,6 +189,10 @@ class CacheDataManager {
               // print(file.path);
               //收集m4s文件
               m4sFiles.add(file);
+            } else if (file.path.endsWith("group.jpg")) {
+              cacheItem.groupCoverPath = file.path;
+            } else if (file.path.endsWith("image.jpg")) {
+              cacheItem.coverPath = file.path;
             }
           }
         }
@@ -209,7 +213,9 @@ class CacheDataManager {
 
     //遍历cacheItemList并按groupId进行分组
     for (var item in cacheItemList) {
-      var groupIdList = cacheGroupList.map((group) { return group.groupId;});
+      var groupIdList = cacheGroupList.map((group) {
+        return group.groupId;
+      });
       if (groupIdList.contains(item.groupId)) {
         //存在则添加到对应缓存组
         for (var group in cacheGroupList) {
@@ -231,7 +237,6 @@ class CacheDataManager {
         cacheGroup.cacheItemList.add(item);
         cacheGroupList.add(cacheGroup);
       }
-
     }
 
     print(cacheGroupList);
@@ -259,14 +264,14 @@ class CacheDataManager {
         () => _getMapString(data, 'p'),
       ]);
 
-      item.coverPath = _getMapString(data, 'coverPath');
+      item.coverPath = item.coverPath ?? _getMapString(data, 'coverPath');
       item.coverUrl = _getMapString(data, 'coverUrl');
 
       item.groupId = _getMapString(data, 'groupId');
-      item.groupCoverPath = _getMapString(data, 'groupCoverPath');
+      item.groupCoverPath =
+          item.groupCoverPath ?? _getMapString(data, 'groupCoverPath');
       item.groupCoverUrl = _getMapString(data, 'groupCoverUrl');
       item.groupTitle = _getMapString(data, 'groupTitle');
-
     } catch (e) {
       print("解析${item.jsonPath} json文件错误:");
       e.printError();
@@ -283,6 +288,7 @@ class CacheDataManager {
     }
     return null;
   }
+
   // 获取第一个非空的值
   static String? _getFirstNonNull(List<String? Function()> getters) {
     for (var get in getters) {
