@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:open_file/open_file.dart';
 
 import 'logic.dart';
 import 'state.dart';
@@ -33,7 +34,7 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             title: const Text("测试按钮"),
             onTap: () async {
-              logic.parseCacheData();
+              //logic.parseCacheData();
             },
           ),
         ],

@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   ffmpeg_hl
+  open_file_linux
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

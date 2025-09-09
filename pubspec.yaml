@@ -35,6 +35,8 @@ dependencies:
         path: "packages/shared_preferences/shared_preferences"
   # 拖拽
   desktop_drop: ^0.6.1
+  # 打开文件或目录
+  open_file: ^3.5.10
 
 
 dev_dependencies:

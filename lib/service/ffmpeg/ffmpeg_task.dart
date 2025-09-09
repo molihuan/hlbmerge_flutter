@@ -15,15 +15,15 @@ import '../../utils/PlatformUtils.dart';
 enum FFmpegTaskStatus { pending, running, completed, failed }
 
 class FFmpegTaskBean {
-  CacheItem cacheItem;
-  FFmpegTaskStatus status;
-  String? groupTitle;
+  final CacheItem cacheItem;
+  final String? groupTitle;
+  final Rx<FFmpegTaskStatus> status;
 
   FFmpegTaskBean({
     required this.cacheItem,
     this.groupTitle,
-    this.status = FFmpegTaskStatus.pending,
-  });
+    FFmpegTaskStatus status = FFmpegTaskStatus.pending,
+  }) : status = status.obs;
 }
 
 class FFmpegTaskController extends GetxController {
@@ -32,82 +32,85 @@ class FFmpegTaskController extends GetxController {
   // 任务列表
   var tasks = <FFmpegTaskBean>[].obs;
 
-  // 是否正在处理任务
-  bool _isProcessing = false;
+  // 当前并发数
+  final int _maxConcurrency = 2;
+  int _runningCount = 0;
 
   // 添加任务
   void addTask(FFmpegTaskBean task) {
     tasks.add(task);
-    _processQueue();
+    _schedule();
   }
 
-  // 处理任务队列
-  Future<void> _processQueue() async {
-    if (_isProcessing) return;
-    _isProcessing = true;
+  // 调度任务
+  void _schedule() {
+    if (_runningCount >= _maxConcurrency) return;
 
-    while (tasks.any((t) => t.status == FFmpegTaskStatus.pending)) {
-      final task =
-          tasks.firstWhere((t) => t.status == FFmpegTaskStatus.pending);
-      task.status = FFmpegTaskStatus.running;
-      tasks.refresh();
+    // 找一个等待中的任务
+    final task = tasks.firstWhereOrNull(
+          (t) => t.status.value == FFmpegTaskStatus.pending,
+    );
+    if (task == null) return;
 
-      try {
-        await _runFFmpegTask(task);
-        task.status = FFmpegTaskStatus.completed;
-      } catch (_) {
-        task.status = FFmpegTaskStatus.failed;
-      }
+    // 标记为运行中
+    task.status.value = FFmpegTaskStatus.running;
+    _runningCount++;
 
-      tasks.refresh();
-    }
-
-    _isProcessing = false;
+    // 执行
+    _runFFmpegTask(task).then((_) {
+      task.status.value = FFmpegTaskStatus.completed;
+    }).catchError((_) {
+      task.status.value = FFmpegTaskStatus.failed;
+    }).whenComplete(() {
+      _runningCount--;
+      _schedule(); // 执行下一个任务
+    });
   }
 
-  // 运行任务
+  // 运行单个任务
   Future<void> _runFFmpegTask(FFmpegTaskBean task) async {
-    mergeAudioVideo(task.cacheItem, groupTitle: task.groupTitle);
+    await mergeAudioVideo(task.cacheItem, groupTitle: task.groupTitle);
   }
 
-  //合并音视频
-  mergeAudioVideo(CacheItem item, {String? groupTitle}) async {
+  // 合并音视频
+  Future<void> mergeAudioVideo(CacheItem item, {String? groupTitle}) async {
     var audioPath = item.audioPath;
     var videoPath = item.videoPath;
     var title = item.title;
 
-    if (audioPath == null || videoPath == null) {
-      return;
-    }
+    if (audioPath == null || videoPath == null) return;
 
     var result = await runPlatformFuncFuture<Pair<bool, String>?>(
       onWindows: () async {
         var tempAudioPath = "${audioPath}.hlb_temp.mp3";
         var tempVideoPath = "${videoPath}.hlb_temp.mp4";
-        //解密m4s
+
+        // 解密
         await HomeLogic.decryptPcM4sAfter202403(audioPath, tempAudioPath);
         await HomeLogic.decryptPcM4sAfter202403(videoPath, tempVideoPath);
-        //文件名
+
+        // 文件名
         var outputFileName = title == null
             ? "${DateTime.now().millisecondsSinceEpoch}.mp4"
-            : "${title}.mp4";
+            : "$title.mp4";
+
         // 输出目录
         var outputDirPath = HomeLogic.getOutputDirPath(groupTitle: groupTitle);
-        //完成文件路径
         var outputPath = path.join(outputDirPath, outputFileName);
 
-        //合并
+        // 合并
         var resultPair = await ffmpegPlugin.mergeAudioVideo(
-            tempAudioPath, tempVideoPath, outputPath);
+          tempAudioPath,
+          tempVideoPath,
+          outputPath,
+        );
 
-        //过2秒后删除文件
+        // 异步删除临时文件
         Future.delayed(const Duration(seconds: 2), () async {
           try {
             await File(tempAudioPath).delete();
             await File(tempVideoPath).delete();
-          } catch (e) {
-            e.printError();
-          }
+          } catch (_) {}
         });
 
         return resultPair;
@@ -116,14 +119,14 @@ class FFmpegTaskController extends GetxController {
     );
 
     if (result == null) {
-      print("${title}合并未知错误");
+      print("$title 合并未知错误");
       return;
     }
 
     if (result.first) {
-      print("${title}合并完成");
+      print("$title 合并完成");
     } else {
-      print("${title}合并错误${result.second}");
+      print("$title 合并错误 ${result.second}");
     }
   }
 }
