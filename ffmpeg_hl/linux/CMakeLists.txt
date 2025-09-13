@@ -7,6 +7,9 @@ cmake_minimum_required(VERSION 3.10)
 set(PROJECT_NAME "ffmpeg_hl")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
+# 指定 FFmpeg 安装目录，并将目录赋值给 FFMPEG_DEV_ROOT 变量，方便后续指令引用
+set(FFMPEG_DEV_ROOT "/home/moli/.vmr/versions/ffmpeg_versions/ffmpeg")
+
 # This value is used when generating builds using this plugin, so it must
 # not be changed.
 set(PLUGIN_NAME "ffmpeg_hl_plugin")
@@ -14,6 +17,8 @@ set(PLUGIN_NAME "ffmpeg_hl_plugin")
 # Any new source files that you add to the plugin should be added here.
 list(APPEND PLUGIN_SOURCES
   "ffmpeg_hl_plugin.cc"
+  "ffmpeg/ffmpeg_merge.cpp"
+  "ffmpeg/ffmpeg_merge.h"
 )
 
 # Define the plugin library target. Its name must not be changed (see comment
@@ -36,16 +41,35 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 
 # Source include directories and library dependencies. Add any plugin-specific
 # dependencies here.
+
+# 指定 FFmpeg 头文件目录
+include_directories(${FFMPEG_DEV_ROOT}/include)
+
 target_include_directories(${PLUGIN_NAME} INTERFACE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
+
+# 指定链接器查找库文件  FFmpeg
+link_directories(${FFMPEG_DEV_ROOT}/lib)
+
+target_link_libraries(${PLUGIN_NAME} PRIVATE
+        flutter
+)
 target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
+
+# 链接 FFmpeg 3 个核心库
+target_link_libraries(${PLUGIN_NAME} PRIVATE
+        ${FFMPEG_DEV_ROOT}/lib/libavformat.so.58.45.100
+        ${FFMPEG_DEV_ROOT}/lib/libavcodec.so.58.91.100
+        ${FFMPEG_DEV_ROOT}/lib/libavutil.so.56.51.100
+)
 
 # List of absolute paths to libraries that should be bundled with the plugin.
 # This list could contain prebuilt libraries, or libraries created by an
 # external build triggered from this build file.
 set(ffmpeg_hl_bundled_libraries
-  ""
+  ${FFMPEG_DEV_ROOT}/lib/libavformat.so.58.45.100
+  ${FFMPEG_DEV_ROOT}/lib/libavcodec.so.58.91.100
+  ${FFMPEG_DEV_ROOT}/lib/libavutil.so.56.51.100
   PARENT_SCOPE
 )
 

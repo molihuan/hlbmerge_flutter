@@ -76,7 +76,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     }
 
     var result = await runPlatformFuncFuture<Pair<bool, String>?>(
-      onWindows: () async {
+      onDefault: () async {
         // 输出目录
         var outputDirPath = getOutputDirPath(groupTitle: groupTitle);
         //文件名
@@ -91,8 +91,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
           return Pair(true, "");
         }
         return Pair(false, "解密失败");
-      },
-      onDefault: () => null,
+      }
     );
     if (result == null) {
       print("${title}导出未知错误");
@@ -228,9 +227,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     var manager = CacheDataManager();
     List<CacheGroup>? cacheGroupList =
         runPlatformFunc<List<CacheGroup>?>(onDefault: () {
-      return null;
-    }, onWindows: () {
-      return manager.loadPcCacheData(dirPath);
+          return manager.loadPcCacheData(dirPath);
     });
 
     if (cacheGroupList == null) {

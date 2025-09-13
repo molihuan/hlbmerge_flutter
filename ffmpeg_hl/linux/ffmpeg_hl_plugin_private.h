@@ -8,3 +8,4 @@
 
 // Handles the getPlatformVersion method call.
 FlMethodResponse *get_platform_version();
+FlMethodResponse *handle_merge_audio_video(FlMethodCall*);

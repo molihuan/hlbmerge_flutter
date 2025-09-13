@@ -21,6 +21,11 @@ class SettingsLogic extends GetxController {
     return cfgStr;
   }
 
+  testFunc() async {
+    var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
+    print(platformVersion);
+  }
+
   mergeAudioVideo() async {
     // var result = await ffmpegHlPlugin.mergeAudioVideo("1", "2", "3");
     // if (result.first) {}

@@ -34,7 +34,7 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             title: const Text("测试按钮"),
             onTap: () async {
-              //logic.parseCacheData();
+              logic.testFunc();
             },
           ),
         ],

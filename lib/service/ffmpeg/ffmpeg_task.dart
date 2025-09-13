@@ -81,7 +81,7 @@ class FFmpegTaskController extends GetxController {
     if (audioPath == null || videoPath == null) return;
 
     var result = await runPlatformFuncFuture<Pair<bool, String>?>(
-      onWindows: () async {
+      onDefault: () async {
         var tempAudioPath = "${audioPath}.hlb_temp.mp3";
         var tempVideoPath = "${videoPath}.hlb_temp.mp4";
 
@@ -114,8 +114,7 @@ class FFmpegTaskController extends GetxController {
         });
 
         return resultPair;
-      },
-      onDefault: () => null,
+      }
     );
 
     if (result == null) {
