@@ -69,6 +69,7 @@ link_libraries(
         ${FFMPEG_DEV_ROOT}/lib/avformat.lib
         ${FFMPEG_DEV_ROOT}/lib/avutil.lib
         ${FFMPEG_DEV_ROOT}/lib/swscale.lib
+        ${FFMPEG_DEV_ROOT}/lib/swresample.lib
 )
 
 target_link_libraries(${PLUGIN_NAME} PRIVATE
@@ -78,6 +79,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
         ${FFMPEG_DEV_ROOT}/lib/avformat.lib
         ${FFMPEG_DEV_ROOT}/lib/avutil.lib
         ${FFMPEG_DEV_ROOT}/lib/swscale.lib
+        ${FFMPEG_DEV_ROOT}/lib/swresample.lib
 )
 
 # 指定存放程序生成的静态库的目录
@@ -92,6 +94,7 @@ file(COPY
         ${FFMPEG_DEV_ROOT}/bin/avformat-58.dll
         ${FFMPEG_DEV_ROOT}/bin/avutil-56.dll
         ${FFMPEG_DEV_ROOT}/bin/swscale-5.dll
+        ${FFMPEG_DEV_ROOT}/bin/swresample-3.dll
         DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 )
 
@@ -103,6 +106,7 @@ set(ffmpeg_hl_bundled_libraries
         ${FFMPEG_DEV_ROOT}/bin/avformat-58.dll
         ${FFMPEG_DEV_ROOT}/bin/avutil-56.dll
         ${FFMPEG_DEV_ROOT}/bin/swscale-5.dll
+        ${FFMPEG_DEV_ROOT}/bin/swresample-3.dll
   PARENT_SCOPE
 )
 
