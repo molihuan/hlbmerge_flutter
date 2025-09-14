@@ -42,4 +42,22 @@ class MethodChannelFfmpegHl extends FfmpegHlPlatform {
     String message = result['message'] as String;
     return Future.value(Pair(success, message));
   }
+
+  // 多段视频拼接
+  @override
+  Future<Pair<bool, String>> mergeVideos(
+      List<String> videoPaths, String outputPath) async {
+    final result = await methodChannel.invokeMethod('mergeVideos', {
+      "videoPaths": videoPaths,
+      "outputPath": outputPath,
+    });
+
+    if (result is! Map) {
+      return Future.value(Pair(false, "未知错误"));
+    }
+
+    bool success = result['success'] as bool;
+    String message = result['message'] as String;
+    return Future.value(Pair(success, message));
+  }
 }

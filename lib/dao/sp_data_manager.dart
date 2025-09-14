@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/FileUtil.dart';
+import 'cache_data_manager.dart';
 
 class SpDataManager {
   static late SharedPreferences prefs;
@@ -21,6 +23,7 @@ class SpDataManager {
 
   //输入缓存文件夹路径
   static const String inputCacheDirPathKey = 'inputCacheDirPath';
+  static const String cachePlatformKey = 'cachePlatform';
 
   //输出目录
   static setOutputDirPath(String path) {
@@ -53,5 +56,15 @@ class SpDataManager {
 
   static String? getInputCacheDirPath() {
     return prefs.getString(inputCacheDirPathKey);
+  }
+
+  //缓存数据平台
+  static setCachePlatform(CachePlatform platform){
+    prefs.setString(cachePlatformKey, platform.name);
+  }
+
+  static CachePlatform? getCachePlatform(){
+    String? target = prefs.getString(cachePlatformKey);
+    return CachePlatform.values.firstWhereOrNull((element) => element.name == target);
   }
 }

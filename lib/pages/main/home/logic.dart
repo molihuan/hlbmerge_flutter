@@ -21,11 +21,24 @@ import 'package:path/path.dart' as path;
 
 class HomeLogic extends SuperController with WidgetsBindingObserver {
   final HomeState state = HomeState();
-
-  late final ffmpegPlugin = FfmpegHl();
+  late final _cacheDataManager = CacheDataManager();
 
   // 任务控制器
   final FFmpegTaskController taskController = Get.put(FFmpegTaskController());
+
+  // 解析缓存数据
+  void parseCacheData() {
+    String dirPath = state.inputCacheDirPath;
+    _cacheDataManager.setCachePlatform(state.cachePlatform);
+    List<CacheGroup>? cacheGroupList = _cacheDataManager.loadCacheData(dirPath);
+
+    if (cacheGroupList == null) {
+      return;
+    }
+
+    state.cacheGroupList = cacheGroupList;
+    // print(cacheGroupList);
+  }
 
   void exportFileByCacheGroup(FileFormat fileType) {
     for (int i = 0; i < state.cacheGroupList.length; i++) {
@@ -75,24 +88,23 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
       return;
     }
 
-    var result = await runPlatformFuncFuture<Pair<bool, String>?>(
-      onDefault: () async {
-        // 输出目录
-        var outputDirPath = getOutputDirPath(groupTitle: groupTitle);
-        //文件名
-        var outputFileName = title == null
-            ? "${DateTime.now().millisecondsSinceEpoch}_only${fileType.extension}.${fileType.extension}"
-            : "${title}_only${fileType.extension}.${fileType.extension}";
-        var outputAudioPath = path.join(outputDirPath, outputFileName);
-        //解密m4s
-        var result =
-            await decryptPcM4sAfter202403(exportTargetPath, outputAudioPath);
-        if (result) {
-          return Pair(true, "");
-        }
-        return Pair(false, "解密失败");
+    var result =
+        await runPlatformFuncFuture<Pair<bool, String>?>(onDefault: () async {
+      // 输出目录
+      var outputDirPath = getOutputDirPath(groupTitle: groupTitle);
+      //文件名
+      var outputFileName = title == null
+          ? "${DateTime.now().millisecondsSinceEpoch}_only${fileType.extension}.${fileType.extension}"
+          : "${title}_only${fileType.extension}.${fileType.extension}";
+      var outputAudioPath = path.join(outputDirPath, outputFileName);
+      //解密m4s
+      var result = await FileUtil.decryptPcM4sAfter202403(
+          exportTargetPath, outputAudioPath);
+      if (result) {
+        return Pair(true, "");
       }
-    );
+      return Pair(false, "解密失败");
+    });
     if (result == null) {
       print("${title}导出未知错误");
       return;
@@ -136,9 +148,10 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     //遍历并进行合并
     for (int i = 0; i < needMergeCacheItemList.length; i++) {
       CacheItem item = needMergeCacheItemList[i];
-      // await mergeAudioVideo(item, groupTitle: cacheGroup.title);
-      taskController.addTask(
-          FFmpegTaskBean(cacheItem: item, groupTitle: cacheGroup.title));
+      taskController.addTask(FFmpegTaskBean(
+          cacheItem: item,
+          groupTitle: cacheGroup.title,
+          cachePlatform: state.cachePlatform));
     }
   }
 
@@ -163,7 +176,6 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     return needMergeCacheItemList;
   }
 
-
   //获取输出目录
   static String getOutputDirPath({String? groupTitle}) {
     var outputRootPath = SpDataManager.getOutputDirPath();
@@ -183,6 +195,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     return outputDirPath;
   }
 
+  //拖入文件夹回调
   void onInputCacheDirPathDragDone(List<DropItem> dropItemList) {
     if (dropItemList.length != 1) {
       Get.snackbar("", "只能拖入一个路径");
@@ -218,24 +231,6 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     parseCacheData();
     //持久化
     //SpDataManager.setInputCacheDirPath(dirPath);
-  }
-
-  // 解析缓存数据
-  void parseCacheData() {
-    String dirPath = state.inputCacheDirPath;
-
-    var manager = CacheDataManager();
-    List<CacheGroup>? cacheGroupList =
-        runPlatformFunc<List<CacheGroup>?>(onDefault: () {
-          return manager.loadPcCacheData(dirPath);
-    });
-
-    if (cacheGroupList == null) {
-      return;
-    }
-
-    state.cacheGroupList = cacheGroupList;
-    // print(cacheGroupList);
   }
 
   //改变多选状态
@@ -306,52 +301,13 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     state.isTextFieldDragging = value;
   }
 
-  // 解密电脑缓存文件2024.03之后的
-  static Future<bool>  decryptPcM4sAfter202403(
-    String targetPath,
-    String outputPath, {
-    int bufSize = 256 * 1024 * 1024, // 256MB
-  }) async {
-    final targetFile = File(targetPath);
-    final outputFile = File(outputPath);
-
-    final target = await targetFile.open();
-    final output = await outputFile.open(mode: FileMode.write);
-
-    try {
-      // 1. 读取前 32 字节
-      final headerBytes = await target.read(32);
-
-      // 2. 转成字符串再替换（只会动 ASCII 部分）
-      var headerStr = ascii.decode(headerBytes, allowInvalid: true);
-      headerStr = headerStr.replaceAll("000000000", "");
-      final newHeader = ascii.encode(headerStr);
-
-      // 3. 写入替换后的 header
-      await output.writeFrom(newHeader);
-
-      // 4. 分块写剩余的内容
-      while (true) {
-        final chunk = await target.read(bufSize);
-        if (chunk.isEmpty) break;
-        await output.writeFrom(chunk);
-      }
-    } catch (e) {
-      e.printError();
-      return false;
-    } finally {
-      await target.close();
-      await output.close();
-    }
-    return true;
-  }
-
   // 监听生命周期变化
   @override
   void didChangeAppLifecycleState(AppLifecycleState appState) {
     if (appState == AppLifecycleState.detached ||
         appState == AppLifecycleState.inactive) {
       SpDataManager.setInputCacheDirPath(state.inputCacheDirPath);
+      SpDataManager.setCachePlatform(state.cachePlatform);
     }
     super.didChangeAppLifecycleState(appState);
   }

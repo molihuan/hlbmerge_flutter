@@ -77,6 +77,28 @@ void FfmpegHlPlugin::HandleMethodCall(
       response[flutter::EncodableValue("success")] = flutter::EncodableValue(true);
       response[flutter::EncodableValue("message")] = flutter::EncodableValue("操作成功");
       result->Success(flutter::EncodableValue(response));
+  }else if(method_call.method_name().compare("mergeVideos") == 0){
+      const auto* args = std::get_if<flutter::EncodableMap>(method_call.arguments());
+      if (!args) { result->Error("No params"); return; }
+
+      const auto* videoListEncodable = std::get_if<flutter::EncodableList>(
+              &args->find(flutter::EncodableValue("videoPaths"))->second);
+      if (!videoListEncodable) { result->Error("videoPaths invalid"); return; }
+
+      std::vector<std::string> videoPaths;
+      for (auto& v : *videoListEncodable) {
+          videoPaths.push_back(std::get<std::string>(v));
+      }
+
+      std::string outputPath = std::get<std::string>(
+              args->find(flutter::EncodableValue("outputPath"))->second);
+
+      bool success = merge_videos(videoPaths, outputPath);
+
+      flutter::EncodableMap response;
+      response[flutter::EncodableValue("success")] = flutter::EncodableValue(success);
+      response[flutter::EncodableValue("message")] = flutter::EncodableValue(success ? "操作成功" : "失败");
+      result->Success(flutter::EncodableValue(response));
   }else {
     result->NotImplemented();
   }

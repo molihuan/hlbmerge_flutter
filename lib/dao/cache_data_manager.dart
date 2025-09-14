@@ -9,13 +9,19 @@ import 'package:hlbmerge/utils/JsonUtils.dart';
 import 'package:path/path.dart' as path;
 
 import '../models/cache_item.dart';
+import '../utils/PlatformUtils.dart';
 
 //枚举,缓存平台
 enum CachePlatform {
-  //电脑
-  PC,
+  //win
+  win("Windows缓存"),
+  //mac
+  mac("Mac缓存"),
   //手机
-  Phone,
+  android("安卓缓存");
+  final String title; // 枚举字段
+
+  const CachePlatform(this.title); // 构造函数
 }
 
 //m4s文件类型
@@ -28,128 +34,14 @@ enum M4sFileType {
 
 class CacheDataManager {
   //缓存平台
-  CachePlatform cachePlatform = CachePlatform.PC;
+  CachePlatform _cachePlatform = CachePlatform.win;
 
-  List<CacheGroup> loadCacheData(String targetPath) {
-    //缓存组列表
-    List<CacheGroup> cacheGroupList = [];
-
-    var rootDir = Directory(targetPath);
-    if (!rootDir.existsSync()) {
-      // 目录不存在
-      return cacheGroupList;
-    }
-
-    //m4s文件大小
-    var m4sSize = 0;
-    //遍历获取子目录
-    var firstDirs = rootDir.listSync();
-    //创建PC缓存组
-    var pcCacheGroup = CacheGroup();
-    pcCacheGroup.path = rootDir.path;
-
-    for (var firstDir in firstDirs) {
-      if (firstDir is Directory) {
-        var secondDirs = firstDir.listSync();
-        //创建手机缓存组
-        var phoneCacheGroup = CacheGroup();
-        phoneCacheGroup.path = firstDir.path;
-
-        //创建电脑缓存项
-        var pcCacheItem = CacheItem();
-        pcCacheItem.path = firstDir.path;
-
-        for (var secondDir in secondDirs) {
-          //创建手机缓存项
-          var phoneCacheItem = CacheItem();
-          phoneCacheItem.parentPath = secondDir.path;
-
-          if (secondDir is Directory) {
-            var thirdDirs = secondDir.listSync();
-            for (var thirdDir in thirdDirs) {
-              if (thirdDir is Directory) {
-                var fourthDirs = thirdDir.listSync();
-                for (var fourthDir in fourthDirs) {
-                  if (fourthDir is File) {
-                    if (fourthDir.path.endsWith("video.m4s")) {
-                      phoneCacheItem.videoPath = fourthDir.path;
-                    } else if (fourthDir.path.endsWith("audio.m4s")) {
-                      phoneCacheItem.audioPath = fourthDir.path;
-                    } else if (fourthDir.path.endsWith(".blv")) {
-                      phoneCacheItem.blvPathList ??= [];
-                      phoneCacheItem.blvPathList?.add(fourthDir.path);
-                    }
-                  }
-                }
-              } else if (thirdDir is File) {
-                if (thirdDir.path.endsWith("entry.json")) {
-                  cachePlatform = CachePlatform.Phone;
-                  phoneCacheItem.jsonPath = thirdDir.path;
-                } else if (thirdDir.path.endsWith("danmaku.xml")) {
-                  phoneCacheItem.danmakuPath = thirdDir.path;
-                }
-              }
-            }
-
-            if (phoneCacheItem.videoPath != null &&
-                phoneCacheItem.audioPath != null) {
-              phoneCacheGroup.cacheItemList.add(phoneCacheItem);
-            } else if (phoneCacheItem.blvPathList?.isNotEmpty == true) {
-              phoneCacheGroup.cacheItemList.add(phoneCacheItem);
-            }
-          } else if (secondDir is File) {
-            if (secondDir.path.endsWith(".videoInfo")) {
-              cachePlatform = CachePlatform.PC;
-              pcCacheItem.jsonPath = secondDir.path;
-            } else if (secondDir.path.endsWith(".m4s")) {
-              var currM4sSize = secondDir.lengthSync();
-              if (m4sSize < currM4sSize) {
-                pcCacheItem.videoPath = secondDir.path;
-              } else {
-                pcCacheItem.audioPath = secondDir.path;
-              }
-              m4sSize = currM4sSize;
-            } else if (secondDir.path.endsWith("dm1")) {
-              pcCacheItem.danmakuPath = secondDir.path;
-            }
-          }
-        }
-
-        switch (cachePlatform) {
-          case CachePlatform.PC:
-            m4sSize = 0;
-            if (pcCacheItem.videoPath != null &&
-                pcCacheItem.audioPath != null) {
-              pcCacheGroup.cacheItemList.add(pcCacheItem);
-            } else if (pcCacheItem.blvPathList?.isNotEmpty == true) {
-              pcCacheGroup.cacheItemList.add(pcCacheItem);
-            }
-            break;
-          case CachePlatform.Phone:
-            break;
-        }
-
-        if (phoneCacheGroup.cacheItemList.isNotEmpty) {
-          cacheGroupList.add(phoneCacheGroup);
-        }
-      }
-    }
-
-    if (pcCacheGroup.cacheItemList.isNotEmpty) {
-      cacheGroupList.add(pcCacheGroup);
-    }
-
-    //解析json
-    if (cacheGroupList.isNotEmpty) {
-      var jsonInfo =
-          JsonUtils.parseCacheJson(cacheGroupList[1].cacheItemList[0].jsonPath);
-      print(jsonInfo);
-    }
-
-    return cacheGroupList;
+  //设置缓存平台
+  void setCachePlatform(CachePlatform platform) {
+    _cachePlatform = platform;
   }
 
-  List<CacheGroup>? loadPcCacheData(String targetPath) {
+  List<CacheGroup>? loadCacheData(String targetPath) {
     //判断路径是否存在并且是否是文件夹
     var rootDir = Directory(targetPath);
     if (!rootDir.existsSync()) {
@@ -157,8 +49,119 @@ class CacheDataManager {
       return null;
     }
 
-    List<CacheItem> cacheItemList = [];
+    return runPlatformFunc<List<CacheGroup>?>(onDefault: () {
+      switch (_cachePlatform) {
+        case CachePlatform.win:
+          return loadWinCacheData(rootDir);
+        case CachePlatform.android:
+          return loadAndroidCacheData(rootDir);
+        default:
+          return null;
+      }
+    }, onAndroid: () {
+      return null;
+    });
+  }
 
+  // 加载安卓缓存数据
+  List<CacheGroup>? loadAndroidCacheData(Directory rootDir) {
+    List<CacheItem> cacheItemList = [];
+    List<File> blvFiles = [];
+    //遍历获取子目录
+    var firstDirs = rootDir.listSync();
+    for (var firstDir in firstDirs) {
+      if (firstDir is Directory) {
+        for (var secondDir in firstDir.listSync()) {
+          blvFiles.clear();
+          if (secondDir is Directory) {
+            //创建缓存item
+            var cacheItem = CacheItem();
+            //缓存项父路径
+            cacheItem.parentPath = firstDir.path;
+            //缓存项路径
+            cacheItem.path = secondDir.path;
+            try {
+              //遍历缓存项
+              final entities = secondDir.listSync(recursive: true);
+              for (var file in entities) {
+                if (file is File) {
+                  if (file.path.endsWith("entry.json")) {
+                    //json信息文件
+                    // print(file.path);
+                    cacheItem.jsonPath = file.path;
+                    //解析json文件信息
+                    cacheItem = _parseAndroidJsonFile(cacheItem);
+                  } else if (file.path.endsWith("danmaku.xml")) {
+                    //弹幕文件
+                    cacheItem.danmakuPath = file.path;
+                  } else if (file.path.endsWith("audio.m4s")) {
+                    cacheItem.audioPath = file.path;
+                  } else if (file.path.endsWith("video.m4s")) {
+                    cacheItem.videoPath = file.path;
+                  } else if (file.path.endsWith("cover.jpg")) {
+                    cacheItem.coverPath = file.path;
+                  } else if (file.path.endsWith(".blv")) {
+                    blvFiles.add(file);
+                  }
+                }
+              }
+
+              if (blvFiles.isNotEmpty) {
+                cacheItem.blvPathList = blvFiles.map((it) {
+                  return it.path;
+                }).toList();
+              }
+              //判断是否可以合并音视频
+              if (cacheItem.canMergeAudioVideo()) {
+                cacheItem.groupId = firstDir.path;
+                cacheItemList.add(cacheItem);
+              }
+            } catch (e) {
+              print('递归遍历目录时出错: $e');
+            }
+          }
+        }
+      }
+    }
+
+    //缓存组列表
+    List<CacheGroup> cacheGroupList = [];
+
+    //遍历cacheItemList并按groupId进行分组
+    for (var item in cacheItemList) {
+      var groupIdList = cacheGroupList.map((group) {
+        return group.groupId;
+      });
+      if (groupIdList.contains(item.groupId)) {
+        //存在则添加到对应缓存组
+        for (var group in cacheGroupList) {
+          if (group.groupId == item.groupId) {
+            //更新缓存组的路径为它们的父目录
+            group.path = item.parentPath;
+            group.cacheItemList.add(item);
+            break;
+          }
+        }
+      } else {
+        //不存在则创建缓存组
+        var cacheGroup = CacheGroup();
+        cacheGroup.groupId = item.groupId;
+        cacheGroup.path = item.path;
+        cacheGroup.title = item.groupTitle;
+        cacheGroup.coverPath = item.groupCoverPath;
+        cacheGroup.coverUrl = item.groupCoverUrl;
+        cacheGroup.cacheItemList.add(item);
+        cacheGroupList.add(cacheGroup);
+      }
+    }
+
+    print(cacheGroupList);
+    return cacheGroupList;
+  }
+
+  // 加载Windows缓存数据
+  List<CacheGroup>? loadWinCacheData(Directory rootDir) {
+    List<CacheItem> cacheItemList = [];
     List<File> m4sFiles = [];
 
     //遍历获取子目录
@@ -169,7 +172,7 @@ class CacheDataManager {
         //创建缓存item
         var cacheItem = CacheItem();
         //缓存项父路径
-        cacheItem.parentPath = targetPath;
+        cacheItem.parentPath = rootDir.path;
         //缓存项路径
         cacheItem.path = firstDir.path;
         var files = firstDir.listSync();
@@ -180,7 +183,7 @@ class CacheDataManager {
               // print(file.path);
               cacheItem.jsonPath = file.path;
               //解析json文件信息
-              cacheItem = _parsePcJsonFile(cacheItem);
+              cacheItem = _parseWinJsonFile(cacheItem);
             } else if (file.path.endsWith("dm1")) {
               //弹幕文件
               cacheItem.danmakuPath = file.path;
@@ -243,8 +246,66 @@ class CacheDataManager {
     return cacheGroupList;
   }
 
+  //解析安卓json文件信息
+  CacheItem _parseAndroidJsonFile(CacheItem item) {
+    final jsonPath = item.jsonPath;
+    if (jsonPath == null) {
+      //抛出异常
+      throw Exception("json路径不存在,请先设置");
+    }
+    //判断json文件是否是正常的json格式
+    try {
+      // 读取文件
+      String content = File(jsonPath).readAsStringSync();
+      Map<String, dynamic> data;
+      try {
+        // 第一次直接尝试解析
+        data = json.decode(content);
+      } catch (_) {
+        // 如果失败，再尝试修复
+        data = JsonUtils.tryFixJson(content);
+      }
+
+      item.avId = _getMapString(data, 'avid');
+      item.bvId = _getMapString(data, 'bvid');
+
+      if (data.containsKey('page_data')) {
+        final pageData = data['page_data'];
+        item.title = _getMapString(pageData, 'part');
+        item.cId = _getMapString(pageData, 'cid');
+      }
+
+      if (data.containsKey('ep')) {
+        final epData = data['ep'];
+        item.title =
+            _getFirstNonNull([() => _getMapString(epData, 'index_title')]);
+      }
+
+      // 获取标题
+      item.title = _getFirstNonNull([
+        () => item.title,
+        () => _getMapString(data, 'title'),
+        () => item.bvId,
+        () => item.avId,
+        () => item.cId,
+      ]);
+
+      item.coverUrl = _getMapString(data, 'cover');
+
+      // item.groupId = _getMapString(data, 'groupId');
+      item.groupCoverPath = item.coverPath;
+
+      item.groupCoverUrl = item.coverUrl;
+      item.groupTitle = _getMapString(data, 'title');
+    } catch (e) {
+      print("解析${item.jsonPath} json文件错误:${e.toString()}");
+    }
+
+    return item;
+  }
+
   //解析电脑json文件信息
-  CacheItem _parsePcJsonFile(CacheItem item) {
+  CacheItem _parseWinJsonFile(CacheItem item) {
     final jsonPath = item.jsonPath;
     if (jsonPath == null) {
       //抛出异常
@@ -255,11 +316,16 @@ class CacheDataManager {
       // 读取文件
       String content = File(jsonPath).readAsStringSync();
       final Map<String, dynamic> data = json.decode(content);
+
+      item.avId = _getMapString(data, 'aid');
+      item.bvId = _getMapString(data, 'bvid');
       // 获取标题
       item.title = _getFirstNonNull([
         () => _getMapString(data, 'title'),
         () => _getMapString(data, 'tabName'),
         () => _getMapString(data, 'cid'),
+        () => item.bvId,
+        () => item.avId,
         () => _getMapString(data, 'itemId'),
         () => _getMapString(data, 'p'),
       ]);

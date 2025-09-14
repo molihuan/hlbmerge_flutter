@@ -38,4 +38,7 @@ abstract class FfmpegHlPlatform extends PlatformInterface {
   Future<Pair<bool, String>> mergeAudioVideo(String audioPath, String videoPath, String outputPath) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
+  Future<Pair<bool, String>> mergeVideos(List<String> videoPaths, String outputPath) {
+    throw UnimplementedError('platformVersion() has not been implemented.');
+  }
 }

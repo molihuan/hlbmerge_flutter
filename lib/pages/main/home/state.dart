@@ -1,5 +1,6 @@
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 
+import '../../../dao/cache_data_manager.dart';
 import '../../../dao/sp_data_manager.dart';
 import '../../../models/cache_group.dart';
 import '../../../models/cache_item.dart';
@@ -8,6 +9,7 @@ class HomeState {
   HomeState() {
     ///Initialize variables
     inputCacheDirPath = SpDataManager.getInputCacheDirPath() ?? '';
+    cachePlatform = SpDataManager.getCachePlatform() ?? CachePlatform.android;
   }
 
   //输入缓存文件夹路径
@@ -16,6 +18,13 @@ class HomeState {
   String get inputCacheDirPath => _inputCacheDirPath.value;
 
   set inputCacheDirPath(String value) => _inputCacheDirPath.value = value;
+
+  //缓存平台数据类型
+  final Rx<CachePlatform> _cachePlatform = CachePlatform.android.obs;
+
+  CachePlatform get cachePlatform => _cachePlatform.value;
+
+  set cachePlatform(CachePlatform value) => _cachePlatform.value = value;
 
   final RxList<CacheGroup> _cacheGroupList = <CacheGroup>[].obs;
 

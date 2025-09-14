@@ -15,43 +15,13 @@ class SettingsLogic extends GetxController {
   final SettingsState state = SettingsState();
 
   late final ffmpegHlPlugin = FfmpegHl();
+  late final _cacheDataManager = CacheDataManager();
 
+  //获取ffmpeg版本配置
   Future<String?> getAvcodecCfg() async {
     var cfgStr = await ffmpegHlPlugin.getAvcodecCfg();
     return cfgStr;
   }
-
-  testFunc() async {
-    var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
-    print(platformVersion);
-  }
-
-  mergeAudioVideo() async {
-    // var result = await ffmpegHlPlugin.mergeAudioVideo("1", "2", "3");
-    // if (result.first) {}
-
-    //获取文件夹路径
-    String? dirPath = await FilePicker.platform.getDirectoryPath();
-    if(dirPath == null){
-      return;
-    }
-
-    var manager = CacheDataManager();
-    List<CacheGroup> cacheGroupList = manager.loadCacheData(dirPath);
-    print(cacheGroupList);
-
-
-  }
-
-  //解析缓存数据
-  parseCacheData() async {
-    String dirPath = "C:/Users/moli/FlutterProject/hlbmerge_flutter/testRes/电脑缓存文件";
-
-    var manager = CacheDataManager();
-    List<CacheGroup>? cacheGroupList = manager.loadPcCacheData(dirPath);
-    // print(cacheGroupList);
-  }
-
 
   //选择输出路径
   selectOutputPath() async {
@@ -73,10 +43,18 @@ class SettingsLogic extends GetxController {
     SpDataManager.setOutputDirPath(dirPath);
     Get.snackbar("提示", "已选择输出路径:$dirPath");
   }
+  // 测试方法
+  testFunc() async {
+    // var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
+    // print(platformVersion);
+    _cacheDataManager.setCachePlatform(CachePlatform.android);
+    _cacheDataManager.loadCacheData("C:\\Users\\moli\\FlutterProject\\hlbmerge_flutter\\testRes\\手机缓存文件");
+
+  }
 
   @override
   void onReady() {
-    // TODO: implement onReady
+    testFunc();
     super.onReady();
   }
 

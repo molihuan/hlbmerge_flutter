@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hlbmerge/utils/FileUtil.dart';
 
-import '../../../models/cache_group.dart';
-import '../../../service/ffmpeg/ffmpeg_task.dart';
+import '../../../dao/cache_data_manager.dart';
 import 'logic.dart';
 import 'state.dart';
 
@@ -69,7 +68,8 @@ class HomePage extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(5),
                             image: DecorationImage(
-                              image: FileImage(File(item.coverPath ?? "")),
+                              image: _buildCoverImage(
+                                  item.coverPath, item.coverUrl),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -109,6 +109,18 @@ class HomePage extends StatelessWidget {
         );
       }),
     );
+  }
+
+  //封面图片
+  ImageProvider _buildCoverImage(
+      final String? coverPath, final String? coverUrl) {
+    if (coverPath != null) {
+      return FileImage(File(coverPath));
+    } else if (coverUrl != null) {
+      return NetworkImage(coverUrl);
+    } else {
+      return const AssetImage("assets/icos/app_logo.png");
+    }
   }
 
   //topbar
@@ -163,9 +175,43 @@ class HomePage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text(
-            "缓存路径:",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              const Text(
+                "缓存类型:",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey, width: 1), // 边框颜色和宽度
+                  borderRadius: BorderRadius.circular(5),           // 圆角
+                ),
+                child: DropdownButton<CachePlatform>(
+                  value: state.cachePlatform,
+                  items: CachePlatform.values.map((platform) {
+                    return DropdownMenuItem<CachePlatform>(
+                      value: platform,
+                      alignment: AlignmentDirectional.center,
+                      child: Text(platform.title),
+                    );
+                  }).toList(),
+                  onChanged: (CachePlatform? value) {
+                    if (value != null) {
+                      state.cachePlatform = value;
+                    }
+                  },
+                  underline: const SizedBox(), // 去掉默认下划线
+                  alignment: AlignmentDirectional.center,
+                  focusColor: Colors.transparent,
+                ),
+              ),
+              const Text(
+                "路径:",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              )
+            ],
           ),
           Expanded(
               child: Container(
@@ -181,7 +227,8 @@ class HomePage extends StatelessWidget {
                 logic.changeTextFieldDragging(false);
               },
               child: TextField(
-                controller: TextEditingController(text: state.inputCacheDirPath),
+                controller:
+                    TextEditingController(text: state.inputCacheDirPath),
                 onChanged: (value) {
                   state.inputCacheDirPath = value;
                 },
@@ -209,12 +256,14 @@ class HomePage extends StatelessWidget {
                         ElevatedButton(
                             onPressed: () {
                               logic.pickInputCacheDirPath();
-                            }, child: const Text("选择")),
+                            },
+                            child: const Text("选择")),
                         const SizedBox(width: 5),
                         FilledButton(
                             onPressed: () {
                               logic.parseCacheData();
-                            }, child: const Text("加载数据")),
+                            },
+                            child: const Text("加载数据")),
                         const SizedBox(width: 5),
                       ],
                     )),
@@ -328,8 +377,8 @@ class HomePage extends StatelessWidget {
                                           borderRadius:
                                               BorderRadius.circular(5),
                                           image: DecorationImage(
-                                            image: FileImage(
-                                                File(item.coverPath ?? "")),
+                                            image: _buildCoverImage(
+                                                item.coverPath, item.coverUrl),
                                             fit: BoxFit.cover,
                                           ),
                                         ),
