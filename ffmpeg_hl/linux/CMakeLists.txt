@@ -56,20 +56,46 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
 )
 target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
 
-# 链接 FFmpeg 3 个核心库
-target_link_libraries(${PLUGIN_NAME} PRIVATE
+# 真正的 so 文件
+set(FFMPEG_REAL_LIBS
         ${FFMPEG_DEV_ROOT}/lib/libavformat.so.58.45.100
         ${FFMPEG_DEV_ROOT}/lib/libavcodec.so.58.91.100
         ${FFMPEG_DEV_ROOT}/lib/libavutil.so.56.51.100
+        ${FFMPEG_DEV_ROOT}/lib/libswresample.so.3.7.100
+        ${FFMPEG_DEV_ROOT}/lib/libx264.so.161
+        ${FFMPEG_DEV_ROOT}/lib/libopenh264.so.2.1.1
+        ${FFMPEG_DEV_ROOT}/lib/libbz2.so.1.0.8
 )
+
+# 对应的符号链接（运行时 loader 要找的名字）
+set(FFMPEG_SYMLINKS
+        ${FFMPEG_DEV_ROOT}/lib/libavformat.so.58
+        ${FFMPEG_DEV_ROOT}/lib/libavcodec.so.58
+        ${FFMPEG_DEV_ROOT}/lib/libavutil.so.56
+        ${FFMPEG_DEV_ROOT}/lib/libswresample.so.3
+        ${FFMPEG_DEV_ROOT}/lib/libx264.so.161
+        ${FFMPEG_DEV_ROOT}/lib/libopenh264.so.6
+        ${FFMPEG_DEV_ROOT}/lib/libbz2.so.1.0
+)
+
+# 链接 FFmpeg 3 个核心库
+target_link_libraries(${PLUGIN_NAME} PRIVATE
+        ${FFMPEG_REAL_LIBS}
+)
+# 运行时自动去 bundle/lib 找库
+set_target_properties(${PLUGIN_NAME} PROPERTIES
+        BUILD_WITH_INSTALL_RPATH TRUE
+        INSTALL_RPATH "\$ORIGIN"
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+)
+
 
 # List of absolute paths to libraries that should be bundled with the plugin.
 # This list could contain prebuilt libraries, or libraries created by an
 # external build triggered from this build file.
 set(ffmpeg_hl_bundled_libraries
-  ${FFMPEG_DEV_ROOT}/lib/libavformat.so.58.45.100
-  ${FFMPEG_DEV_ROOT}/lib/libavcodec.so.58.91.100
-  ${FFMPEG_DEV_ROOT}/lib/libavutil.so.56.51.100
+  ${FFMPEG_REAL_LIBS}
+  ${FFMPEG_SYMLINKS}
   PARENT_SCOPE
 )
 
