@@ -2,6 +2,16 @@
 
 ```sh
 flutter create --org com.molihuan --platforms=android,ios,web,windows,macos,linux,ohos hlbmerge
+
+# debug 包
+flutter build apk --debug
+
+# release 包
+flutter build apk --release
+
+# 分割 ABI 构建，减小 apk 大小
+flutter build apk --release --split-per-abi
+
 ```
 Windows配置
 ```sh

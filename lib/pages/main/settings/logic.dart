@@ -8,6 +8,7 @@ import 'package:hlbmerge/dao/cache_data_manager.dart';
 import 'package:hlbmerge/dao/sp_data_manager.dart';
 import 'package:hlbmerge/utils/StrUtil.dart';
 import 'package:hlbmerge/models/cache_group.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'state.dart';
 
@@ -47,8 +48,12 @@ class SettingsLogic extends GetxController {
   testFunc() async {
     // var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
     // print(platformVersion);
-    _cacheDataManager.setCachePlatform(CachePlatform.android);
-    _cacheDataManager.loadCacheData("C:\\Users\\moli\\FlutterProject\\hlbmerge_flutter\\testRes\\手机缓存文件");
+
+    // _cacheDataManager.setCachePlatform(CachePlatform.android);
+    // _cacheDataManager.loadCacheData("C:\\Users\\moli\\FlutterProject\\hlbmerge_flutter\\testRes\\手机缓存文件");
+
+     var list = await getExternalStorageDirectory();
+    print(list?.path);
 
   }
 

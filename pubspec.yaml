@@ -22,6 +22,11 @@ dependencies:
 #    git:
 #      url: "https://gitcode.com/openharmony-sig/fluttertpc_file_picker.git"
   file_picker: ^8.3.2
+  # 路径
+  path_provider:
+    git:
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+      path: "packages/path_provider/path_provider"
 
   # ffmpeg_hl
   ffmpeg_hl:
@@ -38,6 +43,8 @@ dependencies:
   # 打开文件或目录
   open_file: ^3.5.10
 
+#强制覆盖
+dependency_overrides:
 
 dev_dependencies:
 #  flutter_test:

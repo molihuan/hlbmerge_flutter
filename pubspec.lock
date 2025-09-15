@@ -56,6 +56,22 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ffmpeg_kit_flutter_new_min:
+    dependency: transitive
+    description:
+      name: ffmpeg_kit_flutter_new_min
+      sha256: "1fce79b73ebbcf34e1063ed84cacc4920adfbb8631877e585302e68157b0ace3"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.1.0"
+  ffmpeg_kit_flutter_platform_interface:
+    dependency: transitive
+    description:
+      name: ffmpeg_kit_flutter_platform_interface
+      sha256: addf046ae44e190ad0101b2fde2ad909a3cd08a2a109f6106d2f7048b7abedee
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.2.1"
   file:
     dependency: transitive
     description:
@@ -211,6 +227,31 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.9.1"
+  path_provider:
+    dependency: "direct main"
+    description:
+      path: "packages/path_provider/path_provider"
+      ref: HEAD
+      resolved-ref: "17dc9d4014a4b4bbcfc99ee33cf3006699548f51"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
+    version: "2.1.0"
+  path_provider_android:
+    dependency: transitive
+    description:
+      name: path_provider_android
+      sha256: "6f01f8e37ec30b07bc424b4deabac37cacb1bc7e2e515ad74486039918a37eb7"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.2.10"
+  path_provider_foundation:
+    dependency: transitive
+    description:
+      name: path_provider_foundation
+      sha256: "4843174df4d288f5e29185bd6e72a6fbdf5a4a4602717eed565497429f179942"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.4.1"
   path_provider_linux:
     dependency: transitive
     description:
@@ -218,6 +259,15 @@ packages:
       sha256: f7a1fe3a634fe7734c8d3f2766ad746ae2a2884abe22e241a8b301bf5cac3279
       url: "https://pub.flutter-io.cn"
     source: hosted
+    version: "2.2.1"
+  path_provider_ohos:
+    dependency: transitive
+    description:
+      path: "packages/path_provider/path_provider_ohos"
+      ref: HEAD
+      resolved-ref: "17dc9d4014a4b4bbcfc99ee33cf3006699548f51"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
     version: "2.2.1"
   path_provider_platform_interface:
     dependency: transitive

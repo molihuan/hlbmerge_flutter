@@ -3,6 +3,8 @@ version = "1.0-SNAPSHOT"
 
 buildscript {
     ext.kotlin_version = "1.7.10"
+//    ext.kotlin_version = "1.8.22"
+//    ext.kotlin_version = "1.9.24"
     repositories {
         google()
         mavenCentral()
@@ -16,6 +18,11 @@ buildscript {
 
 allprojects {
     repositories {
+        maven { url 'https://maven.aliyun.com/repository/public/'}
+        maven { url 'https://maven.aliyun.com/repository/google/'}
+        maven { url 'https://maven.aliyun.com/repository/central/'}
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://repo.huaweicloud.com/repository/maven/' }
         google()
         mavenCentral()
     }
@@ -32,12 +39,12 @@ android {
     compileSdk = 34
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     sourceSets {
@@ -46,10 +53,11 @@ android {
     }
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
     }
 
     dependencies {
+//        implementation 'com.github.microshow:RxFFmpeg:4.9.0-lite'
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
     }

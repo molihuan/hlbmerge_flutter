@@ -7,6 +7,7 @@ import 'package:hlbmerge/dao/sp_data_manager.dart';
 import 'package:hlbmerge/pages/app_pages.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await SpDataManager.init();
   runApp(const MyApp());
 }

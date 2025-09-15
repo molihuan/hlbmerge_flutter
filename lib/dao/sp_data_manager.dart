@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:get/get.dart';
+import 'package:hlbmerge/utils/PlatformUtils.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/FileUtil.dart';
@@ -36,8 +38,17 @@ class SpDataManager {
 
   //获取默认的输出路径
   static String _getDefaultOutputDirPath() {
-    var currExeDir = FileUtil.getCurrExeDir();
-    var outputDir = Directory('${currExeDir.path}/outputDir');
+
+    var outputDir = runPlatformFunc<Directory?>(onDefault: (){
+      var currExeDir = FileUtil.getCurrExeDir();
+      return Directory('${currExeDir.path}/outputDir');
+    }, onAndroid: (){
+      return null;
+    });
+
+    if(outputDir == null){
+      return "";
+    }
 
     // 如果目录不存在则创建
     if (!outputDir.existsSync()) {
