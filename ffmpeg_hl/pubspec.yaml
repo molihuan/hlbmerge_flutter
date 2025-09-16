@@ -14,6 +14,7 @@ dependencies:
 #    sdk: flutter
 #  web: ^0.5.1
   plugin_platform_interface: ^2.0.2
+  #https://pub-web.flutter-io.cn/packages/ffmpeg_kit_flutter_new_min
   ffmpeg_kit_flutter_new_min: ^2.1.0
 
 dev_dependencies:

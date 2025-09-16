@@ -4,6 +4,10 @@ import 'package:ffmpeg_hl/utils/StrUtil.dart';
 import 'ffmpeg_hl_platform_interface.dart';
 
 class FfmpegHl {
+  FfmpegHl() {
+    FfmpegHlPlatform.init();
+  }
+
   Future<String?> getPlatformVersion() {
     return FfmpegHlPlatform.instance.getPlatformVersion();
   }
@@ -30,11 +34,11 @@ class FfmpegHl {
     return FfmpegHlPlatform.instance
         .mergeAudioVideo(audioPath, videoPath, outputPath);
   }
+
   // 合并音频和视频
   Future<Pair<bool, String>> mergeVideos(
       List<String> videoPaths, String outputPath) {
     //判断路径中是否有空格
-    return FfmpegHlPlatform.instance
-        .mergeVideos(videoPaths, outputPath);
+    return FfmpegHlPlatform.instance.mergeVideos(videoPaths, outputPath);
   }
 }

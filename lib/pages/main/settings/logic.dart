@@ -52,8 +52,8 @@ class SettingsLogic extends GetxController {
     // _cacheDataManager.setCachePlatform(CachePlatform.android);
     // _cacheDataManager.loadCacheData("C:\\Users\\moli\\FlutterProject\\hlbmerge_flutter\\testRes\\手机缓存文件");
 
-     var list = await getExternalStorageDirectory();
-    print(list?.path);
+     // var list = await getExternalStorageDirectory();
+    // print(list?.path);
 
   }
 
