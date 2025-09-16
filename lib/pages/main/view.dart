@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'logic.dart';
@@ -13,7 +14,9 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
-      body: logic.getCurrPage(),
+      body:SafeArea(
+        child: logic.getCurrPage(),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: state.currPageIndex,
         onTap: logic.changePage,

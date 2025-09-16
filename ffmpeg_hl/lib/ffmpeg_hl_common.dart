@@ -3,13 +3,17 @@ import 'package:ffmpeg_kit_flutter_new_min/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_flutter_new_min/return_code.dart';
 
 import 'beans/Pair.dart';
+import 'ffmpeg_hl_method_channel.dart';
 import 'ffmpeg_hl_platform_interface.dart';
 
 class FfmpegHlCommon extends FfmpegHlPlatform {
+  final _methodChannel = MethodChannelFfmpegHl();
+
   @override
-  Future<String?> getAvcodecCfg() {
-    // TODO: implement getAvcodecCfg
-    return super.getAvcodecCfg();
+  Future<String?> getAvcodecCfg() async {
+    FFmpegSession session = await FFmpegKit.execute('-version');
+    final output = await session.getOutput();
+    return Future.value(output);
   }
 
   @override
@@ -32,7 +36,6 @@ class FfmpegHlCommon extends FfmpegHlPlatform {
 
   @override
   Future<String?> getPlatformVersion() {
-    // TODO: implement getAvcodecCfg
-    return super.getPlatformVersion();
+    return _methodChannel.getPlatformVersion();
   }
 }

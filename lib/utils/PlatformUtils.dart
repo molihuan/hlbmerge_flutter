@@ -29,6 +29,23 @@ T runPlatformFunc<T>({
   }
 }
 
+T runPlatformFuncClass<T>({
+  T Function()? onMobile,
+  T Function()? onDesktop,
+  T Function()? onWeb,
+  required T Function() onDefault, // 必须提供通用方法
+}) {
+  if (kIsWeb) {
+    return (onWeb ?? onDefault)();
+  } else if (Platform.isAndroid || Platform.isIOS) {
+    return (onMobile ?? onDefault)();
+  } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    return (onDesktop ?? onDefault)();
+  } else {
+    return onDefault();
+  }
+}
+
 
 Future<T> runPlatformFuncFuture<T>({
   FutureOr<T> Function()? onAndroid,

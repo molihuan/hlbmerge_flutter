@@ -19,8 +19,7 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             title: const Text("Avcodec配置"),
             onTap: () async {
-              String? avcodecCfg = await logic.getAvcodecCfg();
-              Get.snackbar("Avcodec配置", avcodecCfg ?? "获取失败");
+              logic.showAvcodecCfg();
             },
           ),
           Obx(() {

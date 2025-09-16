@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hlbmerge/utils/FileUtil.dart';
+import 'package:hlbmerge/utils/PlatformUtils.dart';
 
 import '../../../dao/cache_data_manager.dart';
 import 'logic.dart';
@@ -21,153 +23,134 @@ class HomePage extends StatelessWidget {
       child: Obx(() {
         return Column(
           children: [
+            // topbar
             _buildTopBar(context),
-            Expanded(
-                child: ListView.builder(
-              itemCount: state.cacheGroupList.length,
-              itemExtent: 100,
-              itemBuilder: (context, index) {
-                var item = state.cacheGroupList[index];
-
-                return InkWell(
-                  onTap: () {
-                    if (state.isMultiSelectMode) {
-                      logic.changeGroupListChecked(index, !item.checked);
-                    } else {
-                      showCacheItemListDialog(context, index);
-                    }
-                  },
-                  onLongPress: () {
-                    logic.changeMultiSelectMode(!state.isMultiSelectMode);
-                    logic.changeGroupListChecked(index, true);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Obx(() {
-                          return state.isMultiSelectMode
-                              ? Container(
-                                  margin: const EdgeInsets.only(right: 10),
-                                  child: Checkbox(
-                                      value: item.checked,
-                                      onChanged: (v) {
-                                        var checked = v ?? false;
-                                        logic.changeGroupListChecked(
-                                            index, checked);
-                                      }),
-                                )
-                              : const SizedBox.shrink();
-                        }),
-                        Container(
-                          width: 160,
-                          height: 100,
-                          margin: const EdgeInsets.symmetric(vertical: 5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            image: DecorationImage(
-                              image: _buildCoverImage(
-                                  item.coverPath, item.coverUrl),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(left: 10),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Align(
-                                  child: Text(item.title ?? "",
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      )),
-                                ),
-                              ),
-                              Container(
-                                  margin: const EdgeInsets.only(bottom: 5),
-                                  child: Text(
-                                    '路径:${item.path}',
-                                    style: const TextStyle(color: Colors.grey),
-                                  )),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ))
+            // body
+            _buildBody(context),
+            _buildBottomBar(),
           ],
         );
       }),
     );
   }
 
-  //封面图片
-  ImageProvider _buildCoverImage(
-      final String? coverPath, final String? coverUrl) {
-    if (coverPath != null) {
-      return FileImage(File(coverPath));
-    } else if (coverUrl != null) {
-      return NetworkImage(coverUrl);
-    } else {
-      return const AssetImage("assets/icos/app_logo.png");
-    }
+  Widget _buildBottomBar() {
+    return runPlatformFuncClass<Widget>(onDefault: () {
+      return const SizedBox.shrink();
+    }, onMobile: () {
+      return state.isMultiSelectMode
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [..._buildHandleBtnList()],
+            )
+          : const SizedBox.shrink();
+    });
   }
 
   //topbar
   Widget _buildTopBar(BuildContext context) {
+    return runPlatformFuncClass<Widget>(onDefault: () {
+      return _buildPcTopBar(context);
+    }, onMobile: () {
+      return _buildPhoneTopBar(context);
+    }, onWeb: () {
+      return const SizedBox.shrink();
+    });
+  }
+
+  //全选按钮
+  Widget _buildSelectAllBtn() {
+    // 全选按钮
+    return Container(
+      margin: const EdgeInsets.only(right: 10),
+      child: InkWell(
+        onTap: () {
+          logic.changeAllGroupListChecked(!state.isAllGroupListChecked);
+        },
+        child: state.isAllGroupListChecked
+            ? const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [Icon(Icons.check_box), Text("取消全选")],
+              )
+            : const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [Icon(Icons.check_box_outline_blank), Text("全选")],
+              ),
+      ),
+    );
+  }
+
+  //编辑按钮
+  Widget _buildEditBtn() {
+    //编辑按钮
+    return Container(
+      decoration: BoxDecoration(
+        color: state.isMultiSelectMode
+            ? Colors.red.withOpacity(0.7)
+            : Colors.transparent,
+        shape: BoxShape.circle, // 圆形
+      ),
+      child: IconButton(
+        icon: Icon(
+          Icons.edit,
+          color: state.isMultiSelectMode ? Colors.white : Colors.black,
+        ),
+        onPressed: () {
+          logic.changeMultiSelectMode(!state.isMultiSelectMode);
+        },
+      ),
+    );
+  }
+
+  //PC顶部栏
+  Widget _buildPcTopBar(BuildContext context) {
     List<Widget> optionWidgets;
     if (state.isMultiSelectMode) {
-      optionWidgets = [
-        // 操作按钮
-        TextButton(
-            onPressed: () {
-              logic.exportFileByCacheGroup(FileFormat.mp3);
-            },
-            child: const Text("提取音频")),
-        TextButton(
-            onPressed: () {
-              logic.exportFileByCacheGroup(FileFormat.mp4);
-            },
-            child: const Text("提取视频")),
-        TextButton(
-            onPressed: () {
-              logic.mergeAudioVideoByCacheGroup();
-            },
-            child: const Text("合并音视频")),
-        // 全选按钮
-        Container(
-          margin: const EdgeInsets.only(right: 10),
-          child: InkWell(
-            onTap: () {
-              logic.changeAllGroupListChecked(!state.isAllGroupListChecked);
-            },
-            child: state.isAllGroupListChecked
-                ? const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [Icon(Icons.check_box), Text("取消全选")],
-                  )
-                : const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [Icon(Icons.check_box_outline_blank), Text("全选")],
-                  ),
-          ),
-        )
-      ];
+      optionWidgets = [..._buildHandleBtnList(), _buildSelectAllBtn()];
     } else {
       optionWidgets = [];
     }
+
+    //缓存类型视图
+    Widget cacheTypeWidget = runPlatformFunc(onDefault: () {
+      return Row(children: [
+        const Text(
+          "缓存类型:",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey, width: 1), // 边框颜色和宽度
+            borderRadius: BorderRadius.circular(5), // 圆角
+          ),
+          child: DropdownButton<CachePlatform>(
+            value: state.cachePlatform,
+            items: CachePlatform.values.map((platform) {
+              return DropdownMenuItem<CachePlatform>(
+                value: platform,
+                alignment: AlignmentDirectional.center,
+                child: Text(platform.title),
+              );
+            }).toList(),
+            onChanged: (CachePlatform? value) {
+              if (value != null) {
+                state.cachePlatform = value;
+              }
+            },
+            underline: const SizedBox(),
+            // 去掉默认下划线
+            alignment: AlignmentDirectional.center,
+            focusColor: Colors.transparent,
+          ),
+        ),
+      ]);
+    }, onAndroid: () {
+      return const SizedBox.shrink();
+    });
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
@@ -175,43 +158,10 @@ class HomePage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              const Text(
-                "缓存类型:",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 5),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 1), // 边框颜色和宽度
-                  borderRadius: BorderRadius.circular(5),           // 圆角
-                ),
-                child: DropdownButton<CachePlatform>(
-                  value: state.cachePlatform,
-                  items: CachePlatform.values.map((platform) {
-                    return DropdownMenuItem<CachePlatform>(
-                      value: platform,
-                      alignment: AlignmentDirectional.center,
-                      child: Text(platform.title),
-                    );
-                  }).toList(),
-                  onChanged: (CachePlatform? value) {
-                    if (value != null) {
-                      state.cachePlatform = value;
-                    }
-                  },
-                  underline: const SizedBox(), // 去掉默认下划线
-                  alignment: AlignmentDirectional.center,
-                  focusColor: Colors.transparent,
-                ),
-              ),
-              const Text(
-                "路径:",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              )
-            ],
+          cacheTypeWidget,
+          const Text(
+            "路径:",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           Expanded(
               child: Container(
@@ -271,34 +221,186 @@ class HomePage extends StatelessWidget {
             ),
           )),
           Row(
-            children: [
-              ...optionWidgets,
-              //编辑按钮
-              Container(
-                decoration: BoxDecoration(
-                  color: state.isMultiSelectMode
-                      ? Colors.red.withOpacity(0.7)
-                      : Colors.transparent,
-                  shape: BoxShape.circle, // 圆形
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.edit,
-                    color:
-                        state.isMultiSelectMode ? Colors.white : Colors.black,
-                  ),
-                  onPressed: () {
-                    logic.changeMultiSelectMode(!state.isMultiSelectMode);
-                  },
-                ),
-              )
-            ],
+            children: [...optionWidgets, _buildEditBtn()],
           ),
         ],
       ),
     );
   }
 
+  //手机顶部栏
+  Widget _buildPhoneTopBar(BuildContext context) {
+    var searchTextField = Expanded(
+        child: Container(
+      child: TextField(
+        controller: TextEditingController(text: "你好"),
+        onChanged: (value) {},
+        decoration: InputDecoration(
+            labelText: '搜索',
+            border: OutlineInputBorder(),
+            hintText: '请输入搜索内容',
+            enabledBorder: OutlineInputBorder(
+              borderSide: state.isTextFieldDragging
+                  ? const BorderSide(color: Colors.blue, width: 2)
+                  : const BorderSide(
+                      color: Colors.grey,
+                    ),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue, width: 2), // 聚焦状态边框颜色
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+            suffixIcon: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.search),
+                ),
+              ],
+            )),
+      ),
+    ));
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2), // 阴影颜色
+            spreadRadius: 1, // 阴影扩散
+            blurRadius: 1,   // 模糊程度
+            offset: const Offset(0, 1.5), // x,y 偏移
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          state.isMultiSelectMode
+              ? const SizedBox.shrink()
+              : const Text("缓存",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20)),
+          state.isMultiSelectMode
+              ? _buildSelectAllBtn()
+              : const SizedBox.shrink(),
+          state.isMultiSelectMode ? searchTextField : const SizedBox.shrink(),
+          const SizedBox(width: 5),
+          _buildEditBtn(),
+        ],
+      ),
+    );
+  }
+
+  // 缓存列表内容
+  Widget _buildBody(BuildContext context) {
+    return Expanded(
+        child: ListView.builder(
+      itemCount: state.cacheGroupList.length,
+      itemExtent: 100,
+      itemBuilder: (context, index) {
+        var item = state.cacheGroupList[index];
+
+        return InkWell(
+          onTap: () {
+            if (state.isMultiSelectMode) {
+              logic.changeGroupListChecked(index, !item.checked);
+            } else {
+              showCacheItemListDialog(context, index);
+            }
+          },
+          onLongPress: () {
+            logic.changeMultiSelectMode(!state.isMultiSelectMode);
+            logic.changeGroupListChecked(index, true);
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Obx(() {
+                  return state.isMultiSelectMode
+                      ? Container(
+                          margin: const EdgeInsets.only(right: 10),
+                          child: Checkbox(
+                              value: item.checked,
+                              onChanged: (v) {
+                                var checked = v ?? false;
+                                logic.changeGroupListChecked(index, checked);
+                              }),
+                        )
+                      : const SizedBox.shrink();
+                }),
+                Container(
+                  width: 160,
+                  height: 100,
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    image: DecorationImage(
+                      image: _buildCoverImage(item.coverPath, item.coverUrl),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(left: 10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Align(
+                          child: Text(item.title ?? "",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              )),
+                        ),
+                      ),
+                      Container(
+                          margin: const EdgeInsets.only(bottom: 5),
+                          child: Text(
+                            '路径:${item.path}',
+                            style: const TextStyle(color: Colors.grey),
+                          )),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ));
+  }
+
+  // 操作按钮
+  List<Widget> _buildHandleBtnList() {
+    return [
+      TextButton(
+          onPressed: () {
+            logic.exportFileByCacheGroup(FileFormat.mp3);
+          },
+          child: const Text("提取音频")),
+      TextButton(
+          onPressed: () {
+            logic.exportFileByCacheGroup(FileFormat.mp4);
+          },
+          child: const Text("提取视频")),
+      TextButton(
+          onPressed: () {
+            logic.mergeAudioVideoByCacheGroup();
+          },
+          child: const Text("合并音视频"))
+    ];
+  }
+
+  //缓存项列表弹窗
   void showCacheItemListDialog(BuildContext context, int cacheGroupIndex) {
     showDialog(
       context: context,
@@ -504,5 +606,17 @@ class HomePage extends StatelessWidget {
         );
       },
     );
+  }
+
+  //封面图片
+  ImageProvider _buildCoverImage(
+      final String? coverPath, final String? coverUrl) {
+    if (coverPath != null) {
+      return FileImage(File(coverPath));
+    } else if (coverUrl != null) {
+      return NetworkImage(coverUrl);
+    } else {
+      return const AssetImage("assets/icos/app_logo.png");
+    }
   }
 }

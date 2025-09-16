@@ -19,9 +19,12 @@ class SettingsLogic extends GetxController {
   late final _cacheDataManager = CacheDataManager();
 
   //获取ffmpeg版本配置
-  Future<String?> getAvcodecCfg() async {
+  showAvcodecCfg() async {
     var cfgStr = await ffmpegHlPlugin.getAvcodecCfg();
-    return cfgStr;
+    Get.snackbar("Avcodec配置", "",
+        messageText: Text(cfgStr ?? "获取失败",
+            maxLines: 10, // 最多显示 3 行
+            overflow: TextOverflow.ellipsis));
   }
 
   //选择输出路径
@@ -44,17 +47,17 @@ class SettingsLogic extends GetxController {
     SpDataManager.setOutputDirPath(dirPath);
     Get.snackbar("提示", "已选择输出路径:$dirPath");
   }
+
   // 测试方法
   testFunc() async {
-    // var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
-    // print(platformVersion);
+    var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
+    print(platformVersion);
 
     // _cacheDataManager.setCachePlatform(CachePlatform.android);
     // _cacheDataManager.loadCacheData("C:\\Users\\moli\\FlutterProject\\hlbmerge_flutter\\testRes\\手机缓存文件");
 
-     // var list = await getExternalStorageDirectory();
+    // var list = await getExternalStorageDirectory();
     // print(list?.path);
-
   }
 
   @override
