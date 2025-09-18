@@ -46,5 +46,3 @@ ffmpeg version 4.3.1 Copyright (c) 2000-2020 the FFmpeg developers
 Hyper fast Audio and Video encoder
 ```
 
-重名问题
-

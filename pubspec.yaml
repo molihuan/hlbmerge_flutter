@@ -2,7 +2,7 @@ name: hlbmerge
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -31,8 +31,6 @@ dependencies:
   # ffmpeg_hl
   ffmpeg_hl:
     path: ./ffmpeg_hl
-  # 弹窗 https://pub-web.flutter-io.cn/packages/flutter_smart_dialog
-  flutter_smart_dialog: ^4.9.8+7
   # 数据存储
   shared_preferences:
       git:
