@@ -30,7 +30,7 @@ class ProgressPage extends StatelessWidget {
               ),
               FilledButton(
                 onPressed: () {
-                  taskController.tasks.clear();
+                  taskController.clearTasks();
                   logic.loadOutputChildDirList();
                 },
                 child: const Text("归档"),

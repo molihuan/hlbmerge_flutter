@@ -10,6 +10,7 @@ import 'package:hlbmerge/utils/StrUtil.dart';
 import 'package:hlbmerge/models/cache_group.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../../channel/main/main_channel.dart';
 import 'state.dart';
 
 class SettingsLogic extends GetxController {
@@ -17,6 +18,7 @@ class SettingsLogic extends GetxController {
 
   late final ffmpegHlPlugin = FfmpegHl();
   late final _cacheDataManager = CacheDataManager();
+  late final _mainChannel = MainChannel();
 
   //获取ffmpeg版本配置
   showAvcodecCfg() async {
@@ -52,6 +54,9 @@ class SettingsLogic extends GetxController {
   testFunc() async {
     var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
     print(platformVersion);
+
+    var result = await _mainChannel.startActivity("777");
+    print(result);
 
     // _cacheDataManager.setCachePlatform(CachePlatform.android);
     // _cacheDataManager.loadCacheData("C:\\Users\\moli\\FlutterProject\\hlbmerge_flutter\\testRes\\手机缓存文件");

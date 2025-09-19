@@ -64,6 +64,7 @@ android {
 
     buildFeatures {
         compose true
+        buildConfig true
     }
 }
 
@@ -90,6 +91,8 @@ dependencies {
     // 图片加载
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    // 日志
+    implementation(libs.timber)
 
     // compose约束布局
     implementation(libs.androidx.constraintlayout.compose)

@@ -31,7 +31,14 @@ class FFmpegTaskController extends GetxController {
   late final ffmpegPlugin = FfmpegHl();
 
   // 任务列表
-  var tasks = <FFmpegTaskBean>[].obs;
+  final _tasks = <FFmpegTaskBean>[].obs;
+  //获取
+  List<FFmpegTaskBean> get tasks => _tasks.toList();
+  set tasks(List<FFmpegTaskBean> value) => _tasks.assignAll(value);
+  //清空任务
+  void clearTasks() {
+    _tasks.clear();
+  }
 
   // 当前并发数
   final int _maxConcurrency = 1;
@@ -39,7 +46,7 @@ class FFmpegTaskController extends GetxController {
 
   // 添加任务
   void addTask(FFmpegTaskBean task) {
-    tasks.add(task);
+    _tasks.add(task);
     _schedule();
   }
 
@@ -48,7 +55,7 @@ class FFmpegTaskController extends GetxController {
     if (_runningCount >= _maxConcurrency) return;
 
     // 找一个等待中的任务
-    final task = tasks.firstWhereOrNull(
+    final task = _tasks.firstWhereOrNull(
       (t) => t.status.value == FFmpegTaskStatus.pending,
     );
     if (task == null) return;
