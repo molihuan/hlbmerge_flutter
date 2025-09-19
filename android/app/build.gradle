@@ -81,6 +81,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
     // Kotlin 反射库
@@ -98,6 +99,14 @@ dependencies {
     implementation(libs.androidx.constraintlayout.compose)
     // https://mvnrepository.com/artifact/androidx.navigation/navigation-compose
     implementation(libs.androidx.navigation.compose)
+
+    // 设备兼容框架：https://github.com/getActivity/DeviceCompat
+    implementation libs.devicecompat
+    // 权限请求框架：https://github.com/getActivity/XXPermissions
+    implementation libs.xxpermissions
+
+    //图标库 https://mvnrepository.com/artifact/androidx.compose.material/material-icons-extended
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     //基础UI
     implementation(libs.androidx.core.ktx)
