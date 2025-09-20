@@ -86,4 +86,9 @@ class HomeState {
   bool get isTextFieldDragging => _isTextFieldDragging.value;
 
   set isTextFieldDragging(bool value) => _isTextFieldDragging.value = value;
+
+  //是否有权限
+  final _hasPermission = false.obs;
+  bool get hasPermission => _hasPermission.value;
+  set hasPermission(bool value) => _hasPermission.value = value;
 }

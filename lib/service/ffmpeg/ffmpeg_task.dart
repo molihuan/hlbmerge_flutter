@@ -98,6 +98,9 @@ class FFmpegTaskController extends GetxController {
 
       // 输出目录
       var outputDirPath = HomeLogic.getOutputDirPath(groupTitle: groupTitle);
+      if(outputDirPath == null){
+        return Pair(false, "请先选择输出目录");
+      }
       var outputPath = path.join(outputDirPath, outputFileName);
 
       //判断输出文件是否存在,如果存在则重命名

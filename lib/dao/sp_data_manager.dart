@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:get/get.dart';
+import 'package:hlbmerge/channel/main/main_channel.dart';
 import 'package:hlbmerge/utils/PlatformUtils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,26 +29,43 @@ class SpDataManager {
   static const String cachePlatformKey = 'cachePlatform';
 
   //输出目录
-  static setOutputDirPath(String path) {
+  static setOutputDirPath(String? path) {
+    if (path == null) {
+      prefs.remove(outputDirPathKey);
+      return;
+    }
     prefs.setString(outputDirPathKey, path);
   }
 
-  static String getOutputDirPath() {
-    return prefs.getString(outputDirPathKey) ?? _getDefaultOutputDirPath();
+  static String? getOutputDirPath({void Function(String)? futureCallback}) {
+    return prefs.getString(outputDirPathKey) ??
+        _getDefaultOutputDirPath(futureCallback: futureCallback);
   }
 
   //获取默认的输出路径
-  static String _getDefaultOutputDirPath() {
-
-    var outputDir = runPlatformFunc<Directory?>(onDefault: (){
+  static String? _getDefaultOutputDirPath({void Function(String)? futureCallback}) {
+    var outputDir = runPlatformFunc<Directory?>(onDefault: () {
       var currExeDir = FileUtil.getCurrExeDir();
       return Directory('${currExeDir.path}/outputDir');
-    }, onAndroid: (){
+    }, onAndroid: () {
+      MainChannel.getDefaultOutputDirPath().then((result) {
+        print("获取安卓默认输出路径结果:${result}");
+        if (result.first != 0) {
+          return;
+        }
+        final path = result.third;
+        if (path == null) {
+          return;
+        }
+        //持久化
+        SpDataManager.setOutputDirPath(path);
+        futureCallback?.call(path);
+      });
       return null;
     });
 
-    if(outputDir == null){
-      return "";
+    if (outputDir == null) {
+      return null;
     }
 
     // 如果目录不存在则创建
@@ -70,12 +88,13 @@ class SpDataManager {
   }
 
   //缓存数据平台
-  static setCachePlatform(CachePlatform platform){
+  static setCachePlatform(CachePlatform platform) {
     prefs.setString(cachePlatformKey, platform.name);
   }
 
-  static CachePlatform? getCachePlatform(){
+  static CachePlatform? getCachePlatform() {
     String? target = prefs.getString(cachePlatformKey);
-    return CachePlatform.values.firstWhereOrNull((element) => element.name == target);
+    return CachePlatform.values
+        .firstWhereOrNull((element) => element.name == target);
   }
 }

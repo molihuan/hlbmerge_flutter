@@ -184,7 +184,7 @@ class HomePage extends StatelessWidget {
                 },
                 decoration: InputDecoration(
                     labelText: '请输入缓存文件夹路径(支持拖拽),如果加载数据失败请查看设置中的教程',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     hintText: '请输入缓存文件夹路径(支持拖拽)',
                     enabledBorder: OutlineInputBorder(
                       borderSide: state.isTextFieldDragging
@@ -237,7 +237,7 @@ class HomePage extends StatelessWidget {
         onChanged: (value) {},
         decoration: InputDecoration(
             labelText: '搜索',
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             hintText: '请输入搜索内容',
             enabledBorder: OutlineInputBorder(
               borderSide: state.isTextFieldDragging
@@ -272,7 +272,7 @@ class HomePage extends StatelessWidget {
           BoxShadow(
             color: Colors.grey.withOpacity(0.2), // 阴影颜色
             spreadRadius: 1, // 阴影扩散
-            blurRadius: 1,   // 模糊程度
+            blurRadius: 1, // 模糊程度
             offset: const Offset(0, 1.5), // x,y 偏移
           ),
         ],
@@ -282,7 +282,8 @@ class HomePage extends StatelessWidget {
         children: [
           state.isMultiSelectMode
               ? const SizedBox.shrink()
-              : const Text("缓存",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20)),
+              : const Text("缓存",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
           state.isMultiSelectMode
               ? _buildSelectAllBtn()
               : const SizedBox.shrink(),
@@ -296,87 +297,120 @@ class HomePage extends StatelessWidget {
 
   // 缓存列表内容
   Widget _buildBody(BuildContext context) {
-    return Expanded(
-        child: ListView.builder(
-      itemCount: state.cacheGroupList.length,
-      itemExtent: 100,
-      itemBuilder: (context, index) {
-        var item = state.cacheGroupList[index];
+    final ({double itemHeight, double checkboxMargin, double titleFontSize, double pathFontSize,EdgeInsetsGeometry itemPadding}) itemScreenCfg = runPlatformFuncClassRecord(onDefault: (){
+      return (itemHeight: 110, checkboxMargin: 10, titleFontSize: 16, pathFontSize: 12, itemPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5));
+    },onMobile: (){
+      return (itemHeight: 85, checkboxMargin: 0, titleFontSize: 14, pathFontSize: 12,itemPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3));
+    });
 
-        return InkWell(
-          onTap: () {
-            if (state.isMultiSelectMode) {
-              logic.changeGroupListChecked(index, !item.checked);
-            } else {
-              showCacheItemListDialog(context, index);
-            }
-          },
-          onLongPress: () {
-            logic.changeMultiSelectMode(!state.isMultiSelectMode);
-            logic.changeGroupListChecked(index, true);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Obx(() {
-                  return state.isMultiSelectMode
-                      ? Container(
-                          margin: const EdgeInsets.only(right: 10),
-                          child: Checkbox(
-                              value: item.checked,
-                              onChanged: (v) {
-                                var checked = v ?? false;
-                                logic.changeGroupListChecked(index, checked);
-                              }),
-                        )
-                      : const SizedBox.shrink();
-                }),
-                Container(
-                  width: 160,
-                  height: 100,
-                  margin: const EdgeInsets.symmetric(vertical: 5),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    image: DecorationImage(
-                      image: _buildCoverImage(item.coverPath, item.coverUrl),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(left: 10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Align(
-                          child: Text(item.title ?? "",
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              )),
+
+    Widget content;
+
+    if (state.hasPermission) {
+      content = ListView.builder(
+        // itemCount 和 itemBuilder 保持我们之前优化好的版本
+        itemCount: state.cacheGroupList.length,
+        itemBuilder: (context, index) {
+          var item = state.cacheGroupList[index];
+
+          return InkWell(
+            onTap: () {
+              if (state.isMultiSelectMode) {
+                logic.changeGroupListChecked(index, !item.checked);
+              } else {
+                showCacheItemListDialog(context, index);
+              }
+            },
+            onLongPress: () {
+              logic.changeMultiSelectMode(!state.isMultiSelectMode);
+              logic.changeGroupListChecked(index, true);
+            },
+            child: Container(
+              height: itemScreenCfg.itemHeight,
+              padding: itemScreenCfg.itemPadding,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // 1. 复选框部分 (保持不变)
+                  Obx(() {
+                    return state.isMultiSelectMode
+                        ? Container(
+                            margin: EdgeInsets.only(right: itemScreenCfg.checkboxMargin),
+                            child: Checkbox(
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                value: item.checked,
+                                onChanged: (v) {
+                                  var checked = v ?? false;
+                                  logic.changeGroupListChecked(index, checked);
+                                }),
+                          )
+                        : const SizedBox.shrink();
+                  }),
+                  // 2. 图片部分 (保持不变)
+                  SizedBox(
+                    height: itemScreenCfg.itemHeight,
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          image: DecorationImage(
+                            image:
+                                _buildCoverImage(item.coverPath, item.coverUrl),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                      Container(
-                          margin: const EdgeInsets.only(bottom: 5),
-                          child: Text(
-                            '路径:${item.path}',
-                            style: const TextStyle(color: Colors.grey),
-                          )),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  // 3. 文字信息部分 (已解决溢出问题)
+                  Expanded(
+                    child: Container(
+                      height: 100,
+                      margin: const EdgeInsets.only(left: 10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.title ?? "无标题",
+                            style: TextStyle(
+                              fontSize: itemScreenCfg.titleFontSize,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                          Text(
+                            '路径:${item.path}',
+                            style:  TextStyle(
+                                color: Colors.grey, fontSize: itemScreenCfg.pathFontSize),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    ));
+          );
+        },
+      );
+    } else {
+      // 权限申请页面的逻辑不变
+      content = Container(
+        alignment: Alignment.center,
+        child: ElevatedButton(
+            onPressed: () {
+              logic.grantReadWritePermission();
+            },
+            child: const Text("授予读写权限")),
+      );
+    }
+
+    return Expanded(child: content);
   }
 
   // 操作按钮

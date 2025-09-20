@@ -59,7 +59,7 @@ class CacheDataManager {
           return null;
       }
     }, onAndroid: () {
-      return null;
+      return loadAndroidCacheData(rootDir);
     });
   }
 

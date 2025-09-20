@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -16,6 +17,14 @@
 
             <data android:mimeType="text/plain" />
         </intent>
+        <!-- 哔哩哔哩 -->
+        <package android:name="tv.danmaku.bili" />
+        <!-- 概念版 -->
+        <package android:name="com.bilibili.app.blue" />
+        <!-- 谷歌版 -->
+        <package android:name="com.bilibili.app.in" />
+        <!-- shizuku -->
+        <package android:name="moe.shizuku.privileged.api" />
     </queries>
 
     <application

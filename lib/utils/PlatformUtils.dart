@@ -46,6 +46,23 @@ T runPlatformFuncClass<T>({
   }
 }
 
+T runPlatformFuncClassRecord<T extends Record>({
+  T Function()? onMobile,
+  T Function()? onDesktop,
+  T Function()? onWeb,
+  required T Function() onDefault,
+}) {
+  if (kIsWeb) {
+    return (onWeb ?? onDefault)();
+  } else if (Platform.isAndroid || Platform.isIOS) {
+    return (onMobile ?? onDefault)();
+  } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    return (onDesktop ?? onDefault)();
+  } else {
+    return onDefault();
+  }
+}
+
 
 Future<T> runPlatformFuncFuture<T>({
   FutureOr<T> Function()? onAndroid,

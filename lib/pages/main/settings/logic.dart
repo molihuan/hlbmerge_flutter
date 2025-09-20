@@ -18,7 +18,7 @@ class SettingsLogic extends GetxController {
 
   late final ffmpegHlPlugin = FfmpegHl();
   late final _cacheDataManager = CacheDataManager();
-  late final _mainChannel = MainChannel();
+
 
   //获取ffmpeg版本配置
   showAvcodecCfg() async {
@@ -52,10 +52,10 @@ class SettingsLogic extends GetxController {
 
   // 测试方法
   testFunc() async {
-    var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
-    print(platformVersion);
+    // var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
+    // print(platformVersion);
 
-    var result = await _mainChannel.startActivity("777");
+    var result = await MainChannel.startActivity("777");
     print(result);
 
     // _cacheDataManager.setCachePlatform(CachePlatform.android);

@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../channel/main/main_channel.dart';
 import '../../../dao/cache_data_manager.dart';
 import '../../../dao/sp_data_manager.dart';
 import '../../../models/cache_group.dart';
@@ -27,8 +28,8 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   final FFmpegTaskController taskController = Get.put(FFmpegTaskController());
 
   // 解析缓存数据
-  void parseCacheData() {
-    String dirPath = state.inputCacheDirPath;
+  void parseCacheData({String? cacheDirPath}) {
+    String dirPath = cacheDirPath ?? state.inputCacheDirPath;
     _cacheDataManager.setCachePlatform(state.cachePlatform);
     List<CacheGroup>? cacheGroupList = _cacheDataManager.loadCacheData(dirPath);
 
@@ -92,6 +93,9 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
         await runPlatformFuncFuture<Pair<bool, String>?>(onDefault: () async {
       // 输出目录
       var outputDirPath = getOutputDirPath(groupTitle: groupTitle);
+      if (outputDirPath == null) {
+        return Pair(false, "请先选择输出目录");
+      }
       //文件名
       var outputFileName = title == null
           ? "${DateTime.now().millisecondsSinceEpoch}_only${fileType.extension}.${fileType.extension}"
@@ -177,8 +181,11 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   }
 
   //获取输出目录
-  static String getOutputDirPath({String? groupTitle}) {
+  static String? getOutputDirPath({String? groupTitle}) {
     var outputRootPath = SpDataManager.getOutputDirPath();
+    if (outputRootPath == null) {
+      return null;
+    }
 
     var outputDirPath;
     if (groupTitle == null) {
@@ -301,6 +308,24 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     state.isTextFieldDragging = value;
   }
 
+  ///申请读写权限
+  grantReadWritePermission() async {
+    runPlatformFunc(
+        onDefault: () {},
+        onAndroid: () async {
+          var result = await MainChannel.grantReadWritePermission();
+          print("申请权限结果:${result}");
+          if (result.first == 0) {
+            if (result.third == true) {
+              state.hasPermission = true;
+              //parseCacheData(cacheDirPath: null);
+            } else {
+              state.hasPermission = false;
+            }
+          }
+        });
+  }
+
   // 监听生命周期变化
   @override
   void didChangeAppLifecycleState(AppLifecycleState appState) {
@@ -320,7 +345,24 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
 
   @override
   void onReady() {
-    parseCacheData();
+    runPlatformFunc(onDefault: () {
+      state.hasPermission = true;
+      parseCacheData();
+    }, onAndroid: () async {
+      //判断是否有读写权限
+      var result = await MainChannel.hasReadWritePermission();
+      print("安卓权限判断结果:${result}");
+      if (result.first == 0) {
+        if (result.third == true) {
+          state.hasPermission = true;
+          var path = "/storage/emulated/0/Android/data/tv.danmaku.bili/download";
+          parseCacheData(cacheDirPath: path);
+        } else {
+          state.hasPermission = false;
+        }
+      }
+    });
+
     super.onReady();
   }
 

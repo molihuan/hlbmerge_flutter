@@ -7,8 +7,11 @@ import 'package:hlbmerge/utils/FileUtil.dart';
 class SettingsState {
   SettingsState() {
     ///Initialize variables
-    outputDirPath = SpDataManager.getOutputDirPath();
+    outputDirPath = SpDataManager.getOutputDirPath(futureCallback: (path) {
+      outputDirPath = path;
+    }) ?? "";
   }
+
   //输出路径
   final _outputDirPath = ''.obs;
 
