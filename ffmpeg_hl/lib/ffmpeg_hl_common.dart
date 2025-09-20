@@ -25,7 +25,16 @@ class FfmpegHlCommon extends FfmpegHlPlatform {
   @override
   Future<Pair<bool, String>> mergeAudioVideo(
       String audioPath, String videoPath, String outputPath) async {
-    FFmpegSession session = await FFmpegKit.execute('-i $audioPath -i $videoPath -c copy $outputPath');
+    final List<String> cmds = [
+      '-i',
+      audioPath, // 直接传递变量，不需要加引号
+      '-i',
+      videoPath, // 库会处理好路径中的空格
+      '-c',
+      'copy',
+      outputPath // 无论路径是什么，都会被当作单一参数
+    ];
+    FFmpegSession session = await FFmpegKit.executeWithArguments(cmds);
     final returnCode = await session.getReturnCode();
     if (ReturnCode.isSuccess(returnCode)) {
       return Future.value(Pair(true, "合并成功"));
