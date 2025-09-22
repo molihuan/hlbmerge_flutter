@@ -309,7 +309,17 @@ class HomePage extends StatelessWidget {
               : const SizedBox.shrink(),
           state.isMultiSelectMode ? searchTextField : const SizedBox.shrink(),
           const SizedBox(width: 5),
-          _buildEditBtn(),
+          Row(children: [
+            state.isMultiSelectMode ? const SizedBox.shrink() : IconButton(
+              icon: const Icon(
+                Icons.refresh,
+              ),
+              onPressed: () {
+                // 刷新
+              },
+            ),
+            _buildEditBtn()
+          ],),
         ],
       ),
     );
@@ -437,7 +447,7 @@ class HomePage extends StatelessWidget {
             onPressed: () {
               logic.grantReadWritePermission();
             },
-            child: const Text("授予读写权限")),
+            child: const Text("授权")),
       );
     }
 

@@ -15,7 +15,7 @@ object FlutterSpUtils {
      *
      * @param context 建议传入 ApplicationContext，以防止内存泄漏。
      */
-    fun init(context: Application,name: String) {
+    fun init(context: Application, name: String) {
         sharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE)
     }
 

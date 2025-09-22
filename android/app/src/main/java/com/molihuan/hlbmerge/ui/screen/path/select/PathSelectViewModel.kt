@@ -4,11 +4,11 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.XXPermissions
 import com.hjq.permissions.permission.PermissionLists
@@ -18,13 +18,12 @@ import com.molihuan.commonmodule.tool.ToastTool
 import com.molihuan.hlbmerge.App
 import com.molihuan.hlbmerge.R
 import com.molihuan.hlbmerge.dao.FlutterSpData
+import com.molihuan.hlbmerge.utils.FileUtils
 import com.molihuan.hlbmerge.utils.UriUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import rikka.shizuku.Shizuku
 import timber.log.Timber
 import javax.inject.Inject
@@ -36,8 +35,11 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
 
     private val REQUEST_CODE_SHIZUKU_PERMISSION = 1112
 
-    val isAndroid11 = AppTool.isAndroid11()
-    val isAndroid14 = AppTool.isAndroid14()
+    private val isAndroid11 = AppTool.isAndroid11()
+    private val isAndroid14 = AppTool.isAndroid14()
+
+    // 当前授权Uri权限时输入的缓存目录
+    private var currGrantUriPermissionInfo: Pair<String, String>? = null
 
     fun init(context: Context) {
         val biliAppInfoList: List<BiliAppInfo> = listOf(
@@ -62,8 +64,10 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                 R.mipmap.ico_bilibili
             ),
         ).map { item ->
+            val androidInputCachePackageName = FlutterSpData.getAndroidInputCachePackageName()
             val isInstall = AppTool.isAppInstall(item.packageName)
             item.copy(
+                check = isInstall && item.packageName == androidInputCachePackageName,
                 isInstall = isInstall,
             )
         }
@@ -75,6 +79,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
         if (grantedPermission) {
             val shizukuAvailableAndHasPermission = isShizukuAvailableAndHasPermission()
             if (shizukuAvailableAndHasPermission) {
+                //有读写权限且有Shizuku权限
                 _uiState.update {
                     it.copy(
                         showPermissionTips = isAndroid11,
@@ -83,6 +88,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                     )
                 }
             } else {
+                //有读写权限但无Shizuku权限
                 _uiState.update {
                     it.copy(
                         showPermissionTips = isAndroid11,
@@ -92,6 +98,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                 }
             }
         } else {
+            //没有读写权限
             _uiState.update {
                 it.copy(
                     biliAppInfoList = biliAppInfoList,
@@ -107,17 +114,72 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    //更新biliAppInfoList
+    //url权限回调结果
+    fun onUrlPermissionResult(context: Context, result: ActivityResult) {
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                // 从 result.data (这是一个 Intent) 中提取数据
+                result.data?.let { data ->
+                    val uri: Uri? = data.data
+                    if (uri == null) {
+                        return@let
+                    }
+
+                    val takeFlags: Int =
+                        data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
+//                    @SuppressLint("WrongConstant")
+                    context.contentResolver
+                        .takePersistableUriPermission(
+                            uri,
+                            takeFlags
+                        )
+                    //
+                    currGrantUriPermissionInfo?.let { permissionInfo ->
+                        FlutterSpData.setInputCacheDirPath(permissionInfo.first)
+                        FlutterSpData.setAndroidInputCachePackageName(permissionInfo.second)
+                        FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+                        val state = _uiState.value
+                        val biliAppInfoList = state.biliAppInfoList.toMutableList().map {
+                            if (it.packageName == permissionInfo.second) {
+                                it.copy(check = true)
+                            } else {
+                                it.copy(check = false)
+                            }
+                        }
+                        _uiState.update {
+                            it.copy(biliAppInfoList = biliAppInfoList)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    //更新biliAppInfoCheck
     fun changeBiliAppInfoCheck(
         index: Int,
         check: Boolean,
         urlPermissionLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
     ) {
-        val state = _uiState.value
 
+
+        //如果能进入这里肯定是有读写权限的
+        val state = _uiState.value
         val appInfo = state.biliAppInfoList[index]
 
+        val uriPath = "${FileUtils.androidDataPath}/${appInfo.packageName}/download"
         run {
+
+            if (!check) {
+                //ToastTool.toast("您已开启读取此项,无需再次开启")
+                FlutterSpData.setInputCacheDirPath("")
+                FlutterSpData.setAndroidInputCachePackageName("")
+                FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.NoReadWritePermission)
+                return@run
+            }
+
             when (state.functionState) {
                 PathSelectFunctionState.NoReadWritePermission -> {
                     ToastTool.toast("请先授予读写权限")
@@ -127,6 +189,9 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                 PathSelectFunctionState.HasReadWritePermission -> {
                     if (!isAndroid11) {
                         //小于安卓11直接设置Android/data路径即可,可用直接读写
+                        FlutterSpData.setInputCacheDirPath(uriPath)
+                        FlutterSpData.setAndroidInputCachePackageName(appInfo.packageName)
+                        FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
                         return@run
                     }
 
@@ -135,24 +200,42 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                         ToastTool.toast("请先授予Shizuku权限")
                         return
                     }
-                    val uriPath = "/storage/emulated/0/Android/data/${appInfo.packageName}/download"
 
-                    grantUriPermission(path = uriPath, urlPermissionLauncher)
-                }
 
-                PathSelectFunctionState.HasReadWriteUriPermission -> {
-                    Timber.d("Uri模式check")
+                    //11~13授予Uri权限
+                    val inputCacheDirPath = FlutterSpData.cacheCopyTempPath
+
+                    val hasPermission =
+                        grantUriPermission(path = uriPath, urlPermissionLauncher)
+                    if (hasPermission) {
+                        FlutterSpData.setInputCacheDirPath(inputCacheDirPath)
+                        FlutterSpData.setAndroidInputCachePackageName(appInfo.packageName)
+                        FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+                    } else {
+                        currGrantUriPermissionInfo = Pair(inputCacheDirPath, appInfo.packageName)
+                        return
+                    }
                 }
 
                 PathSelectFunctionState.HasReadWriteShizukuPermission -> {
                     Timber.d("Shizuku模式check")
+                    FlutterSpData.setInputCacheDirPath(FlutterSpData.cacheCopyTempPath)
+                    FlutterSpData.setAndroidInputCachePackageName(appInfo.packageName)
+                    FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWriteShizukuPermission)
                 }
+
+                else -> {}
 
             }
         }
 
-        val biliAppInfoList = state.biliAppInfoList.toMutableList()
-        biliAppInfoList[index] = biliAppInfoList[index].copy(check = check)
+        val biliAppInfoList = state.biliAppInfoList.toMutableList().map {
+            if (it.packageName == appInfo.packageName) {
+                it.copy(check = check)
+            } else {
+                it.copy(check = false)
+            }
+        }
         _uiState.update {
             it.copy(biliAppInfoList = biliAppInfoList)
         }
@@ -207,9 +290,6 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
         }
         if (hasShizukuPermission()) {
             Timber.d("Shizuku权限已获取")
-            viewModelScope.launch(Dispatchers.IO) {
-                FlutterSpData.setInputCacheDirPath("/storage/emulated/0/Download/HLB站缓存视频合并/download")
-            }
             return
         }
         Shizuku.requestPermission(REQUEST_CODE_SHIZUKU_PERMISSION)
@@ -221,20 +301,24 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
             if (grantResult != PackageManager.PERMISSION_GRANTED) {
                 return
             }
+            FlutterSpData.setInputCacheDirPath(FlutterSpData.cacheCopyTempPath)
             _uiState.update { it.copy(functionState = PathSelectFunctionState.HasReadWriteShizukuPermission) }
         }
     }
 
+    // 授予Uri权限,如果运行时有权限会直接返回true,运行时没有权限会返回 false,并且会自动请求权限，后续的结果请在回调中处理。
     fun grantUriPermission(
         path: String,
         urlPermissionLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
-    ) {
+    ): Boolean {
         val uriPair = UriUtils.hasUriPermission(App.instance, path)
         val uriStr = uriPair.first
         if (uriStr == null) {
             val intent = UriUtils.getGrantUriPermissionIntent(uriPair.second)
             urlPermissionLauncher.launch(intent)
+            return false
         }
+        return true
     }
 
     fun grantReadWritePermission(activity: Activity?) {
@@ -279,18 +363,19 @@ data class PathSelectUiState(
     val showPermissionTips: Boolean = true,
 )
 
-sealed class PathSelectFunctionState {
+sealed class PathSelectFunctionState(val title: String) {
     //无读写权限
-    object NoReadWritePermission : PathSelectFunctionState()
+    object NoReadWritePermission : PathSelectFunctionState("NoPermission")
 
     //有读写授予权限
-    object HasReadWritePermission : PathSelectFunctionState()
+    object HasReadWritePermission : PathSelectFunctionState("ReadWritePermission")
 
     //有读写授予权限，并且有uri权限
-    object HasReadWriteUriPermission : PathSelectFunctionState()
+    object HasReadWriteUriPermission : PathSelectFunctionState("ReadWriteUriPermission")
+
 
     //有读写授予权限，并且有shizuku权限
-    object HasReadWriteShizukuPermission : PathSelectFunctionState()
+    object HasReadWriteShizukuPermission : PathSelectFunctionState("ReadWriteShizukuPermission")
 }
 
 data class BiliAppInfo(

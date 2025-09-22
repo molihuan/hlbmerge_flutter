@@ -1,16 +1,11 @@
 package com.molihuan.hlbmerge.ui.screen.path.select
 
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFrom
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.molihuan.hlbmerge.NavRoute
 import com.molihuan.hlbmerge.R
@@ -65,27 +58,7 @@ fun PathSelectScreen(
         contract = ActivityResultContracts.StartActivityForResult(),
         // onResult 回调：在这里处理返回的结果
         onResult = { result: ActivityResult ->
-            when {
-                result.resultCode == Activity.RESULT_OK -> {
-                    // 从 result.data (这是一个 Intent) 中提取数据
-                    result.data?.let { data ->
-                        val uri: Uri? = data.data
-                        if (uri == null) {
-                            return@let
-                        }
-
-                        val takeFlags: Int =
-                            data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-
-//                    @SuppressLint("WrongConstant")
-                        context.contentResolver
-                            .takePersistableUriPermission(
-                                uri,
-                                takeFlags
-                            )
-                    }
-                }
-            }
+            vm.onUrlPermissionResult(context = context, result = result)
         }
     )
 
@@ -94,12 +67,12 @@ fun PathSelectScreen(
     }
 
     DisposableEffect(Unit) {
+        // Shizuku请求权限监听
         val listener = Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
             vm.onShizukuRequestPermissionResult(requestCode, grantResult)
         }
         Shizuku.addRequestPermissionResultListener(listener)
 
-        // onDispose 块会在 Composable 离开屏幕时执行
         onDispose {
             Shizuku.removeRequestPermissionResultListener(listener)
         }
@@ -107,7 +80,7 @@ fun PathSelectScreen(
 
     Scaffold(
         topBar = {
-            BackCenterTopAppBar(title = "选择缓存路径", activity = activity)
+            BackCenterTopAppBar(title = "选择缓存", activity = activity)
         }
     ) { padding ->
         Box(
@@ -287,7 +260,7 @@ private fun PermissionTipsSection(
                 .padding(vertical = 15.dp, horizontal = 15.dp)
         ) {
             Text(text = "提示:由于安卓高版本系统限制,安卓11及以上需要通过以下任意一种方法授予权限才可读取缓存文件:")
-            Text("1、通过DocumentUri授权,点击下方对应Bilibili版本后的读取开关即可开始授权,适用于安卓11~安卓13,如果无法授权请使用方法2。")
+            Text("1、通过DocumentUri授权,点击下方对应Bilibili版本后的读取开关即可开始授权(本地必须要有缓存文件),适用于安卓11~安卓13,如果无法授权请使用方法2。")
             Text(
                 "2、通过Shizuku授权,适用于安卓11及以上系统,点击下方按钮即可开始授权,授权后打开对应Bilibili版本读取开关即可。",
                 modifier = Modifier.padding(bottom = 8.dp)

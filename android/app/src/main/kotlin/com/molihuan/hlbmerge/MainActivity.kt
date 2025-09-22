@@ -1,17 +1,17 @@
 package com.molihuan.hlbmerge
 
-import android.os.Environment
 import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.XXPermissions
 import com.hjq.permissions.permission.PermissionLists
 import com.hjq.permissions.permission.base.IPermission
 import com.molihuan.commonmodule.tool.ToastTool
+import com.molihuan.hlbmerge.dao.FlutterSpData
+import com.molihuan.hlbmerge.utils.FileUtils
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import timber.log.Timber
-import java.io.File
 
 
 class MainActivity : FlutterActivity() {
@@ -76,17 +76,7 @@ class MainActivity : FlutterActivity() {
 
         try {
             // 这是获取公共下载目录的标准方法
-            val downloadDir: File =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-
-            if (!downloadDir.exists()) {
-                downloadDir.mkdirs() // 如果目录不存在，尝试创建它
-            }
-            val downloadPath = downloadDir.absolutePath
-
-            val finalPath =
-                downloadPath + File.separator + "HLB站缓存视频合并" + File.separator + "outputDir"
-
+            val finalPath = FlutterSpData.getDefaultOutputDirPath()
             val returnMap = mapOf<String, Any?>(
                 "code" to 0,
                 "msg" to "ok",
@@ -115,7 +105,7 @@ class MainActivity : FlutterActivity() {
         call: MethodCall,
         result: MethodChannel.Result
     ) {
-        val path = Environment.getExternalStorageDirectory().absolutePath
+        val path = FileUtils.externalStorageRootPath
         if (path.isBlank()) {
             val returnMap = mapOf<String, Any?>(
                 "code" to 0,
