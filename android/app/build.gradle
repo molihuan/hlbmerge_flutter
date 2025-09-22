@@ -97,10 +97,6 @@ dependencies {
     // 日志
     implementation(libs.timber)
 
-    // compose约束布局
-    implementation(libs.androidx.constraintlayout.compose)
-    // https://mvnrepository.com/artifact/androidx.navigation/navigation-compose
-    implementation(libs.androidx.navigation.compose)
 
     // 设备兼容框架：https://github.com/getActivity/DeviceCompat
     implementation libs.devicecompat
@@ -110,6 +106,12 @@ dependencies {
     //图标库 https://mvnrepository.com/artifact/androidx.compose.material/material-icons-extended
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
+    // https://mvnrepository.com/artifact/androidx.documentfile/documentfile
+    implementation(libs.androidx.documentfile)
+    //shizuku
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
+
     //基础UI
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -118,6 +120,11 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    // compose约束布局
+    implementation(libs.androidx.constraintlayout.compose)
+    // https://mvnrepository.com/artifact/androidx.navigation/navigation-compose
+    implementation(libs.androidx.navigation.compose)
 
     //测试相关
     testImplementation(libs.junit)

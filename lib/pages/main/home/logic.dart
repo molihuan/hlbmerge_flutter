@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../channel/main/main_channel.dart';
+import '../../../channel/main/main_channel_android.dart';
 import '../../../dao/cache_data_manager.dart';
 import '../../../dao/sp_data_manager.dart';
 import '../../../models/cache_group.dart';
@@ -313,25 +314,34 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     runPlatformFunc(
         onDefault: () {},
         onAndroid: () async {
-          var result = await MainChannel.grantReadWritePermission();
-          print("申请权限结果:${result}");
-          if (result.first == 0) {
-            if (result.third == true) {
-              state.hasPermission = true;
-              //parseCacheData(cacheDirPath: null);
-            } else {
-              state.hasPermission = false;
-            }
+          // var result = await MainChannel.grantReadWritePermission();
+          // print("申请权限结果:${result}");
+          // if (result.first == 0) {
+          //   if (result.third == true) {
+          //     state.hasPermission = true;
+          //     //parseCacheData(cacheDirPath: null);
+          //   } else {
+          //     state.hasPermission = false;
+          //   }
+          // }
+          var result = await MainChannel.startActivity(ActivityScreen.pathSelectScreen.route);
+          print("跳转结果:${result}");
+          if(result.first == 0){
+
           }
         });
   }
 
-  // 监听生命周期变化
+  /// 监听生命周期变化
   @override
   void didChangeAppLifecycleState(AppLifecycleState appState) {
     if (appState == AppLifecycleState.detached ||
         appState == AppLifecycleState.inactive) {
-      SpDataManager.setInputCacheDirPath(state.inputCacheDirPath);
+      runPlatformFunc(onDefault: (){
+        SpDataManager.setInputCacheDirPath(state.inputCacheDirPath);
+      },onAndroid: (){
+
+      });
       SpDataManager.setCachePlatform(state.cachePlatform);
     }
     super.didChangeAppLifecycleState(appState);

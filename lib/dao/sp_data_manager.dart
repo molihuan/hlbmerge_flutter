@@ -6,6 +6,7 @@ import 'package:hlbmerge/utils/PlatformUtils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../pages/main/home/state.dart';
 import '../utils/FileUtil.dart';
 import 'cache_data_manager.dart';
 
@@ -95,6 +96,18 @@ class SpDataManager {
   static CachePlatform? getCachePlatform() {
     String? target = prefs.getString(cachePlatformKey);
     return CachePlatform.values
+        .firstWhereOrNull((element) => element.name == target);
+  }
+
+  //key
+  static const String androidParseCachePermissionKey = 'androidParseCachePermission';
+  //安卓解析缓存权限
+  static setAndroidParseCachePermission(AndroidParseCachePermission permission){
+    prefs.setString(androidParseCachePermissionKey, permission.name);
+  }
+  static AndroidParseCachePermission? getAndroidParseCachePermission(){
+    String? target = prefs.getString(androidParseCachePermissionKey);
+    return AndroidParseCachePermission.values
         .firstWhereOrNull((element) => element.name == target);
   }
 }

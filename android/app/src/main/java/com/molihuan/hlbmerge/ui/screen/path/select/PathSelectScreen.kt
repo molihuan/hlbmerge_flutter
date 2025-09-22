@@ -1,24 +1,55 @@
 package com.molihuan.hlbmerge.ui.screen.path.select
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFrom
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.molihuan.hlbmerge.NavRoute
+import com.molihuan.hlbmerge.R
 import com.molihuan.hlbmerge.ui.components.BackCenterTopAppBar
 import com.molihuan.hlbmerge.ui.theme.AndroidTheme
+import rikka.shizuku.Shizuku
 
 @Composable
 fun PathSelectScreen(
@@ -29,29 +60,198 @@ fun PathSelectScreen(
     val context = LocalContext.current
     val state by vm.uiState.collectAsState()
 
-    vm.init(context)
+    val urlPermissionLauncher = rememberLauncherForActivityResult(
+        // 使用预定义的协定，它接收 Intent 并返回 ActivityResult
+        contract = ActivityResultContracts.StartActivityForResult(),
+        // onResult 回调：在这里处理返回的结果
+        onResult = { result: ActivityResult ->
+            when {
+                result.resultCode == Activity.RESULT_OK -> {
+                    // 从 result.data (这是一个 Intent) 中提取数据
+                    result.data?.let { data ->
+                        val uri: Uri? = data.data
+                        if (uri == null) {
+                            return@let
+                        }
+
+                        val takeFlags: Int =
+                            data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
+//                    @SuppressLint("WrongConstant")
+                        context.contentResolver
+                            .takePersistableUriPermission(
+                                uri,
+                                takeFlags
+                            )
+                    }
+                }
+            }
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        vm.init(context)
+    }
+
+    DisposableEffect(Unit) {
+        val listener = Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
+            vm.onShizukuRequestPermissionResult(requestCode, grantResult)
+        }
+        Shizuku.addRequestPermissionResultListener(listener)
+
+        // onDispose 块会在 Composable 离开屏幕时执行
+        onDispose {
+            Shizuku.removeRequestPermissionResultListener(listener)
+        }
+    }
 
     Scaffold(
         topBar = {
             BackCenterTopAppBar(title = "选择缓存路径", activity = activity)
         }
     ) { padding ->
-        when (state.functionState) {
-            PathSelectFunctionState.HasPermission -> {
-                Column(
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            when (state.functionState) {
+//            when (PathSelectFunctionState.HasReadWritePermission) {
+                PathSelectFunctionState.NoReadWritePermission -> {
+                    NoPermissionSection(grantPermission = {
+                        vm.grantReadWritePermission(activity)
+//                    vm.grantUriPermission(urlPermissionLauncher)
+                    })
+                }
+
+                PathSelectFunctionState.HasReadWriteShizukuPermission -> {
+                    HasReadWritePermissionSection(
+                        hasShizukuPermission = true,
+                        biliAppList = state.biliAppInfoList,
+                        showPermissionTips = state.showPermissionTips,
+                        readSwitchChange = { index, status ->
+                            vm.changeBiliAppInfoCheck(index, check = status,urlPermissionLauncher = urlPermissionLauncher)
+                        },
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    )
+                }
+
+                else -> {
+                    HasReadWritePermissionSection(
+                        hasShizukuPermission = false,
+                        grantShizukuPermission = {
+                            vm.requestShizukuPermission()
+                        },
+                        showPermissionTips = state.showPermissionTips,
+                        biliAppList = state.biliAppInfoList,
+                        readSwitchChange = { index, status ->
+                            vm.changeBiliAppInfoCheck(index, check = status,urlPermissionLauncher = urlPermissionLauncher)
+                        },
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun HasReadWritePermissionSection(
+    biliAppList: List<BiliAppInfo> = listOf(
+        BiliAppInfo(
+            "哔哩哔哩",
+            "tv.danmaku.bili",
+            R.mipmap.ico_bilibili
+        )
+    ),
+    readSwitchChange: (index: Int, status: Boolean) -> Unit = { _, _ -> },
+    hasShizukuPermission: Boolean = false,
+    grantShizukuPermission: () -> Unit = {},
+    showPermissionTips: Boolean = true,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            if (showPermissionTips) {
+                PermissionTipsSection(
+                    hasShizukuPermission = hasShizukuPermission,
+                    grantShizukuPermission = grantShizukuPermission
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 10.dp)
+            ) {
+                Text("Bilibili版本", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text("是否读取", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            }
+
+            //biliApp列表
+            biliAppList.forEachIndexed { index, info ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
-                        .padding(padding)
-                        .fillMaxSize()
+                        .alpha(if (info.isInstall) 1f else 0.5f)
+                        .padding(5.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                        .fillMaxWidth()
+                        .background(Color.Blue.copy(alpha = 0.1f))
+                        .padding(10.dp)
                 ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Image(
+                            painter = painterResource(id = info.icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(50.dp)
+                        )
+                        Column(
+                            verticalArrangement = Arrangement.SpaceAround,
+                            modifier = Modifier
+                                .padding(start = 10.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = info.name,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                if (!info.isInstall) {
+                                    Text(
+                                        text = "未安装",
+                                        fontSize = 15.sp,
+                                        color = Color.Red,
+                                        modifier = Modifier.padding(start = 10.dp)
+                                    )
+                                }
+                            }
+                            Text(text = info.packageName, fontSize = 12.sp)
+                        }
+                    }
+
+                    if (info.isInstall) {
+                        Switch(checked = info.check, onCheckedChange = {
+                            readSwitchChange(index, it)
+                        })
+                    } else {
+                        Switch(checked = false, onCheckedChange = null)
+                    }
 
                 }
             }
 
-            PathSelectFunctionState.NoPermission -> {
-                NoPermissionSection(grantPermission = {
-                    vm.grantReadWritePermission(activity)
-                })
-            }
+
         }
     }
 }
@@ -67,7 +267,45 @@ private fun NoPermissionSection(
     }
 }
 
-@Preview(showBackground = true)
+//权限tips部分
+@Composable
+private fun PermissionTipsSection(
+    //是否有Shizuku授权
+    hasShizukuPermission: Boolean = false,
+    //申请Shizuku授权
+    grantShizukuPermission: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    Box(modifier) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = modifier
+                .padding(vertical = 10.dp, horizontal = 5.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color.Gray.copy(alpha = 0.1f))
+                .padding(vertical = 15.dp, horizontal = 15.dp)
+        ) {
+            Text(text = "提示:由于安卓高版本系统限制,安卓11及以上需要通过以下任意一种方法授予权限才可读取缓存文件:")
+            Text("1、通过DocumentUri授权,点击下方对应Bilibili版本后的读取开关即可开始授权,适用于安卓11~安卓13,如果无法授权请使用方法2。")
+            Text(
+                "2、通过Shizuku授权,适用于安卓11及以上系统,点击下方按钮即可开始授权,授权后打开对应Bilibili版本读取开关即可。",
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            if (hasShizukuPermission) {
+                Text(
+                    "Shizuku已授权",
+                    color = Color.Green.copy(green = 0.5f),
+                    fontWeight = FontWeight.SemiBold
+                )
+            } else {
+                Button(onClick = grantShizukuPermission) { Text("Shizuku授权") }
+            }
+        }
+    }
+}
+
+@Preview
 @Composable
 private fun PathSelectScreenPreview() {
     AndroidTheme {

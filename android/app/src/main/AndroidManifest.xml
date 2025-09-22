@@ -19,6 +19,8 @@
         </intent>
         <!-- 哔哩哔哩 -->
         <package android:name="tv.danmaku.bili" />
+        <!-- 平板 -->
+        <package android:name="tv.danmaku.bilibilihd" />
         <!-- 概念版 -->
         <package android:name="com.bilibili.app.blue" />
         <!-- 谷歌版 -->
@@ -70,6 +72,25 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!--shizuku-->
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:multiprocess="false"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
     </application>
 
 </manifest>

@@ -3,6 +3,14 @@ import 'package:flutter/services.dart';
 
 import 'main_channel_interface.dart';
 
+enum ActivityScreen{
+  pathSelectScreen("AndroidActivity/PathSelectScreen");
+  //route
+  final String route;
+
+  const ActivityScreen(this.route);
+}
+
 class MainChannelAndroid extends MainChannelInterface {
   late final MethodChannel _platform =
       const MethodChannel("com.molihuan.hlbmerge/mainChannel");

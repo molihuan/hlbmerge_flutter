@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!--    <files-path>代表应用内部存储的 files 目录,files标识符(别名,随便),path="."代表共享整个files/目录-->
+    <files-path
+        name="files"
+        path="." />
+    <cache-path
+        name="caches"
+        path="." />
+</paths>

@@ -1,6 +1,8 @@
 package com.molihuan.hlbmerge
 
 import android.app.Application
+import com.molihuan.commonmodule.CommonModule
+import com.molihuan.hlbmerge.dao.FlutterSpData
 import com.molihuan.hlbmerge.log.LogUtils
 import dagger.hilt.android.HiltAndroidApp
 
@@ -18,6 +20,9 @@ class App: Application() {
      */
     private fun prepareInit() {
         LogUtils.init()
+        CommonModule.init(this)
+        // flutter sp 数据存储
+        FlutterSpData.init(this)
     }
 
     /**

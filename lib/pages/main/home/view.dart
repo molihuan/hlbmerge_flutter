@@ -17,6 +17,26 @@ class HomePage extends StatelessWidget {
   final HomeLogic logic = Get.put(HomeLogic());
   final HomeState state = Get.find<HomeLogic>().state;
 
+  // item屏幕配置
+  final _ItemScreenCfg _itemScreenCfg =
+      runPlatformFuncClassRecord(onDefault: () {
+    return (
+      itemHeight: 110,
+      checkboxMargin: 10,
+      titleFontSize: 16,
+      pathFontSize: 12,
+      itemPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5)
+    );
+  }, onMobile: () {
+    return (
+      itemHeight: 85,
+      checkboxMargin: 0,
+      titleFontSize: 14,
+      pathFontSize: 12,
+      itemPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3)
+    );
+  });
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -297,15 +317,7 @@ class HomePage extends StatelessWidget {
 
   // 缓存列表内容
   Widget _buildBody(BuildContext context) {
-    final ({double itemHeight, double checkboxMargin, double titleFontSize, double pathFontSize,EdgeInsetsGeometry itemPadding}) itemScreenCfg = runPlatformFuncClassRecord(onDefault: (){
-      return (itemHeight: 110, checkboxMargin: 10, titleFontSize: 16, pathFontSize: 12, itemPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5));
-    },onMobile: (){
-      return (itemHeight: 85, checkboxMargin: 0, titleFontSize: 14, pathFontSize: 12,itemPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3));
-    });
-
-
     Widget content;
-
     if (state.hasPermission) {
       content = ListView.builder(
         // itemCount 和 itemBuilder 保持我们之前优化好的版本
@@ -318,7 +330,7 @@ class HomePage extends StatelessWidget {
               if (state.isMultiSelectMode) {
                 logic.changeGroupListChecked(index, !item.checked);
               } else {
-                showCacheItemListDialog(context, index);
+                _showCacheItemListDialog(context, index);
               }
             },
             onLongPress: () {
@@ -326,8 +338,8 @@ class HomePage extends StatelessWidget {
               logic.changeGroupListChecked(index, true);
             },
             child: Container(
-              height: itemScreenCfg.itemHeight,
-              padding: itemScreenCfg.itemPadding,
+              height: _itemScreenCfg.itemHeight,
+              padding: _itemScreenCfg.itemPadding,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -335,9 +347,11 @@ class HomePage extends StatelessWidget {
                   Obx(() {
                     return state.isMultiSelectMode
                         ? Container(
-                            margin: EdgeInsets.only(right: itemScreenCfg.checkboxMargin),
+                            margin: EdgeInsets.only(
+                                right: _itemScreenCfg.checkboxMargin),
                             child: Checkbox(
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
                                 value: item.checked,
                                 onChanged: (v) {
                                   var checked = v ?? false;
@@ -348,7 +362,7 @@ class HomePage extends StatelessWidget {
                   }),
                   // 2. 图片部分 (保持不变)
                   SizedBox(
-                    height: itemScreenCfg.itemHeight,
+                    height: _itemScreenCfg.itemHeight,
                     child: AspectRatio(
                       aspectRatio: 16 / 9,
                       child: Container(
@@ -366,28 +380,45 @@ class HomePage extends StatelessWidget {
                   // 3. 文字信息部分 (已解决溢出问题)
                   Expanded(
                     child: Container(
-                      height: 100,
+                      height: _itemScreenCfg.itemHeight,
                       margin: const EdgeInsets.only(left: 10),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            item.title ?? "无标题",
-                            style: TextStyle(
-                              fontSize: itemScreenCfg.titleFontSize,
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                              child: Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              item.title ?? "无标题",
+                              style: TextStyle(
+                                fontSize: _itemScreenCfg.titleFontSize,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
                             ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
-                          ),
-                          Text(
-                            '路径:${item.path}',
-                            style:  TextStyle(
-                                color: Colors.grey, fontSize: itemScreenCfg.pathFontSize),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
+                          )),
+                          SizedBox(
+                            height: _itemScreenCfg.itemHeight * 0.3,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  Text("路径:",
+                                      style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize:
+                                              _itemScreenCfg.pathFontSize)),
+                                  SelectableText(
+                                    '${item.path}',
+                                    style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: _itemScreenCfg.pathFontSize),
+                                    maxLines: 1,
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
                         ],
                       ),
                     ),
@@ -435,7 +466,10 @@ class HomePage extends StatelessWidget {
   }
 
   //缓存项列表弹窗
-  void showCacheItemListDialog(BuildContext context, int cacheGroupIndex) {
+  void _showCacheItemListDialog(BuildContext context, int cacheGroupIndex) {
+    var itemHeight = _itemScreenCfg.itemHeight - 15;
+    var titleFontSize = _itemScreenCfg.titleFontSize - 1;
+    var pathFontSize = _itemScreenCfg.pathFontSize - 1;
     showDialog(
       context: context,
       barrierDismissible: true, // 点击空白关闭
@@ -455,8 +489,8 @@ class HomePage extends StatelessWidget {
                   // 居中内容
                   Center(
                     child: Container(
-                      padding: const EdgeInsets.all(20),
-                      margin: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(5),
+                      margin: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -474,7 +508,7 @@ class HomePage extends StatelessWidget {
                           Expanded(
                               child: ListView.builder(
                             itemCount: cacheItemList.length,
-                            itemExtent: 100,
+                            itemExtent: itemHeight,
                             itemBuilder: (context, index) {
                               var item = cacheItemList[index];
 
@@ -484,18 +518,21 @@ class HomePage extends StatelessWidget {
                                       cacheGroupIndex, index, !item.checked);
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 15),
+                                  padding:  EdgeInsets.symmetric(vertical: _itemScreenCfg.itemPadding.vertical - 2),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
                                       Container(
-                                        margin:
-                                            const EdgeInsets.only(right: 10),
+                                        margin: EdgeInsets.only(
+                                            right:
+                                                _itemScreenCfg.checkboxMargin),
                                         child: Checkbox(
                                             value: item.checked,
+                                            materialTapTargetSize:
+                                                MaterialTapTargetSize
+                                                    .shrinkWrap,
                                             onChanged: (v) {
                                               var checked = v ?? false;
                                               logic.changeCacheItemListChecked(
@@ -504,49 +541,79 @@ class HomePage extends StatelessWidget {
                                                   checked);
                                             }),
                                       ),
-                                      Container(
-                                        width: 160,
-                                        height: 100,
-                                        margin: const EdgeInsets.symmetric(
-                                            vertical: 5),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(5),
-                                          image: DecorationImage(
-                                            image: _buildCoverImage(
-                                                item.coverPath, item.coverUrl),
-                                            fit: BoxFit.cover,
+
+                                      SizedBox(
+                                        height: itemHeight,
+                                        child: AspectRatio(
+                                          aspectRatio: 16 / 9,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              image: DecorationImage(
+                                                image: _buildCoverImage(
+                                                    item.coverPath,
+                                                    item.coverUrl),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                      Container(
-                                        margin: const EdgeInsets.only(left: 10),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Expanded(
-                                              child: Align(
-                                                child: Text(item.title ?? "",
-                                                    textAlign: TextAlign.center,
-                                                    style: const TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    )),
-                                              ),
-                                            ),
-                                            Container(
-                                                margin: const EdgeInsets.only(
-                                                    bottom: 5),
+                                      //文字
+                                      Expanded(
+                                        child: Container(
+                                          height: itemHeight, // 整个内容区域的固定高度
+                                          margin:
+                                              const EdgeInsets.only(left: 5),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              // 标题文本区域
+                                              Expanded(
+                                                  child: Container(
+                                                alignment: Alignment.centerLeft,
                                                 child: Text(
-                                                  '路径:${item.path}',
-                                                  style: const TextStyle(
-                                                      color: Colors.grey),
-                                                )),
-                                          ],
+                                                  item.title ?? "",
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: titleFontSize,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              )),
+                                              // 路径文本区域
+                                              SizedBox(
+                                                height: itemHeight * 0.3,
+                                                // 例如，给路径文本分配 30% 的 itemHeight
+                                                child: SingleChildScrollView(
+                                                  scrollDirection:
+                                                      Axis.horizontal,
+                                                  child: Row(
+                                                    children: [
+                                                      Text("路径:",
+                                                          style: TextStyle(
+                                                            fontSize:
+                                                                pathFontSize,
+                                                            color: Colors.grey,
+                                                          )),
+                                                      SelectableText(
+                                                        item.path ?? "",
+                                                        style: TextStyle(
+                                                          fontSize:
+                                                              pathFontSize,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -555,7 +622,10 @@ class HomePage extends StatelessWidget {
                               );
                             },
                           )),
-                          const Divider(thickness: 0.4),
+                          Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: const Divider(thickness: 0.4)),
                           //全选按钮
                           Row(
                             children: [
@@ -593,8 +663,11 @@ class HomePage extends StatelessWidget {
                               )
                             ],
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+                          Wrap(
+                            alignment: WrapAlignment.spaceEvenly,
+                            spacing: 8.0,
+                            runSpacing: 8.0,
                             children: [
                               ElevatedButton(
                                 onPressed: () {
@@ -654,3 +727,12 @@ class HomePage extends StatelessWidget {
     }
   }
 }
+
+///item屏幕配置
+typedef _ItemScreenCfg = ({
+  double itemHeight,
+  double checkboxMargin,
+  double titleFontSize,
+  double pathFontSize,
+  EdgeInsetsGeometry itemPadding,
+});

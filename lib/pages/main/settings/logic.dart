@@ -11,6 +11,7 @@ import 'package:hlbmerge/models/cache_group.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../channel/main/main_channel.dart';
+import '../../../channel/main/main_channel_android.dart';
 import 'state.dart';
 
 class SettingsLogic extends GetxController {
@@ -55,7 +56,7 @@ class SettingsLogic extends GetxController {
     // var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
     // print(platformVersion);
 
-    var result = await MainChannel.startActivity("777");
+    var result = await MainChannel.startActivity(ActivityScreen.pathSelectScreen.route);
     print(result);
 
     // _cacheDataManager.setCachePlatform(CachePlatform.android);

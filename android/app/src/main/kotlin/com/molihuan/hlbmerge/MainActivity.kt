@@ -1,13 +1,11 @@
 package com.molihuan.hlbmerge
 
-import android.R.attr.path
 import android.os.Environment
 import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.XXPermissions
 import com.hjq.permissions.permission.PermissionLists
 import com.hjq.permissions.permission.base.IPermission
 import com.molihuan.commonmodule.tool.ToastTool
-import com.molihuan.hlbmerge.ui.screen.path.select.PathSelectFunctionState
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -29,16 +27,7 @@ class MainActivity : FlutterActivity() {
     fun methodCallHandler(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "startActivity" -> {
-                // 获取 Flutter 传递的参数
-                val to = call.argument<String>("to")
-                Timber.d("startActivity: $to")
-                AndroidActivity.go(this)
-                val returnMap = mapOf<String, Any?>(
-                    "code" to 0,
-                    "msg" to "ok",
-                    "data" to null,
-                )
-                result.success(returnMap)
+                startActivity(call, result)
             }
 
             "hasReadWritePermission" -> {
@@ -61,6 +50,23 @@ class MainActivity : FlutterActivity() {
                 result.notImplemented()
             }
         }
+    }
+
+    private fun startActivity(call: MethodCall, result: MethodChannel.Result) {
+        // 获取 Flutter 传递的参数
+        val to = call.argument<String>("to")
+        Timber.d("startActivity: $to")
+        when(to){
+            "AndroidActivity/PathSelectScreen"->{
+                AndroidActivity.go(this, NavRoute.PathSelect(NavRoute.PathSelect.Args()))
+            }
+        }
+        val returnMap = mapOf<String, Any?>(
+            "code" to 0,
+            "msg" to "ok",
+            "data" to null,
+        )
+        result.success(returnMap)
     }
 
     private fun getDefaultOutputDirPath(
@@ -131,7 +137,7 @@ class MainActivity : FlutterActivity() {
         result.success(returnMap)
     }
 
-    fun hasReadWritePermission(call: MethodCall, result: MethodChannel.Result) {
+    private fun hasReadWritePermission(call: MethodCall, result: MethodChannel.Result) {
         val grantedPermission = XXPermissions.isGrantedPermission(
             context,
             PermissionLists.getManageExternalStoragePermission()
@@ -146,7 +152,7 @@ class MainActivity : FlutterActivity() {
         result.success(returnMap)
     }
 
-    fun grantReadWritePermission(call: MethodCall, result: MethodChannel.Result) {
+    private fun grantReadWritePermission(call: MethodCall, result: MethodChannel.Result) {
         XXPermissions.with(activity)
             .permission(PermissionLists.getManageExternalStoragePermission())
             // 设置不触发错误检测机制（局部设置）

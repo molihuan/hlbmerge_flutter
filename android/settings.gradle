@@ -30,3 +30,6 @@ plugins {
 include ":app"
 //通用模块
 include(":CommonModule")
+//数据管理
+//include(":DataManage:DataProviderModule")
+//include(":DataManage:DataStoreModule")

@@ -91,4 +91,18 @@ class HomeState {
   final _hasPermission = false.obs;
   bool get hasPermission => _hasPermission.value;
   set hasPermission(bool value) => _hasPermission.value = value;
+
+  //Android解析权限
+  final _androidParseCachePermission = AndroidParseCachePermission.readWrite.obs;
+  AndroidParseCachePermission get androidParseCachePermission => _androidParseCachePermission.value;
+  set androidParseCachePermission(AndroidParseCachePermission value) => _androidParseCachePermission.value = value;
+}
+/// 安卓解析缓存权限
+enum AndroidParseCachePermission{
+  //读写权限
+  readWrite,
+  //document uri权限
+  documentUri,
+  //shizuku
+  shizuku,
 }
