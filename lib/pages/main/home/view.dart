@@ -231,7 +231,7 @@ class HomePage extends StatelessWidget {
                         const SizedBox(width: 5),
                         FilledButton(
                             onPressed: () {
-                              logic.parseCacheData();
+                              logic.finalParseCacheData();
                             },
                             child: const Text("加载数据")),
                         const SizedBox(width: 5),
@@ -316,6 +316,7 @@ class HomePage extends StatelessWidget {
               ),
               onPressed: () {
                 // 刷新
+                logic.refreshCacheData();
               },
             ),
             _buildEditBtn()

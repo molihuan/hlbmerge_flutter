@@ -87,6 +87,10 @@ class SpDataManager {
   static String? getInputCacheDirPath() {
     return prefs.getString(inputCacheDirPathKey);
   }
+  static Future<String?> getInputCacheDirPathByReload() async {
+    await prefs.reload(); // 确保读的是最新的
+    return prefs.getString(inputCacheDirPathKey);
+  }
 
   //缓存数据平台
   static setCachePlatform(CachePlatform platform) {

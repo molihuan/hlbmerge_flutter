@@ -28,9 +28,39 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   // 任务控制器
   final FFmpegTaskController taskController = Get.put(FFmpegTaskController());
 
+  void refreshCacheData() async {
+    state.inputCacheDirPath = await SpDataManager.getInputCacheDirPathByReload() ?? "";
+    if(state.inputCacheDirPath.isEmpty){
+      Get.snackbar("提示", "你还没有设置缓存路径,请在设置中设置缓存路径");
+    }
+    parseCacheData();
+  }
+
+  void parseCacheData(){
+    runPlatformFunc(onDefault: () {
+      state.hasPermission = true;
+      finalParseCacheData();
+    }, onAndroid: () async {
+      //判断是否有读写权限
+      var result = await MainChannel.hasReadWritePermission();
+      print("安卓权限判断结果:${result}");
+      if (result.first == 0) {
+        if (result.third == true) {
+          state.hasPermission = true;
+          finalParseCacheData();
+        } else {
+          state.hasPermission = false;
+        }
+      }
+    });
+  }
+
   // 解析缓存数据
-  void parseCacheData({String? cacheDirPath}) {
+  void finalParseCacheData({String? cacheDirPath}) {
     String dirPath = cacheDirPath ?? state.inputCacheDirPath;
+    if (dirPath.isEmpty) {
+      return;
+    }
     _cacheDataManager.setCachePlatform(state.cachePlatform);
     List<CacheGroup>? cacheGroupList = _cacheDataManager.loadCacheData(dirPath);
 
@@ -217,7 +247,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     }
     state.inputCacheDirPath = dropItem.path;
     // 解析缓存数据
-    parseCacheData();
+    finalParseCacheData();
   }
 
   //选择输入缓存文件夹路径
@@ -236,7 +266,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
       return;
     }
     state.inputCacheDirPath = dirPath;
-    parseCacheData();
+    finalParseCacheData();
     //持久化
     //SpDataManager.setInputCacheDirPath(dirPath);
   }
@@ -355,24 +385,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
 
   @override
   void onReady() {
-    runPlatformFunc(onDefault: () {
-      state.hasPermission = true;
-      parseCacheData();
-    }, onAndroid: () async {
-      //判断是否有读写权限
-      var result = await MainChannel.hasReadWritePermission();
-      print("安卓权限判断结果:${result}");
-      if (result.first == 0) {
-        if (result.third == true) {
-          state.hasPermission = true;
-          var path = "/storage/emulated/0/Android/data/tv.danmaku.bili/download";
-          parseCacheData(cacheDirPath: path);
-        } else {
-          state.hasPermission = false;
-        }
-      }
-    });
-
+    parseCacheData();
     super.onReady();
   }
 

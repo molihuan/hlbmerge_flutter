@@ -102,6 +102,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
             _uiState.update {
                 it.copy(
                     biliAppInfoList = biliAppInfoList,
+                    showPermissionTips = isAndroid11,
                     functionState = PathSelectFunctionState.NoReadWritePermission
                 )
             }

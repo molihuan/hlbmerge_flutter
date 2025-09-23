@@ -277,8 +277,10 @@ class CacheDataManager {
 
       if (data.containsKey('ep')) {
         final epData = data['ep'];
-        item.title =
-            _getFirstNonNull([() => _getMapString(epData, 'index_title')]);
+        if(epData != null){
+          item.title =
+              _getFirstNonNull([() => _getMapString(epData, 'index_title')]);
+        }
       }
 
       // 获取标题
