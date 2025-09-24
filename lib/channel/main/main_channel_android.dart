@@ -1,10 +1,14 @@
+import 'dart:async';
+
+import 'package:ffmpeg_hl/beans/Pair.dart';
 import 'package:ffmpeg_hl/beans/Triple.dart';
 import 'package:flutter/services.dart';
 
 import 'main_channel_interface.dart';
 
-enum ActivityScreen{
+enum ActivityScreen {
   pathSelectScreen("AndroidActivity/PathSelectScreen");
+
   //route
   final String route;
 
@@ -14,6 +18,19 @@ enum ActivityScreen{
 class MainChannelAndroid extends MainChannelInterface {
   late final MethodChannel _platform =
       const MethodChannel("com.molihuan.hlbmerge/mainChannel");
+
+  @override
+  void init() {
+    _platform.setMethodCallHandler(methodCallHandler);
+  }
+
+  Future<dynamic> methodCallHandler(MethodCall call) async {
+    if (call.method ==
+        NativePageEventType.onReturnFlutterPageFromNativePage.v) {
+      super.nativePageController.add(
+          Pair(NativePageEventType.onReturnFlutterPageFromNativePage, null));
+    }
+  }
 
   @override
   Future<Triple<int, String, Map?>> startActivity(String to,
@@ -29,6 +46,7 @@ class MainChannelAndroid extends MainChannelInterface {
     }
     return returnError;
   }
+
   @override
   Future<Triple<int, String, bool?>> hasReadWritePermission() async {
     final result = await _platform.invokeMethod("hasReadWritePermission");
@@ -70,6 +88,7 @@ class MainChannelAndroid extends MainChannelInterface {
     }
     return returnError;
   }
+
   @override
   Future<Triple<int, String, String?>> getDefaultOutputDirPath() async {
     final result = await _platform.invokeMethod("getDefaultOutputDirPath");

@@ -38,11 +38,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.molihuan.hlbmerge.MainActivity
 import com.molihuan.hlbmerge.NavRoute
 import com.molihuan.hlbmerge.R
+import com.molihuan.hlbmerge.channel.main.MainMethodChannel
 import com.molihuan.hlbmerge.ui.components.BackCenterTopAppBar
 import com.molihuan.hlbmerge.ui.theme.AndroidTheme
+import io.flutter.embedding.engine.FlutterEngineCache
+import io.flutter.plugin.common.MethodChannel
 import rikka.shizuku.Shizuku
+import timber.log.Timber
 
 @Composable
 fun PathSelectScreen(
@@ -75,6 +80,8 @@ fun PathSelectScreen(
 
         onDispose {
             Shizuku.removeRequestPermissionResultListener(listener)
+            Timber.d("PathSelectScreen销毁")
+            MainMethodChannel.invokeMethod("onReturnFlutterPageFromNativePage", null)
         }
     }
 

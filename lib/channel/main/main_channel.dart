@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:ffmpeg_hl/beans/Pair.dart';
 import 'package:ffmpeg_hl/beans/Triple.dart';
 import 'package:flutter/services.dart';
 import 'package:hlbmerge/channel/main/main_channel_common.dart';
@@ -8,6 +11,8 @@ import 'main_channel_interface.dart';
 
 class MainChannel {
   MainChannel._();
+  //是否初始化
+  static bool _isInit = false;
 
   static MainChannelInterface? _interface;
 
@@ -21,6 +26,20 @@ class MainChannel {
     });
     return _interface;
   }
+
+  static void init(){
+    if(_isInit){
+      return;
+    }
+    _isInit = true;
+    interface.init();
+  }
+
+  static Stream<Pair<NativePageEventType, NativePageEventParams?>> get onNativePageEvent {
+    init();
+    return interface.onNativePageEvent;
+  }
+
 
   static Future<Triple<int, String, Map?>> startActivity(String to,
       {Map<String, String>? args}) async {

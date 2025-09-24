@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hlbmerge/utils/PlatformUtils.dart';
 import 'package:open_file/open_file.dart';
 
 import 'logic.dart';
@@ -14,30 +15,51 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: ListView(
+      child: Column(
         children: [
-          ListTile(
-            title: const Text("Avcodec配置"),
-            onTap: () async {
-              logic.showAvcodecCfg();
-            },
-          ),
-          Obx(() {
-            return ListTile(
-              title: Text("输出路径:${state.outputDirPath}"),
-              onTap: () async {
-                logic.selectOutputPath();
-              },
-            );
-          }),
-          ListTile(
-            title: const Text("测试按钮"),
-            onTap: () async {
-              logic.testFunc();
-            },
-          ),
+          AppBar(title: const Text("设置",style: TextStyle(fontWeight: FontWeight.bold))),
+          Expanded(
+              child: ListView(
+            children: [
+              ListTile(
+                title: const Text("Avcodec配置"),
+                onTap: () async {
+                  logic.showAvcodecCfg();
+                },
+              ),
+              _buildInputCacheItem("输入缓存项"),
+              Obx(() {
+                return ListTile(
+                  title: Text("输出路径:${state.outputDirPath}"),
+                  onTap: () async {
+                    logic.selectOutputPath();
+                  },
+                );
+              }),
+              ListTile(
+                title: const Text("测试按钮"),
+                onTap: () async {
+                  logic.testFunc();
+                },
+              ),
+            ],
+          ))
         ],
       ),
     );
+  }
+
+  //输入缓存项设置
+  Widget _buildInputCacheItem(String title) {
+    return runPlatformFunc<Widget>(onDefault: () {
+      return const SizedBox.shrink();
+    }, onAndroid: () {
+      return ListTile(
+        title: Text(title),
+        onTap: () {
+          logic.startPathSelectScreen();
+        },
+      );
+    });
   }
 }

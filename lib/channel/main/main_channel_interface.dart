@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:ffmpeg_hl/beans/Pair.dart';
 import 'package:ffmpeg_hl/beans/Triple.dart';
 
 abstract class MainChannelInterface {
@@ -25,4 +28,21 @@ abstract class MainChannelInterface {
     throw UnimplementedError();
   }
 
+  late final nativePageController = StreamController<Pair<NativePageEventType, NativePageEventParams?>>.broadcast();
+
+  Stream<Pair<NativePageEventType, NativePageEventParams?>> get onNativePageEvent => nativePageController.stream;
+
+  void init() {}
+}
+// native页面事件类型
+enum NativePageEventType {
+  //onReturnFlutterPageFromNativePage
+  onReturnFlutterPageFromNativePage("onReturnFlutterPageFromNativePage");
+
+  final String v;
+
+  const NativePageEventType(this.v);
+}
+//native页面事件参数
+class NativePageEventParams {
 }

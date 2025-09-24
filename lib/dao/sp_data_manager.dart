@@ -109,7 +109,8 @@ class SpDataManager {
   static setAndroidParseCachePermission(AndroidParseCachePermission permission){
     prefs.setString(androidParseCachePermissionKey, permission.name);
   }
-  static AndroidParseCachePermission? getAndroidParseCachePermission(){
+  static Future<AndroidParseCachePermission?> getAndroidParseCachePermission() async {
+    await prefs.reload();
     String? target = prefs.getString(androidParseCachePermissionKey);
     return AndroidParseCachePermission.values
         .firstWhereOrNull((element) => element.name == target);

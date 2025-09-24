@@ -19,25 +19,23 @@ class ProgressPage extends StatelessWidget {
 
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "任务列表",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              FilledButton(
-                onPressed: () {
-                  taskController.clearTasks();
-                  logic.loadOutputChildDirList();
-                },
-                child: const Text("归档"),
-              )
-            ],
-          ),
-        ),
+        AppBar(
+            title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "任务列表",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            FilledButton(
+              onPressed: () {
+                taskController.clearTasks();
+                logic.loadOutputChildDirList();
+              },
+              child: const Text("归档"),
+            )
+          ],
+        )),
         Expanded(
           child: Obx(() {
             final tasks = taskController.tasks;
@@ -94,4 +92,3 @@ class ProgressPage extends StatelessWidget {
     );
   }
 }
-

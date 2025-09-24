@@ -110,6 +110,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
     }
 
     fun updateFunctionState(functionState: PathSelectFunctionState) {
+        FlutterSpData.setAndroidParseCacheDataPermission(functionState)
         _uiState.update {
             it.copy(functionState = functionState)
         }
@@ -165,12 +166,12 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
         urlPermissionLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
     ) {
 
-
         //如果能进入这里肯定是有读写权限的
         val state = _uiState.value
         val appInfo = state.biliAppInfoList[index]
 
         val uriPath = "${FileUtils.androidDataPath}/${appInfo.packageName}/download"
+//        val uriPath = "${FileUtils.androidDataPath}/${appInfo.packageName}/files"
         run {
 
             if (!check) {

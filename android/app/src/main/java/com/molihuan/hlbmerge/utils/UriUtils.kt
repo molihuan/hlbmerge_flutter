@@ -6,6 +6,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
+import androidx.documentfile.provider.DocumentFile
+import com.molihuan.hlbmerge.App
 import timber.log.Timber
 import java.io.File
 
@@ -55,6 +57,8 @@ object UriUtils {
     }
     //获取跳转请求权限SAF页面的intent
     fun getGrantUriPermissionIntent(uri: Uri): Intent{
+        Timber.d("跳转请求权限SAF页面的uri是:$uri")
+
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
             setFlags(
                 (Intent.FLAG_GRANT_READ_URI_PERMISSION

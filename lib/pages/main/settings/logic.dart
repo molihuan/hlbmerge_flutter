@@ -51,13 +51,16 @@ class SettingsLogic extends GetxController {
     Get.snackbar("提示", "已选择输出路径:$dirPath");
   }
 
+  void startPathSelectScreen() async {
+    var result = await MainChannel.startActivity(ActivityScreen.pathSelectScreen.route);
+    print(result);
+  }
+
+
   // 测试方法
   testFunc() async {
     // var platformVersion = await ffmpegHlPlugin.getPlatformVersion();
     // print(platformVersion);
-
-    var result = await MainChannel.startActivity(ActivityScreen.pathSelectScreen.route);
-    print(result);
 
     // _cacheDataManager.setCachePlatform(CachePlatform.android);
     // _cacheDataManager.loadCacheData("C:\\Users\\moli\\FlutterProject\\hlbmerge_flutter\\testRes\\手机缓存文件");

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -7,6 +8,7 @@ import 'package:ffmpeg_hl/ffmpeg_hl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hlbmerge/channel/main/main_channel_interface.dart';
 
 import '../../../channel/main/main_channel.dart';
 import '../../../channel/main/main_channel_android.dart';
@@ -28,15 +30,20 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   // 任务控制器
   final FFmpegTaskController taskController = Get.put(FFmpegTaskController());
 
+  // 刷新缓存数据
   void refreshCacheData() async {
-    state.inputCacheDirPath = await SpDataManager.getInputCacheDirPathByReload() ?? "";
-    if(state.inputCacheDirPath.isEmpty){
-      Get.snackbar("提示", "你还没有设置缓存路径,请在设置中设置缓存路径");
+    state.inputCacheDirPath =
+        await SpDataManager.getInputCacheDirPathByReload() ?? "";
+    if (state.inputCacheDirPath.isEmpty) {
+      //清空列表
+      state.cacheGroupList = [];
+      Get.snackbar("提示", "你还没有设置'输入缓存项',请在设置页面设置'输入缓存项'");
     }
     parseCacheData();
   }
 
-  void parseCacheData(){
+  // 解析缓存数据,带权限判断
+  void parseCacheData() {
     runPlatformFunc(onDefault: () {
       state.hasPermission = true;
       finalParseCacheData();
@@ -55,7 +62,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     });
   }
 
-  // 解析缓存数据
+  // 最终解析缓存数据
   void finalParseCacheData({String? cacheDirPath}) {
     String dirPath = cacheDirPath ?? state.inputCacheDirPath;
     if (dirPath.isEmpty) {
@@ -163,7 +170,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
       int index = indexCacheGroupList[i].key;
       mergeAudioVideoByCacheItem(index, alwaysMerge: true);
     }
-    Get.snackbar("", "已添加任务,请前往进度页面查看");
+    Get.snackbar("提示", "已添加任务,请前往进度页面查看");
   }
 
   void mergeAudioVideoByCacheItem(int cacheGroupIndex,
@@ -236,13 +243,13 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   //拖入文件夹回调
   void onInputCacheDirPathDragDone(List<DropItem> dropItemList) {
     if (dropItemList.length != 1) {
-      Get.snackbar("", "只能拖入一个路径");
+      Get.snackbar("提示", "只能拖入一个路径");
       return;
     }
     DropItem dropItem = dropItemList.first;
     var isDir = FileUtil.isDir(dropItem.path);
     if (!isDir) {
-      Get.snackbar("", "请拖入一个目录");
+      Get.snackbar("提示", "请拖入一个目录");
       return;
     }
     state.inputCacheDirPath = dropItem.path;
@@ -344,21 +351,10 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     runPlatformFunc(
         onDefault: () {},
         onAndroid: () async {
-          // var result = await MainChannel.grantReadWritePermission();
-          // print("申请权限结果:${result}");
-          // if (result.first == 0) {
-          //   if (result.third == true) {
-          //     state.hasPermission = true;
-          //     //parseCacheData(cacheDirPath: null);
-          //   } else {
-          //     state.hasPermission = false;
-          //   }
-          // }
-          var result = await MainChannel.startActivity(ActivityScreen.pathSelectScreen.route);
+          var result = await MainChannel.startActivity(
+              ActivityScreen.pathSelectScreen.route);
           print("跳转结果:${result}");
-          if(result.first == 0){
-
-          }
+          if (result.first == 0) {}
         });
   }
 
@@ -367,20 +363,37 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState appState) {
     if (appState == AppLifecycleState.detached ||
         appState == AppLifecycleState.inactive) {
-      runPlatformFunc(onDefault: (){
-        SpDataManager.setInputCacheDirPath(state.inputCacheDirPath);
-      },onAndroid: (){
-
-      });
+      runPlatformFunc(
+          onDefault: () {
+            SpDataManager.setInputCacheDirPath(state.inputCacheDirPath);
+          },
+          onAndroid: () {});
       SpDataManager.setCachePlatform(state.cachePlatform);
     }
     super.didChangeAppLifecycleState(appState);
   }
 
+  StreamSubscription? _nativePageEventSubscription;
+
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+    runPlatformFunc(
+        onDefault: () {
+          //暂时不需要
+        },
+        onAndroid: () {
+          _nativePageEventSubscription =
+              MainChannel.onNativePageEvent.listen((event) {
+            switch (event.first) {
+              case NativePageEventType.onReturnFlutterPageFromNativePage:
+                //刷新一下
+                refreshCacheData();
+                break;
+            }
+          });
+        });
   }
 
   @override
@@ -392,6 +405,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
+    _nativePageEventSubscription?.cancel();
     super.onClose();
   }
 

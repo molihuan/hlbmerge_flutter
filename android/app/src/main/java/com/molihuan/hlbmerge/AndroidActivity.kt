@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
@@ -20,8 +21,11 @@ import androidx.navigation.navArgument
 import com.molihuan.hlbmerge.ui.screen.path.select.PathSelectScreen
 import com.molihuan.hlbmerge.ui.theme.AndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
+import io.flutter.embedding.engine.FlutterEngineCache
+import io.flutter.plugin.common.MethodChannel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import timber.log.Timber
 
 @AndroidEntryPoint
 class AndroidActivity : ComponentActivity() {
@@ -58,7 +62,6 @@ class AndroidActivity : ComponentActivity() {
 
 // 创建LocalNavController,用于快速跳转
 val LocalNavController = staticCompositionLocalOf<NavController?> { null }
-
 @Composable
 fun AppScreen(initRoute: NavRoute = NavRoute.PathSelect(NavRoute.PathSelect.Args())) {
     val navController = rememberNavController()
@@ -69,7 +72,6 @@ fun AppScreen(initRoute: NavRoute = NavRoute.PathSelect(NavRoute.PathSelect.Args
             navController,
             startDestination = initRoute.route,
         ) {
-
             composable(
                 route = NavRoute.PathSelect.routeWithArgs,
                 arguments = listOf(
