@@ -1,0 +1,87 @@
+package com.molihuan.hlbmerge.service
+
+import android.content.ComponentName
+import android.content.ServiceConnection
+import android.os.IBinder
+import com.molihuan.hlbmerge.BuildConfig
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.withTimeout
+import rikka.shizuku.Shizuku
+
+class ShizukuFileCopy : BaseFileCopy {
+
+    private var mChannel = Channel<IShizukuFileCopy>()
+    private var fileCopyService: IShizukuFileCopy? = null
+
+    private val userServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(
+            name: ComponentName?,
+            binder: IBinder?
+        ) {
+            if (binder != null && binder.pingBinder()) {
+                val service = IShizukuFileCopy.Stub.asInterface(binder)
+                fileCopyService = service
+                mChannel.trySend(service)
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            fileCopyService = null
+        }
+
+    }
+
+    private val userServiceArgs = Shizuku
+        //被绑定的进程会在Shizuku权限下运行
+        .UserServiceArgs(
+            ComponentName(
+                BuildConfig.APPLICATION_ID,
+                ShizukuFileCopyUserService::class.java.name
+            )
+        )
+        .daemon(false)
+        .processNameSuffix(ShizukuFileCopy::class.java.simpleName)
+        .debuggable(BuildConfig.DEBUG)
+        .version(BuildConfig.VERSION_CODE)
+
+    private fun bindService() {
+        try {
+            Shizuku.bindUserService(userServiceArgs, userServiceConnection)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+    }
+
+    @Throws(TimeoutCancellationException::class)
+    suspend fun getService(): IShizukuFileCopy {
+        fileCopyService?.let { return it }
+        bindService()
+        return withTimeout(10000) {
+            mChannel.receive()
+        }
+    }
+
+    //解绑
+    fun unbindService() {
+        try {
+            fileCopyService = null
+            Shizuku.unbindUserService(userServiceArgs, userServiceConnection, true)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+    }
+
+    override suspend fun copyFile(
+        src: String,
+        dest: String,
+        includeRegex: String?,
+        excludeRegex: String?,
+        progressCallback: ((current: Long, total: Long) -> Unit)?,
+        completeCallback: (() -> Unit)?,
+        errorCallback: ((e: Exception) -> Unit)?
+    ) {
+        val service = getService()
+        service.copy(src, dest, includeRegex, excludeRegex)
+    }
+}

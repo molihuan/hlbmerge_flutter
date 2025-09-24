@@ -9,6 +9,7 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.XXPermissions
 import com.hjq.permissions.permission.PermissionLists
@@ -18,12 +19,15 @@ import com.molihuan.commonmodule.tool.ToastTool
 import com.molihuan.hlbmerge.App
 import com.molihuan.hlbmerge.R
 import com.molihuan.hlbmerge.dao.FlutterSpData
+import com.molihuan.hlbmerge.service.ShizukuFileCopy
 import com.molihuan.hlbmerge.utils.FileUtils
 import com.molihuan.hlbmerge.utils.UriUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import rikka.shizuku.Shizuku
 import timber.log.Timber
 import javax.inject.Inject
@@ -42,6 +46,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
     private var currGrantUriPermissionInfo: Pair<String, String>? = null
 
     fun init(context: Context) {
+        test()
         val biliAppInfoList: List<BiliAppInfo> = listOf(
             BiliAppInfo(
                 "哔哩哔哩",
@@ -305,6 +310,16 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
             }
             FlutterSpData.setInputCacheDirPath(FlutterSpData.cacheCopyTempPath)
             _uiState.update { it.copy(functionState = PathSelectFunctionState.HasReadWriteShizukuPermission) }
+        }
+    }
+
+    //测试
+    fun test() {
+        val srcDir = "/storage/emulated/0/Android/data/tv.danmaku.bili/download"
+        val targetDir = "/storage/emulated/0/Download/HLB站缓存视频合并/cacheCopyTempDir"
+        viewModelScope.launch(Dispatchers.IO) {
+            ShizukuFileCopy().copyFile(srcDir, targetDir)
+//            ShizukuFileCopy().copyFile(srcDir, targetDir, excludeRegex = ".*\\.m4s")
         }
     }
 

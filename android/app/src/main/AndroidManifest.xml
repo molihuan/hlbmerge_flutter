@@ -91,6 +91,12 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
+<!--        <service-->
+<!--            android:name=".service.ShizukuFileCopyUserService"-->
+<!--            android:exported="true"-->
+<!--            android:permission="moe.shizuku.manager.permission.ACCESS_USER_SERVICE" />-->
+
     </application>
 
 </manifest>
