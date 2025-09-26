@@ -5,7 +5,9 @@ import 'package:ffmpeg_hl/ffmpeg_hl.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 
+import '../../channel/main/main_channel.dart';
 import '../../dao/cache_data_manager.dart';
+import '../../dao/sp_data_manager.dart';
 import '../../models/cache_item.dart';
 import '../../pages/main/home/logic.dart';
 import '../../utils/FileUtil.dart';
@@ -32,9 +34,12 @@ class FFmpegTaskController extends GetxController {
 
   // 任务列表
   final _tasks = <FFmpegTaskBean>[].obs;
+
   //获取
   List<FFmpegTaskBean> get tasks => _tasks.toList();
+
   set tasks(List<FFmpegTaskBean> value) => _tasks.assignAll(value);
+
   //清空任务
   void clearTasks() {
     _tasks.clear();
@@ -51,7 +56,7 @@ class FFmpegTaskController extends GetxController {
   }
 
   // 调度任务
-  void _schedule() {
+  _schedule() async {
     if (_runningCount >= _maxConcurrency) return;
 
     // 找一个等待中的任务
@@ -64,15 +69,45 @@ class FFmpegTaskController extends GetxController {
     task.status.value = FFmpegTaskStatus.running;
     _runningCount++;
 
+    await _runFFmpegTaskBefore(task);
     // 执行
     _runFFmpegTask(task).then((_) {
       task.status.value = FFmpegTaskStatus.completed;
     }).catchError((_) {
       task.status.value = FFmpegTaskStatus.failed;
     }).whenComplete(() {
+      _runFFmpegTaskAfter(task);
       _runningCount--;
       _schedule(); // 执行下一个任务
     });
+  }
+
+  Future<void> _runFFmpegTaskAfter(FFmpegTaskBean task) async {
+    await runPlatformFunc(
+        onDefault: () {},
+        onAndroid: () async {
+          var currPath = task.cacheItem.path;
+          if (currPath == null){
+            return;
+          }
+          var regex = r".*\.(m4s|blv)$";
+          //将指定目录下所有m4s和blv文件(包括其子文件夹)设置为空文件
+          FileUtil.setEmptyFileByRegex(currPath, regex);
+
+        });
+  }
+  Future<void> _runFFmpegTaskBefore(FFmpegTaskBean task) async {
+    await runPlatformFunc(
+        onDefault: () {},
+        onAndroid: () async {
+          var copyTempDirPath = SpDataManager.getInputCacheDirPath() ?? "";
+          var sufPath = task.cacheItem.path?.replaceFirst(copyTempDirPath, "");
+          if (sufPath == null){
+            return;
+          }
+          //拷贝缓存数据结构
+          await MainChannel.copyCacheAudioVideoFile(sufPath);
+        });
   }
 
   // 运行单个任务
@@ -98,7 +133,7 @@ class FFmpegTaskController extends GetxController {
 
       // 输出目录
       var outputDirPath = HomeLogic.getOutputDirPath(groupTitle: groupTitle);
-      if(outputDirPath == null){
+      if (outputDirPath == null) {
         return Pair(false, "请先选择输出目录");
       }
       var outputPath = path.join(outputDirPath, outputFileName);
@@ -142,7 +177,6 @@ class FFmpegTaskController extends GetxController {
             );
             return resultPair;
         }
-
       }
 
       //blv格式

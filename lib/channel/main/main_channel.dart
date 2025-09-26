@@ -58,4 +58,10 @@ class MainChannel {
   static Future<Triple<int, String, String?>> getDefaultOutputDirPath() async {
     return await interface.getDefaultOutputDirPath();
   }
+  static Future<Triple<int, String, Map?>> copyCacheAudioVideoFile(String sufPath) async {
+    return await interface.copyCacheAudioVideoFile(sufPath);
+  }
+  static Future<Triple<int, String, Map?>> copyCacheStructureFile() async {
+    return await interface.copyCacheStructureFile();
+  }
 }

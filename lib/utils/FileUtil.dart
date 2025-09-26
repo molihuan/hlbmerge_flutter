@@ -108,6 +108,36 @@ class FileUtil {
     return newPath;
   }
 
+  ///删除目录下所有正则匹配的文件(包括其子文件夹)
+  static Future<void> deleteFilesByRegex(String dirPath, String regex) async {
+    final dir = Directory(dirPath);
+    if (!await dir.exists()) {
+      return;
+    }
+
+    final regExp = RegExp(regex);
+    await for (final entity in dir.list()) {
+      if (entity is File && regExp.hasMatch(p.basename(entity.path))) {
+        await entity.delete();
+      }
+    }
+  }
+
+  ///将指定目录下所有正则匹配到的文件(包括其子文件夹)设置为空文件
+  static Future<void> setEmptyFileByRegex(String dirPath, String regex) async {
+    final dir = Directory(dirPath);
+    if (!await dir.exists()) {
+      return;
+    }
+
+    final regExp = RegExp(regex);
+    await for (final entity in dir.list(recursive: true)) {
+      if (entity is File && regExp.hasMatch(p.basename(entity.path))) {
+        await entity.writeAsString('');
+      }
+    }
+  }
+
 }
 
 //文件格式枚举

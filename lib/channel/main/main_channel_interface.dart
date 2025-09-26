@@ -27,12 +27,19 @@ abstract class MainChannelInterface {
   Future<Triple<int, String, String?>> getDefaultOutputDirPath() {
     throw UnimplementedError();
   }
-
+  //原生页面事件流
   late final nativePageController = StreamController<Pair<NativePageEventType, NativePageEventParams?>>.broadcast();
-
+  // 原生页面事件
   Stream<Pair<NativePageEventType, NativePageEventParams?>> get onNativePageEvent => nativePageController.stream;
 
   void init() {}
+
+  Future<Triple<int, String, Map?>> copyCacheAudioVideoFile(String sufPath) {
+    throw UnimplementedError();
+  }
+  Future<Triple<int, String, Map?>> copyCacheStructureFile() {
+    throw UnimplementedError();
+  }
 }
 // native页面事件类型
 enum NativePageEventType {

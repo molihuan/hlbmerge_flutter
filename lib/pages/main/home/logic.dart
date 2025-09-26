@@ -39,7 +39,26 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
       state.cacheGroupList = [];
       Get.snackbar("提示", "你还没有设置'输入缓存项',请在设置页面设置'输入缓存项'");
     }
-    parseCacheData();
+
+    runPlatformFunc(onDefault: () {
+      state.hasPermission = true;
+      finalParseCacheData();
+    }, onAndroid: () async {
+      //判断是否有读写权限
+      var result = await MainChannel.hasReadWritePermission();
+      print("安卓权限判断结果:${result}");
+      if (result.first == 0) {
+        if (result.third == true) {
+          state.hasPermission = true;
+          //拷贝缓存数据结构
+          await MainChannel.copyCacheStructureFile();
+          finalParseCacheData();
+        } else {
+          state.hasPermission = false;
+        }
+      }
+    });
+
   }
 
   // 解析缓存数据,带权限判断

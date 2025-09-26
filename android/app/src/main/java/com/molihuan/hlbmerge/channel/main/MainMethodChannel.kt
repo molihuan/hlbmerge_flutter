@@ -5,6 +5,9 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import androidx.core.app.ComponentActivity
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.XXPermissions
 import com.hjq.permissions.permission.PermissionLists
@@ -12,13 +15,21 @@ import com.hjq.permissions.permission.base.IPermission
 import com.molihuan.commonmodule.tool.ToastTool
 import com.molihuan.hlbmerge.AndroidActivity
 import com.molihuan.hlbmerge.NavRoute
-import com.molihuan.hlbmerge.dao.FlutterSpData
+import com.molihuan.hlbmerge.dao.flutter.FlutterSpData
+import com.molihuan.hlbmerge.service.copy.BaseFileCopy
+import com.molihuan.hlbmerge.service.copy.DocumentFileCopy
+import com.molihuan.hlbmerge.service.copy.ShizukuFileCopy
 import com.molihuan.hlbmerge.utils.FileUtils
+import com.molihuan.hlbmerge.utils.ShizukuUtils
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.File
 import java.lang.ref.WeakReference
+import kotlin.concurrent.thread
 
 @SuppressLint("StaticFieldLeak")
 object MainMethodChannel : Application.ActivityLifecycleCallbacks {
@@ -34,14 +45,13 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
         get() = currentActivityRef?.get()
         // Setter: 每次写入时，都创建一个新的弱引用
         set(value) {
-            if (value == null){
+            if (value == null) {
                 currentActivityRef?.clear()
                 currentActivityRef = null
-            }else{
+            } else {
                 currentActivityRef = WeakReference(value)
             }
         }
-
 
     // 提供一个初始化方法，在应用启动时调用
     fun register(flutterEngineMessenger: BinaryMessenger, context: Context) {
@@ -82,11 +92,120 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
                 getDefaultOutputDirPath(call, result)
             }
 
+            "copyCacheAudioVideoFile" -> {
+                copyCacheAudioVideoFile(call, result)
+            }
+
+            "copyCacheStructureFile" -> {
+                copyCacheStructureFile(call, result)
+            }
+
+
             else -> {
                 result.notImplemented()
             }
         }
     }
+
+    //运行在携程中
+    private fun runOnCoroutine(block: suspend () -> Unit) {
+        currentActivity?.let {
+            if (it is LifecycleOwner) {
+                it.lifecycleScope.launch(Dispatchers.IO) {
+                    block()
+                }
+            } else {
+                throw IllegalArgumentException("currentActivity is not implement LifecycleOwner")
+            }
+        } ?: throw NullPointerException("currentActivity is null")
+    }
+
+    private fun copyCacheStructureFile(
+        call: MethodCall,
+        result: MethodChannel.Result
+    ) {
+
+        //判断是否有Shizuku权限
+        val shizukuPermission = ShizukuUtils.isShizukuAvailableAndHasPermission()
+        val fileCopy: BaseFileCopy? = if (shizukuPermission) {
+            ShizukuFileCopy()
+        } else {
+            val inputCacheDirPath = FlutterSpData.getInputCacheDirPath()
+            if (inputCacheDirPath == FlutterSpData.cacheCopyTempPath) {
+                //说明是uri授权
+                DocumentFileCopy()
+            } else {
+                null
+            }
+        }
+        if (fileCopy == null) {
+            return
+        }
+
+        val inputCachePackageName = FlutterSpData.getAndroidInputCachePackageName()
+
+        val srcDir = "${FileUtils.androidDataPath}/${inputCachePackageName}/download"
+        val targetDir = FlutterSpData.cacheCopyTempPath
+        runOnCoroutine {
+            //复制缓存整体结构,m4s,blv文件只做0拷贝
+            fileCopy.zeroCopyFile(srcDir, targetDir, excludeRegex = ".*\\.(m4s|blv)$")
+            val returnMap = mapOf<String, Any?>(
+                "code" to 0,
+                "msg" to "ok",
+                "data" to null,
+            )
+            result.success(returnMap)
+        }
+    }
+
+    private fun copyCacheAudioVideoFile(
+        call: MethodCall,
+        result: MethodChannel.Result
+    ) {
+        // 获取 Flutter 传递的参数
+        val sufPathParam = call.argument<String>("sufPath")
+        if (sufPathParam.isNullOrBlank()) {
+            return
+        }
+        val sufPath = if (sufPathParam.startsWith(File.separator)) {
+            sufPathParam
+        } else {
+            File.separator + sufPathParam
+        }
+        //判断是否有Shizuku权限
+        val shizukuPermission = ShizukuUtils.isShizukuAvailableAndHasPermission()
+        val fileCopy: BaseFileCopy? = if (shizukuPermission) {
+            ShizukuFileCopy()
+        } else {
+            val inputCacheDirPath = FlutterSpData.getInputCacheDirPath()
+            if (inputCacheDirPath == FlutterSpData.cacheCopyTempPath) {
+                //说明是uri授权
+                DocumentFileCopy()
+            } else {
+                null
+            }
+        }
+        if (fileCopy == null) {
+            return
+        }
+
+        val inputCachePackageName = FlutterSpData.getAndroidInputCachePackageName()
+
+        val srcDir = "${FileUtils.androidDataPath}/${inputCachePackageName}/download${sufPath}"
+        val targetDir = FlutterSpData.cacheCopyTempPath + sufPath
+        Timber.d("copyCacheAudioVideoFile: $srcDir $targetDir")
+        runOnCoroutine {
+            //只复制m4s,blv文件
+            fileCopy.copyFile(srcDir, targetDir, includeRegex = ".*\\.(m4s|blv)$")
+            val returnMap = mapOf<String, Any?>(
+                "code" to 0,
+                "msg" to "ok",
+                "data" to null,
+            )
+            result.success(returnMap)
+        }
+    }
+
 
     private fun startActivity(call: MethodCall, result: MethodChannel.Result) {
         // 获取 Flutter 传递的参数

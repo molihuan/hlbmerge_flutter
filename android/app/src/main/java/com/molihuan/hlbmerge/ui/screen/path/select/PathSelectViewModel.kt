@@ -18,9 +18,10 @@ import com.molihuan.commonmodule.tool.AppTool
 import com.molihuan.commonmodule.tool.ToastTool
 import com.molihuan.hlbmerge.App
 import com.molihuan.hlbmerge.R
-import com.molihuan.hlbmerge.dao.FlutterSpData
-import com.molihuan.hlbmerge.service.ShizukuFileCopy
+import com.molihuan.hlbmerge.dao.flutter.FlutterSpData
+import com.molihuan.hlbmerge.service.copy.ShizukuFileCopy
 import com.molihuan.hlbmerge.utils.FileUtils
+import com.molihuan.hlbmerge.utils.ShizukuUtils
 import com.molihuan.hlbmerge.utils.UriUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import rikka.shizuku.Shizuku
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -45,8 +46,22 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
     // 当前授权Uri权限时输入的缓存目录
     private var currGrantUriPermissionInfo: Pair<String, String>? = null
 
+    //测试
+    fun test() {
+        val srcDir = "/storage/emulated/0/Android/data/tv.danmaku.bili/download"
+        val targetDir = "/storage/emulated/0/Download/HLB站缓存视频合并/cacheCopyTempDir"
+        viewModelScope.launch(Dispatchers.IO) {
+            //复制缓存整体结构,m4s,blv文件只做0拷贝
+            ShizukuFileCopy().zeroCopyFile(srcDir, targetDir, excludeRegex = ".*\\.(m4s|blv)$")
+            //只复制m4s,blv文件
+//            ShizukuFileCopy().copyFile(srcDir, targetDir, includeRegex = ".*\\.(m4s|blv)$")
+            withContext(Dispatchers.Main){
+                ToastTool.toast("读取缓存完成")
+            }
+        }
+    }
     fun init(context: Context) {
-        test()
+        //test()
         val biliAppInfoList: List<BiliAppInfo> = listOf(
             BiliAppInfo(
                 "哔哩哔哩",
@@ -82,7 +97,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
             PermissionLists.getManageExternalStoragePermission()
         )
         if (grantedPermission) {
-            val shizukuAvailableAndHasPermission = isShizukuAvailableAndHasPermission()
+            val shizukuAvailableAndHasPermission = ShizukuUtils.isShizukuAvailableAndHasPermission()
             if (shizukuAvailableAndHasPermission) {
                 //有读写权限且有Shizuku权限
                 _uiState.update {
@@ -121,7 +136,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    //url权限回调结果
+    //uri权限回调结果
     fun onUrlPermissionResult(context: Context, result: ActivityResult) {
         when (result.resultCode) {
             Activity.RESULT_OK -> {
@@ -141,7 +156,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                             uri,
                             takeFlags
                         )
-                    //
+
                     currGrantUriPermissionInfo?.let { permissionInfo ->
                         FlutterSpData.setInputCacheDirPath(permissionInfo.first)
                         FlutterSpData.setAndroidInputCachePackageName(permissionInfo.second)
@@ -164,7 +179,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
     }
 
 
-    //更新biliAppInfoCheck
+    //更新biliAppInfo Check
     fun changeBiliAppInfoCheck(
         index: Int,
         check: Boolean,
@@ -176,7 +191,6 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
         val appInfo = state.biliAppInfoList[index]
 
         val uriPath = "${FileUtils.androidDataPath}/${appInfo.packageName}/download"
-//        val uriPath = "${FileUtils.androidDataPath}/${appInfo.packageName}/files"
         run {
 
             if (!check) {
@@ -248,59 +262,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    //判断Shizuku可用性
-    fun isShizukuAvailable(): Pair<Boolean, String> {
-        val isInstall = AppTool.isAppInstall("moe.shizuku.privileged.api")
-        if (!isInstall) {
-            return Pair(false, "请先安装Shizuku")
-        }
 
-        if (!Shizuku.pingBinder()) {
-            Timber.d("Shizuku服务异常")
-            return Pair(false, "请检查Shizuku服务是否启动,异常:pingBinder is false")
-        }
-
-        //判断Shizuku版本是否满足要求
-        if (Shizuku.isPreV11() || Shizuku.getVersion() < 10) {
-            return Pair(false, "Shizuku版本太低,请升级Shizuku版本")
-        }
-
-        return Pair(true, "")
-    }
-
-    //判断是否有Shizuku权限
-    fun hasShizukuPermission(): Boolean {
-        if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-            return false
-        }
-        return true
-    }
-
-    // 是否可用并且有权限
-    fun isShizukuAvailableAndHasPermission(): Boolean {
-        val shizukuAvailablePair = isShizukuAvailable()
-        if (!shizukuAvailablePair.first) {
-            return false
-        }
-        if (!hasShizukuPermission()) {
-            return false
-        }
-        return true
-    }
-
-    // 请求 Shizuku 权限
-    fun requestShizukuPermission() {
-        val shizukuAvailablePair = isShizukuAvailable()
-        if (!shizukuAvailablePair.first) {
-            ToastTool.toast(shizukuAvailablePair.second)
-            return
-        }
-        if (hasShizukuPermission()) {
-            Timber.d("Shizuku权限已获取")
-            return
-        }
-        Shizuku.requestPermission(REQUEST_CODE_SHIZUKU_PERMISSION)
-    }
 
     // Shizuku权限回调
     fun onShizukuRequestPermissionResult(requestCode: Int, grantResult: Int) {
@@ -310,16 +272,6 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
             }
             FlutterSpData.setInputCacheDirPath(FlutterSpData.cacheCopyTempPath)
             _uiState.update { it.copy(functionState = PathSelectFunctionState.HasReadWriteShizukuPermission) }
-        }
-    }
-
-    //测试
-    fun test() {
-        val srcDir = "/storage/emulated/0/Android/data/tv.danmaku.bili/download"
-        val targetDir = "/storage/emulated/0/Download/HLB站缓存视频合并/cacheCopyTempDir"
-        viewModelScope.launch(Dispatchers.IO) {
-            ShizukuFileCopy().copyFile(srcDir, targetDir)
-//            ShizukuFileCopy().copyFile(srcDir, targetDir, excludeRegex = ".*\\.m4s")
         }
     }
 

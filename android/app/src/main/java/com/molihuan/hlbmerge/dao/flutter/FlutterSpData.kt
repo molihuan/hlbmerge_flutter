@@ -1,9 +1,9 @@
-package com.molihuan.hlbmerge.dao
+package com.molihuan.hlbmerge.dao.flutter
 
 import android.app.Application
 import com.molihuan.hlbmerge.ui.screen.path.select.PathSelectFunctionState
 import com.molihuan.hlbmerge.utils.FileUtils
-import com.molihuan.hlbmerge.utils.FlutterSpUtils
+import com.molihuan.hlbmerge.dao.flutter.FlutterSpUtils
 import java.io.File
 
 object FlutterSpData {

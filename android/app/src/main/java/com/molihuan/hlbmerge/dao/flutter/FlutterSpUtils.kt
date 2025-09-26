@@ -1,4 +1,4 @@
-package com.molihuan.hlbmerge.utils
+package com.molihuan.hlbmerge.dao.flutter
 
 import android.app.Application
 import android.content.Context

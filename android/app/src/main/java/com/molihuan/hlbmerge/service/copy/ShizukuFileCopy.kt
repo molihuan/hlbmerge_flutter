@@ -1,9 +1,11 @@
-package com.molihuan.hlbmerge.service
+package com.molihuan.hlbmerge.service.copy
 
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
 import com.molihuan.hlbmerge.BuildConfig
+import com.molihuan.hlbmerge.service.IShizukuFileCopy
+import com.molihuan.hlbmerge.service.copy.ShizukuFileCopyUserService
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.withTimeout
@@ -83,5 +85,18 @@ class ShizukuFileCopy : BaseFileCopy {
     ) {
         val service = getService()
         service.copy(src, dest, includeRegex, excludeRegex)
+    }
+
+    override suspend fun zeroCopyFile(
+        src: String,
+        dest: String,
+        includeRegex: String?,
+        excludeRegex: String?,
+        progressCallback: ((current: Long, total: Long) -> Unit)?,
+        completeCallback: (() -> Unit)?,
+        errorCallback: ((e: Exception) -> Unit)?
+    ) {
+        val service = getService()
+        service.zeroCopy(src, dest, includeRegex, excludeRegex)
     }
 }

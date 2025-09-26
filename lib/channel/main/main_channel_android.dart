@@ -102,4 +102,31 @@ class MainChannelAndroid extends MainChannelInterface {
     }
     return returnError;
   }
+
+  @override
+  Future<Triple<int, String, Map?>> copyCacheAudioVideoFile(String sufPath) async {
+    final result = await _platform.invokeMethod("copyCacheAudioVideoFile", {"sufPath": sufPath});
+    print(result);
+    if (result is Map) {
+      final int code = result["code"];
+      final String msg = result["msg"];
+      final Map? data = result["data"];
+      return Triple(code, msg, data);
+    }
+    return returnError;
+  }
+
+  @override
+  Future<Triple<int, String, Map?>> copyCacheStructureFile() async {
+    final result = await _platform.invokeMethod("copyCacheStructureFile");
+    print(result);
+    if (result is Map) {
+      final int code = result["code"];
+      final String msg = result["msg"];
+      final Map? data = result["data"];
+      return Triple(code, msg, data);
+    }
+    return returnError;
+  }
+
 }

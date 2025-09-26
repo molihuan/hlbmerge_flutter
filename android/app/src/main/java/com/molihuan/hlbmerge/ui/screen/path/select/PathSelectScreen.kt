@@ -44,6 +44,7 @@ import com.molihuan.hlbmerge.R
 import com.molihuan.hlbmerge.channel.main.MainMethodChannel
 import com.molihuan.hlbmerge.ui.components.BackCenterTopAppBar
 import com.molihuan.hlbmerge.ui.theme.AndroidTheme
+import com.molihuan.hlbmerge.utils.ShizukuUtils
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.plugin.common.MethodChannel
 import rikka.shizuku.Shizuku
@@ -120,7 +121,7 @@ fun PathSelectScreen(
                     HasReadWritePermissionSection(
                         hasShizukuPermission = false,
                         grantShizukuPermission = {
-                            vm.requestShizukuPermission()
+                            ShizukuUtils.requestShizukuPermission()
                         },
                         showPermissionTips = state.showPermissionTips,
                         biliAppList = state.biliAppInfoList,
