@@ -253,7 +253,7 @@ class HomePage extends StatelessWidget {
     var searchTextField = Expanded(
         child: Container(
       child: TextField(
-        controller: TextEditingController(text: "你好"),
+        controller: TextEditingController(text: "还没做"),
         onChanged: (value) {},
         decoration: InputDecoration(
             labelText: '搜索',

@@ -1,3 +1,4 @@
 <resources>
     <string name="title_activity_android">AndroidActivity</string>
+    <string name="app_name">HLB站缓存合并</string>
 </resources>

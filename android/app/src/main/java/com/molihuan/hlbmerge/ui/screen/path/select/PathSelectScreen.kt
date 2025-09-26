@@ -97,11 +97,9 @@ fun PathSelectScreen(
                 .padding(padding)
         ) {
             when (state.functionState) {
-//            when (PathSelectFunctionState.HasReadWritePermission) {
                 PathSelectFunctionState.NoReadWritePermission -> {
                     NoPermissionSection(grantPermission = {
                         vm.grantReadWritePermission(activity)
-//                    vm.grantUriPermission(urlPermissionLauncher)
                     })
                 }
 

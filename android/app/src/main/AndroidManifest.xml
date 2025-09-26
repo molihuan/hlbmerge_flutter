@@ -33,7 +33,7 @@
         android:name=".App"
         android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="hlbmerge">
+        android:label="@string/app_name">
         <activity
             android:name=".AndroidActivity"
             android:exported="false"

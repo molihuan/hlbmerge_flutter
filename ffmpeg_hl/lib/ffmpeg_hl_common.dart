@@ -18,8 +18,24 @@ class FfmpegHlCommon extends FfmpegHlPlatform {
 
   @override
   Future<Pair<bool, String>> mergeVideos(
-      List<String> videoPaths, String outputPath) {
-    return super.mergeVideos(videoPaths, outputPath);
+      List<String> videoPaths, String outputPath) async {
+
+    final concatInput = videoPaths.join("|");
+
+    final List<String> cmds = [
+      '-i',
+      '"concat:$concatInput"',
+      '-c',
+      'copy',
+      outputPath // 无论路径是什么，都会被当作单一参数
+    ];
+    FFmpegSession session = await FFmpegKit.executeWithArguments(cmds);
+    final returnCode = await session.getReturnCode();
+    if (ReturnCode.isSuccess(returnCode)) {
+      return Future.value(Pair(true, "合并成功"));
+    } else {
+      return Future.value(Pair(false, "合并失败"));
+    }
   }
 
   @override

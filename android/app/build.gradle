@@ -27,6 +27,15 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
+//读取本地签名配置
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withReader("UTF-8") { reader ->
+        keystoreProperties.load(reader)
+    }
+}
+
 android {
     namespace = "com.molihuan.hlbmerge"
 //    compileSdk = flutter.compileSdkVersion
@@ -50,15 +59,61 @@ android {
         versionName = flutterVersionName
     }
 
+
+    android.applicationVariants.all { variant ->
+        // 我们只对 release 版本的构建进行重命名
+        if (variant.name == 'release') {
+            variant.outputs.all { output ->
+                // 获取版本号 (例如：1.0.0)
+                def versionName = variant.versionName
+
+                // 获取软件名 (可以硬编码，或从其他地方动态获取)
+                // rootProject.name 会获取 Flutter 项目的根目录名，是一个不错的选择
+                def appName = "HLB站缓存合并"
+
+                // 获取架构 (ABI) 名称
+                def abi = output.getFilter(com.android.build.OutputFile.ABI)
+
+                // 组合成新的文件名
+                // 如果 abi 为 null (例如在构建通用包时)，则不添加架构部分
+                def newApkName
+                if (abi != null) {
+                    newApkName = "${appName}_${abi}_${versionName}.apk"
+                } else {
+                    newApkName = "${appName}_universal_${versionName}.apk"
+                }
+
+                // 应用新的文件名
+                outputFileName = newApkName
+            }
+        }
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         debug {
+            signingConfig signingConfigs.release
             minifyEnabled false
             shrinkResources false
         }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+//            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 

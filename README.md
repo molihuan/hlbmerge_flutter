@@ -124,6 +124,8 @@ Hyper fast Audio and Video encoder
 - https://gitee.com/l2063610646/bilibili-convert
 - https://www.bilibili.com/video/BV1gv4y1M7yn/
 - https://github.com/sk3llo/ffmpeg_kit_flutter
+- https://github.com/RikkaApps/Shizuku
+- https://github.com/10miaomiao/bili-down-out
 
 教程或开源项目以及其依赖项目。
 
