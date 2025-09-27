@@ -2,6 +2,7 @@ package com.molihuan.hlbmerge.service.copy
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.molihuan.hlbmerge.App
 import com.molihuan.hlbmerge.utils.UriUtils
@@ -23,7 +24,12 @@ class DocumentFileCopy : BaseFileCopy {
     ) {
         val includePattern = includeRegex?.let { Regex(it) }
         val excludePattern = excludeRegex?.let { Regex(it) }
-        copyDocumentDir(context, src, dest, includePattern, excludePattern, false)
+        runCatching {
+            copyDocumentDir(context, src, dest, includePattern, excludePattern, false)
+            completeCallback?.invoke()
+        }.onFailure {
+            errorCallback?.invoke(Exception(it))
+        }
     }
 
     override suspend fun zeroCopyFile(
@@ -37,7 +43,12 @@ class DocumentFileCopy : BaseFileCopy {
     ) {
         val includePattern = includeRegex?.let { Regex(it) }
         val excludePattern = excludeRegex?.let { Regex(it) }
-        copyDocumentDir(context, src, dest, includePattern, excludePattern, true)
+        runCatching {
+            copyDocumentDir(context, src, dest, includePattern, excludePattern, true)
+            completeCallback?.invoke()
+        }.onFailure {
+            errorCallback?.invoke(Exception(it))
+        }
     }
 
     private fun copyDocumentDir(
@@ -56,10 +67,8 @@ class DocumentFileCopy : BaseFileCopy {
             Timber.d("未授权,无法copyDocumentDir")
             return
         }
-        val targetUri = Uri.parse(
-            existsPermission + uri.toString()
-                .replaceFirst(UriUtils.URI_PERMISSION_REQUEST_COMPLETE_PREFIX, "")
-        )
+        val targetUri = (existsPermission + uri.toString()
+            .replaceFirst(UriUtils.URI_PERMISSION_REQUEST_COMPLETE_PREFIX, "")).toUri()
 
         val pickedDir = DocumentFile.fromTreeUri(context, targetUri)
         if (pickedDir == null) {
