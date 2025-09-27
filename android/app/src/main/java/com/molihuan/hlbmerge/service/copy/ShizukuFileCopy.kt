@@ -5,7 +5,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import com.molihuan.hlbmerge.BuildConfig
 import com.molihuan.hlbmerge.service.IShizukuFileCopy
-import com.molihuan.hlbmerge.service.copy.ShizukuFileCopyUserService
+import com.molihuan.hlbmerge.service.IShizukuFileCopyCallback
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.withTimeout
@@ -59,7 +59,7 @@ class ShizukuFileCopy : BaseFileCopy {
     suspend fun getService(): IShizukuFileCopy {
         fileCopyService?.let { return it }
         bindService()
-        return withTimeout(10000) {
+        return withTimeout(8000) {
             mChannel.receive()
         }
     }
@@ -83,8 +83,29 @@ class ShizukuFileCopy : BaseFileCopy {
         completeCallback: (() -> Unit)?,
         errorCallback: ((e: Exception) -> Unit)?
     ) {
-        val service = getService()
-        service.copy(src, dest, includeRegex, excludeRegex)
+        runCatching {
+            val service = getService()
+            service.copy(
+                src,
+                dest,
+                includeRegex,
+                excludeRegex,
+                object : IShizukuFileCopyCallback.Stub() {
+                    override fun onProgress(current: Long, total: Long) {
+                        progressCallback?.invoke(current, total)
+                    }
+
+                    override fun onComplete() {
+                        completeCallback?.invoke()
+                    }
+
+                    override fun onError(message: String?) {
+                        errorCallback?.invoke(Exception(message))
+                    }
+                })
+        }.onFailure {
+            errorCallback?.invoke(Exception(it.message))
+        }
     }
 
     override suspend fun zeroCopyFile(
@@ -96,7 +117,28 @@ class ShizukuFileCopy : BaseFileCopy {
         completeCallback: (() -> Unit)?,
         errorCallback: ((e: Exception) -> Unit)?
     ) {
-        val service = getService()
-        service.zeroCopy(src, dest, includeRegex, excludeRegex)
+        runCatching {
+            val service = getService()
+            service.zeroCopy(
+                src,
+                dest,
+                includeRegex,
+                excludeRegex,
+                object : IShizukuFileCopyCallback.Stub() {
+                    override fun onProgress(current: Long, total: Long) {
+                        progressCallback?.invoke(current, total)
+                    }
+
+                    override fun onComplete() {
+                        completeCallback?.invoke()
+                    }
+
+                    override fun onError(message: String?) {
+                        errorCallback?.invoke(Exception(message))
+                    }
+                })
+        }.onFailure {
+            errorCallback?.invoke(Exception(it.message))
+        }
     }
 }

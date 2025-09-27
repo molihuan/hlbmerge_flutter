@@ -698,7 +698,7 @@ class HomePage extends StatelessWidget {
                                 onPressed: () {
                                   logic.mergeAudioVideoByCacheItem(
                                       cacheGroupIndex);
-                                  Get.snackbar("", "已添加任务,请前往进度页面查看");
+                                  Get.snackbar("提示", "已添加任务,请前往进度页面查看");
                                 },
                                 child: const Text("合并音视频"),
                               ),

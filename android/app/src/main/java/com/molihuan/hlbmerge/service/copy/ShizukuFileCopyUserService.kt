@@ -1,21 +1,39 @@
 package com.molihuan.hlbmerge.service.copy
 
 import com.molihuan.hlbmerge.service.IShizukuFileCopy
+import com.molihuan.hlbmerge.service.IShizukuFileCopyCallback
 import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.concurrent.Executors
 
 //被绑定的进程会在Shizuku权限下运行
 class ShizukuFileCopyUserService : IShizukuFileCopy.Stub() {
-    override fun copy(src: String?, dest: String?, includeRegex: String?, excludeRegex: String?) {
+
+    private val executor = Executors.newSingleThreadExecutor()
+    override fun copy(
+        src: String?,
+        dest: String?,
+        includeRegex: String?,
+        excludeRegex: String?,
+        cb: IShizukuFileCopyCallback?
+    ) {
         if (src == null || dest == null) return
         val includePattern = includeRegex?.let { Regex(it) }
         val excludePattern = excludeRegex?.let { Regex(it) }
         Timber.d("ShizukuFileCopyUserService: copy $src to $dest")
-        val srcFile = File(src)
-        val destFile = File(dest)
-        copy(srcFile, destFile, includePattern, excludePattern)
+
+        executor.execute {
+            try {
+                val srcFile = File(src)
+                val destFile = File(dest)
+                copy(srcFile, destFile, includePattern, excludePattern)
+                cb?.onComplete()
+            } catch (e: Exception) {
+                cb?.onError(e.message ?: "unknown error")
+            }
+        }
     }
 
     private fun copy(src: File, dest: File, include: Regex?, exclude: Regex?) {
@@ -32,7 +50,7 @@ class ShizukuFileCopyUserService : IShizukuFileCopy.Stub() {
                 copy(child, File(dest, child.name), include, exclude)
             }
         } else {
-            if (dest.exists()){
+            if (dest.exists()) {
                 dest.delete()
             }
             FileInputStream(src).use { input ->
@@ -54,15 +72,24 @@ class ShizukuFileCopyUserService : IShizukuFileCopy.Stub() {
         src: String?,
         dest: String?,
         includeRegex: String?,
-        excludeRegex: String?
+        excludeRegex: String?,
+        cb: IShizukuFileCopyCallback?
     ) {
         if (src == null || dest == null) return
         val includePattern = includeRegex?.let { Regex(it) }
         val excludePattern = excludeRegex?.let { Regex(it) }
 
-        val srcFile = File(src)
-        val destFile = File(dest)
-        zeroCopy(srcFile, destFile, includePattern, excludePattern)
+        executor.execute {
+            try {
+                val srcFile = File(src)
+                val destFile = File(dest)
+                zeroCopy(srcFile, destFile, includePattern, excludePattern)
+                cb?.onComplete()
+            } catch (e: Exception) {
+                cb?.onError(e.message ?: "unknown error")
+            }
+        }
+
     }
 
     private fun zeroCopy(src: File, dest: File, include: Regex?, exclude: Regex?) {
@@ -83,7 +110,7 @@ class ShizukuFileCopyUserService : IShizukuFileCopy.Stub() {
                 dest.parentFile?.mkdirs()
             }
             //先清理
-            if (dest.exists()){
+            if (dest.exists()) {
                 dest.delete()
             }
 

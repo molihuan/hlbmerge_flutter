@@ -148,13 +148,27 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
         val targetDir = FlutterSpData.cacheCopyTempPath
         runOnCoroutine {
             //复制缓存整体结构,m4s,blv文件只做0拷贝
-            fileCopy.zeroCopyFile(srcDir, targetDir, excludeRegex = ".*\\.(m4s|blv)$")
-            val returnMap = mapOf<String, Any?>(
-                "code" to 0,
-                "msg" to "ok",
-                "data" to null,
-            )
-            result.success(returnMap)
+            fileCopy.zeroCopyFile(
+                srcDir,
+                targetDir,
+                excludeRegex = ".*\\.(m4s|blv)$",
+                completeCallback = {
+                    val returnMap = mapOf<String, Any?>(
+                        "code" to 0,
+                        "msg" to "ok",
+                        "data" to null,
+                    )
+                    result.success(returnMap)
+                },
+                errorCallback = {
+                    val returnMap = mapOf<String, Any?>(
+                        "code" to -1,
+                        "msg" to "err",
+                        "data" to it.message,
+                    )
+                    result.success(returnMap)
+                })
+
         }
     }
 
@@ -196,13 +210,26 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
         Timber.d("copyCacheAudioVideoFile: $srcDir $targetDir")
         runOnCoroutine {
             //只复制m4s,blv文件
-            fileCopy.copyFile(srcDir, targetDir, includeRegex = ".*\\.(m4s|blv)$")
-            val returnMap = mapOf<String, Any?>(
-                "code" to 0,
-                "msg" to "ok",
-                "data" to null,
-            )
-            result.success(returnMap)
+            fileCopy.copyFile(
+                srcDir,
+                targetDir,
+                includeRegex = ".*\\.(m4s|blv)$",
+                completeCallback = {
+                    val returnMap = mapOf<String, Any?>(
+                        "code" to 0,
+                        "msg" to "ok",
+                        "data" to null,
+                    )
+                    result.success(returnMap)
+                },
+                errorCallback = {
+                    val returnMap = mapOf<String, Any?>(
+                        "code" to -1,
+                        "msg" to "err",
+                        "data" to it.message,
+                    )
+                    result.success(returnMap)
+                })
         }
     }
 

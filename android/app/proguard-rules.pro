@@ -8,3 +8,7 @@
 
 # 避免删除带注解的类
 -keepattributes *Annotation*
+# 避免Shizuku的服务接口不被混淆
+-keepclassmembers class com.molihuan.hlbmerge.service.copy.ShizukuFileCopyUserService {
+    public <init>(...);
+}

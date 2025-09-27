@@ -20,6 +20,7 @@ import '../../../service/ffmpeg/ffmpeg_task.dart';
 import '../../../utils/FileUtil.dart';
 import '../../../utils/PlatformUtils.dart';
 import '../../../utils/StrUtil.dart';
+import '../../uitools/DialogTool.dart';
 import 'state.dart';
 import 'package:path/path.dart' as path;
 
@@ -50,8 +51,11 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
       if (result.first == 0) {
         if (result.third == true) {
           state.hasPermission = true;
+          DialogTool.showLoading("正在读取缓存数据...");
           //拷贝缓存数据结构
           await MainChannel.copyCacheStructureFile();
+          print("关闭了读取弹窗");
+          DialogTool.hideLoading();
           finalParseCacheData();
         } else {
           state.hasPermission = false;
@@ -87,9 +91,10 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     if (dirPath.isEmpty) {
       return;
     }
+    DialogTool.showLoading("正在解析缓存数据...");
     _cacheDataManager.setCachePlatform(state.cachePlatform);
     List<CacheGroup>? cacheGroupList = _cacheDataManager.loadCacheData(dirPath);
-
+    DialogTool.hideLoading();
     if (cacheGroupList == null) {
       return;
     }
