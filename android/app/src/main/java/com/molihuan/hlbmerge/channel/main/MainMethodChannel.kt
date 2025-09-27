@@ -269,6 +269,7 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
                 ),
             )
             result.success(returnMap)
+            return
 
         } catch (e: Exception) {
             e.printStackTrace()
