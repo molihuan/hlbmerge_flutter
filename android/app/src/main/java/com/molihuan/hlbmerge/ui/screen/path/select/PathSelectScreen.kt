@@ -43,13 +43,11 @@ import com.molihuan.hlbmerge.NavRoute
 import com.molihuan.hlbmerge.R
 import com.molihuan.hlbmerge.channel.main.MainMethodChannel
 import com.molihuan.hlbmerge.ui.components.BackCenterTopAppBar
+import com.molihuan.hlbmerge.ui.screen.path.select.component.FolderChooserDialog
 import com.molihuan.hlbmerge.ui.theme.AndroidTheme
-import com.molihuan.hlbmerge.utils.FileUtils
-import com.molihuan.hlbmerge.utils.FileUtils.androidDataVulnerabilityPath
 import com.molihuan.hlbmerge.utils.ShizukuUtils
 import rikka.shizuku.Shizuku
 import timber.log.Timber
-import java.io.File
 
 
 @Composable
@@ -117,6 +115,10 @@ fun PathSelectScreen(
                                 urlPermissionLauncher = urlPermissionLauncher
                             )
                         },
+                        customInputPath = state.customInputPath,
+                        changeCustomPathCheck = {
+                            vm.changeCustomPathCheck(context = context, checked = it)
+                        },
                         modifier = Modifier.verticalScroll(rememberScrollState())
                     )
                 }
@@ -136,12 +138,29 @@ fun PathSelectScreen(
                                 urlPermissionLauncher = urlPermissionLauncher
                             )
                         },
+                        customInputPath = state.customInputPath,
+                        changeCustomPathCheck = {
+                            vm.changeCustomPathCheck(context = context, checked = it)
+                        },
                         modifier = Modifier.verticalScroll(rememberScrollState())
                     )
                 }
             }
         }
     }
+
+    //选择自定义输入路径对话框
+    if (state.showSelectCustomInputDialog) {
+        FolderChooserDialog(
+            onDirPathSelected = {
+                vm.onCustomInputDirPathSelected(context = context, path = it)
+            },
+            onDismiss = {
+                vm.changeShowSelectCustomInputDialog(false)
+            }
+        )
+    }
+
 }
 
 
@@ -158,6 +177,9 @@ private fun HasReadWritePermissionSection(
     hasShizukuPermission: Boolean = false,
     grantShizukuPermission: () -> Unit = {},
     showPermissionTips: Boolean = true,
+    //自定义输入路径
+    customInputPath: String? = null,
+    changeCustomPathCheck: (status: Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Box(modifier) {
@@ -189,62 +211,152 @@ private fun HasReadWritePermissionSection(
 
             //biliApp列表
             biliAppList.forEachIndexed { index, info ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                AppInfoItem(info = info, switchCheckedChange = {
+                    readSwitchChange(index, it)
+                })
+            }
+
+            //自定义路径
+            CustomInputPathSection(
+                checked = !customInputPath.isNullOrBlank(),
+                path = customInputPath,
+                switchCheckedChange = {
+                    changeCustomPathCheck(it)
+                }
+            )
+
+
+        }
+    }
+}
+
+//自定义路径
+@Composable
+private fun CustomInputPathSection(
+    //是否启用
+    checked: Boolean = false,
+    //自定义路径
+    path: String? = "Android/data",
+    switchCheckedChange: (status: Boolean) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    Box(modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .padding(5.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .fillMaxWidth()
+                .background(Color.Blue.copy(alpha = if (checked) 0.1f else 0.05f))
+                .padding(10.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.alpha(if (checked) 1f else 0.4f)
+            ) {
+
+                Column(
+                    verticalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier
-                        .alpha(if (info.isInstall) 1f else 0.5f)
-                        .padding(5.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .fillMaxWidth()
-                        .background(Color.Blue.copy(alpha = 0.1f))
-                        .padding(10.dp)
+                        .padding(start = 10.dp)
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Image(
-                            painter = painterResource(id = info.icon),
-                            contentDescription = null,
-                            modifier = Modifier.size(50.dp)
+                        Text(
+                            text = "自定义路径:",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
-                        Column(
-                            verticalArrangement = Arrangement.SpaceAround,
-                            modifier = Modifier
-                                .padding(start = 10.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = info.name,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                if (!info.isInstall) {
-                                    Text(
-                                        text = "未安装",
-                                        fontSize = 15.sp,
-                                        color = Color.Red,
-                                        modifier = Modifier.padding(start = 10.dp)
-                                    )
-                                }
-                            }
-                            Text(text = info.packageName, fontSize = 12.sp)
-                        }
                     }
 
-                    if (info.isInstall) {
-                        Switch(checked = info.check, onCheckedChange = {
-                            readSwitchChange(index, it)
-                        })
-                    } else {
-                        Switch(checked = false, onCheckedChange = null)
+                    if (!path.isNullOrBlank()) {
+                        Text(
+                            text = path,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
-
                 }
             }
 
+            Switch(checked = checked, onCheckedChange = {
+                switchCheckedChange(it)
+            })
+
+        }
+    }
+}
+
+
+@Composable
+private fun AppInfoItem(
+    info: BiliAppInfo = BiliAppInfo(
+        "哔哩哔哩",
+        "tv.danmaku.bili",
+        R.mipmap.ico_bilibili
+    ),
+    switchCheckedChange: (status: Boolean) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    Box(modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .alpha(if (info.isInstall) 1f else 0.5f)
+                .padding(5.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .fillMaxWidth()
+                .background(Color.Blue.copy(alpha = 0.1f))
+                .padding(10.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+
+                info.icon?.let {
+                    Image(
+                        painter = painterResource(id = info.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(50.dp)
+                    )
+                }
+
+                Column(
+                    verticalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = info.name,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        if (!info.isInstall) {
+                            Text(
+                                text = "未安装",
+                                fontSize = 15.sp,
+                                color = Color.Red,
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
+                        }
+                    }
+                    Text(text = info.packageName, fontSize = 12.sp)
+                }
+            }
+
+            if (info.isInstall) {
+                Switch(checked = info.check, onCheckedChange = {
+                    switchCheckedChange(it)
+                })
+            } else {
+                Switch(checked = false, onCheckedChange = null)
+            }
 
         }
     }

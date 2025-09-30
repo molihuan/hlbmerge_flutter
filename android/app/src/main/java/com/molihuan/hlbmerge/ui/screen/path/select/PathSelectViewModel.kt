@@ -1,5 +1,6 @@
 package com.molihuan.hlbmerge.ui.screen.path.select
 
+import android.R.attr.path
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -56,13 +57,17 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
             ShizukuFileCopy().zeroCopyFile(srcDir, targetDir, excludeRegex = ".*\\.(m4s|blv)$")
             //只复制m4s,blv文件
 //            ShizukuFileCopy().copyFile(srcDir, targetDir, includeRegex = ".*\\.(m4s|blv)$")
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 ToastTool.toast("读取缓存完成")
             }
         }
     }
+
     fun init(context: Context) {
         //test()
+
+        val androidInputCachePackageName = FlutterSpData.getAndroidInputCachePackageName()
+
         val biliAppInfoList: List<BiliAppInfo> = listOf(
             BiliAppInfo(
                 "哔哩哔哩",
@@ -90,12 +95,19 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                 R.mipmap.ic_bilimiao_33
             ),
         ).map { item ->
-            val androidInputCachePackageName = FlutterSpData.getAndroidInputCachePackageName()
             val isInstall = AppTool.isAppInstall(item.packageName)
             item.copy(
                 check = isInstall && (item.packageName == androidInputCachePackageName),
                 isInstall = isInstall,
             )
+        }
+
+        if (androidInputCachePackageName == context.packageName){
+            //自定义输入缓存目录
+            val inputPath = FlutterSpData.getInputCacheDirPath()
+            _uiState.update {
+                it.copy( customInputPath = inputPath)
+            }
         }
 
         val grantedPermission = XXPermissions.isGrantedPermission(
@@ -218,15 +230,16 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                 PathSelectFunctionState.HasReadWritePermission -> {
                     //判断Android/data是否有读权限
                     val accessAndroidData = FileUtils.canAccessAndroidData()
-                    if (accessAndroidData){
+                    if (accessAndroidData) {
                         if (isAndroid11) {
                             //设置漏洞路径
-                            val vulnerabilityPath = "${FileUtils.androidDataVulnerabilityPath}/${appInfo.packageName}/download"
+                            val vulnerabilityPath =
+                                "${FileUtils.androidDataVulnerabilityPath}/${appInfo.packageName}/download"
                             FlutterSpData.setInputCacheDirPath(vulnerabilityPath)
                             FlutterSpData.setAndroidInputCachePackageName(appInfo.packageName)
                             FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
                             return@run
-                        }else{
+                        } else {
                             //小于安卓11直接设置Android/data路径即可,可用直接读写
                             FlutterSpData.setInputCacheDirPath(uriPath)
                             FlutterSpData.setAndroidInputCachePackageName(appInfo.packageName)
@@ -281,10 +294,54 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
             }
         }
         _uiState.update {
-            it.copy(biliAppInfoList = biliAppInfoList)
+            it.copy(biliAppInfoList = biliAppInfoList, customInputPath = null)
         }
     }
 
+
+    //自定义路径check
+    fun changeCustomPathCheck(context: Context, checked: Boolean) {
+        if (checked) {
+            //将默认路径清除
+            changeShowSelectCustomInputDialog(true)
+        } else {
+            FlutterSpData.setInputCacheDirPath("")
+            FlutterSpData.setAndroidInputCachePackageName("")
+            FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.NoReadWritePermission)
+        }
+    }
+
+    fun onCustomInputDirPathSelected(context: Context, path: String) {
+        //将预定义的选项取消
+        val state = _uiState.value
+        val appInfoList = state.biliAppInfoList.toMutableList()
+        val newAppInfoList = appInfoList.map {
+            if (it.check) {
+                it.copy(check = false)
+            } else {
+                it
+            }
+        }
+        _uiState.update {
+            it.copy(biliAppInfoList = newAppInfoList, customInputPath = path)
+        }
+        //删除拷贝的缓存结构文件
+        FileTool.deleteAllFiles(FlutterSpData.cacheCopyTempPath)
+
+
+        Timber.d("选择的自定义路径: $path")
+        FlutterSpData.setInputCacheDirPath(path)
+        FlutterSpData.setAndroidInputCachePackageName(context.packageName)
+        FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+        changeShowSelectCustomInputDialog(false)
+    }
+
+    //改变选择自定义路径弹窗显示
+    fun changeShowSelectCustomInputDialog(show: Boolean) {
+        _uiState.update {
+            it.copy(showSelectCustomInputDialog = show)
+        }
+    }
 
 
     // Shizuku权限回调
@@ -343,7 +400,7 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
 }
 
 data class PathSelectUiState(
-    val functionState: PathSelectFunctionState = PathSelectFunctionState.NoReadWritePermission,
+    val functionState: PathSelectFunctionState = PathSelectFunctionState.HasReadWritePermission,
     val biliAppInfoList: List<BiliAppInfo> = listOf(
         BiliAppInfo(
             "哔哩哔哩",
@@ -353,6 +410,10 @@ data class PathSelectUiState(
     ),
     val shizukuPermissionStatus: Int = PackageManager.PERMISSION_DENIED,
     val showPermissionTips: Boolean = true,
+    //自定义路径,null表示没有自定义
+    val customInputPath: String? = null,
+    //是否显示选择自定义路径弹窗
+    val showSelectCustomInputDialog: Boolean = false,
 )
 
 sealed class PathSelectFunctionState(val title: String) {
@@ -374,7 +435,7 @@ data class BiliAppInfo(
     val name: String,
     val packageName: String,
     @DrawableRes
-    val icon: Int,
+    val icon: Int? = null,
     val isInstall: Boolean = false,
     val check: Boolean = false,
 )
