@@ -18,8 +18,9 @@
 ## 特性
 
 - [x] 合并(导出)B站缓存(有声音视频，仅音频)
-- [x] 支持B站Android客户端缓存
+- [x] 支持B站Android客户端缓存(国内版本、概念版、谷歌版、HD版)
 - [x] 支持B站Windows客户端缓存
+- [x] 支持第三方B站客户端(bilimiao)
 
 ## 前言
 
@@ -127,6 +128,7 @@ Hyper fast Audio and Video encoder
 - https://github.com/sk3llo/ffmpeg_kit_flutter
 - https://github.com/RikkaApps/Shizuku
 - https://github.com/10miaomiao/bili-down-out
+- https://zhuanlan.zhihu.com/p/704594199
 
 教程或开源项目以及其依赖项目。
 
