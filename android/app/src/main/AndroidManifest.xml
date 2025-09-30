@@ -25,6 +25,8 @@
         <package android:name="com.bilibili.app.blue" />
         <!-- 谷歌版 -->
         <package android:name="com.bilibili.app.in" />
+        <!-- bilimiao -->
+        <package android:name="com.a10miaomiao.bilimiao" />
         <!-- shizuku -->
         <package android:name="moe.shizuku.privileged.api" />
     </queries>

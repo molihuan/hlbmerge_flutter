@@ -140,8 +140,8 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
         }
         if (fileCopy == null) {
             val returnMap = mapOf<String, Any?>(
-                "code" to -1,
-                "msg" to "err:fileCopy == null",
+                "code" to 0,
+                "msg" to "ok",
                 "data" to null,
             )
             result.success(returnMap)
@@ -149,6 +149,15 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
         }
 
         val inputCachePackageName = FlutterSpData.getAndroidInputCachePackageName()
+        if (inputCachePackageName.isNullOrBlank()){
+            val returnMap = mapOf<String, Any?>(
+                "code" to -1,
+                "msg" to "err:inputCachePackageName is null or blank",
+                "data" to null,
+            )
+            result.success(returnMap)
+            return
+        }
 
         val srcDir = "${FileUtils.androidDataPath}/${inputCachePackageName}/download"
         val targetDir = FlutterSpData.cacheCopyTempPath
@@ -207,8 +216,8 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
         }
         if (fileCopy == null) {
             val returnMap = mapOf<String, Any?>(
-                "code" to -1,
-                "msg" to "err:fileCopy == null",
+                "code" to 0,
+                "msg" to "ok",
                 "data" to null,
             )
             result.success(returnMap)

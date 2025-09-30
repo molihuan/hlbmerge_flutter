@@ -45,6 +45,7 @@ import com.molihuan.hlbmerge.channel.main.MainMethodChannel
 import com.molihuan.hlbmerge.ui.components.BackCenterTopAppBar
 import com.molihuan.hlbmerge.ui.theme.AndroidTheme
 import com.molihuan.hlbmerge.utils.FileUtils
+import com.molihuan.hlbmerge.utils.FileUtils.androidDataVulnerabilityPath
 import com.molihuan.hlbmerge.utils.ShizukuUtils
 import rikka.shizuku.Shizuku
 import timber.log.Timber
@@ -183,8 +184,6 @@ private fun HasReadWritePermissionSection(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable {
-                        val canAccessAndroidData = FileUtils.canAccessAndroidData()
-                        Timber.d("canAccessAndroidData: $canAccessAndroidData")
                     })
             }
 

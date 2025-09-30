@@ -35,16 +35,24 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   void refreshCacheData() async {
     state.inputCacheDirPath =
         await SpDataManager.getInputCacheDirPathByReload() ?? "";
-    if (state.inputCacheDirPath.isEmpty) {
-      //清空列表
-      state.cacheGroupList = [];
-      Get.snackbar("提示", "你还没有设置'输入缓存项',请在设置页面设置'输入缓存项'");
-    }
+
 
     runPlatformFunc(onDefault: () {
+      if (state.inputCacheDirPath.isEmpty) {
+        //清空列表
+        state.cacheGroupList = [];
+        Get.snackbar("提示", "你还没有设置缓存路径,请先设置");
+        return;
+      }
       state.hasPermission = true;
       finalParseCacheData();
     }, onAndroid: () async {
+      if (state.inputCacheDirPath.isEmpty) {
+        //清空列表
+        state.cacheGroupList = [];
+        Get.snackbar("提示", "你还没有设置'输入缓存项',请在设置页面设置'输入缓存项'");
+        return;
+      }
       //判断是否有读写权限
       var result = await MainChannel.hasReadWritePermission();
       print("安卓权限判断结果:${result}");
@@ -53,10 +61,16 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
           state.hasPermission = true;
           DialogTool.showLoading(message: "正在读取缓存数据...");
           //拷贝缓存数据结构
-          await MainChannel.copyCacheStructureFile();
+          var copyResult = await MainChannel.copyCacheStructureFile();
           DialogTool.hideLoading();
-          print("关闭了读取弹窗");
-          finalParseCacheData();
+
+          if (copyResult.first == 0) {
+            //拷贝成功
+            finalParseCacheData();
+          } else {
+            //拷贝失败
+            Get.snackbar("提示", "copy structure err:${copyResult.second}");
+          }
         } else {
           state.hasPermission = false;
         }
@@ -95,11 +109,14 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     List<CacheGroup>? cacheGroupList = _cacheDataManager.loadCacheData(dirPath);
     DialogTool.hideLoading();
     if (cacheGroupList == null) {
+      Get.snackbar("提示", "没有解析到缓存数据");
+      state.cacheGroupList = [];
       return;
     }
 
     state.cacheGroupList = cacheGroupList;
     // print(cacheGroupList);
+    Get.snackbar("提示", "解析缓存数据成功");
   }
 
   void exportFileByCacheGroup(FileFormat fileType) {

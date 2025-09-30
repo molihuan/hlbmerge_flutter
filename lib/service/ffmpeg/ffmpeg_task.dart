@@ -69,7 +69,13 @@ class FFmpegTaskController extends GetxController {
     task.status.value = FFmpegTaskStatus.running;
     _runningCount++;
 
-    await _runFFmpegTaskBefore(task);
+    var beforeResult = await _runFFmpegTaskBefore(task);
+    if (!beforeResult) {
+      task.status.value = FFmpegTaskStatus.failed;
+      _runningCount--;
+      _schedule();
+      return;
+    }
     // 执行
     _runFFmpegTask(task).then((_) {
       task.status.value = FFmpegTaskStatus.completed;
@@ -96,17 +102,24 @@ class FFmpegTaskController extends GetxController {
 
         });
   }
-  Future<void> _runFFmpegTaskBefore(FFmpegTaskBean task) async {
-    await runPlatformFunc(
-        onDefault: () {},
+  Future<bool> _runFFmpegTaskBefore(FFmpegTaskBean task) async {
+    return await runPlatformFunc(
+        onDefault: () {
+          return Future.value(true);
+        },
         onAndroid: () async {
           var copyTempDirPath = SpDataManager.getInputCacheDirPath() ?? "";
           var sufPath = task.cacheItem.path?.replaceFirst(copyTempDirPath, "");
           if (sufPath == null){
-            return;
+            return Future.value(false);
           }
-          //拷贝缓存数据结构
-          await MainChannel.copyCacheAudioVideoFile(sufPath);
+          //拷贝缓存数据
+          var copyResult = await MainChannel.copyCacheAudioVideoFile(sufPath);
+          if(copyResult.first == 0){
+            return Future.value(true);
+          }else{
+            return Future.value(false);
+          }
         });
   }
 

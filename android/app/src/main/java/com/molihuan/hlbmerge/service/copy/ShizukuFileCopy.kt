@@ -59,7 +59,7 @@ class ShizukuFileCopy : BaseFileCopy {
     suspend fun getService(): IShizukuFileCopy {
         fileCopyService?.let { return it }
         bindService()
-        return withTimeout(8000) {
+        return withTimeout(6000) {
             mChannel.receive()
         }
     }

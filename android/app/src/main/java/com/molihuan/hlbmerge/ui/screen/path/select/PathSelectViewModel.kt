@@ -15,6 +15,7 @@ import com.hjq.permissions.XXPermissions
 import com.hjq.permissions.permission.PermissionLists
 import com.hjq.permissions.permission.base.IPermission
 import com.molihuan.commonmodule.tool.AppTool
+import com.molihuan.commonmodule.tool.FileTool
 import com.molihuan.commonmodule.tool.ToastTool
 import com.molihuan.hlbmerge.App
 import com.molihuan.hlbmerge.R
@@ -83,11 +84,16 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                 "tv.danmaku.bilibilihd",
                 R.mipmap.ico_bilibili
             ),
+            BiliAppInfo(
+                "bilimiao",
+                "com.a10miaomiao.bilimiao",
+                R.mipmap.ic_bilimiao_33
+            ),
         ).map { item ->
             val androidInputCachePackageName = FlutterSpData.getAndroidInputCachePackageName()
             val isInstall = AppTool.isAppInstall(item.packageName)
             item.copy(
-                check = isInstall && item.packageName == androidInputCachePackageName,
+                check = isInstall && (item.packageName == androidInputCachePackageName),
                 isInstall = isInstall,
             )
         }
@@ -161,6 +167,8 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                         FlutterSpData.setInputCacheDirPath(permissionInfo.first)
                         FlutterSpData.setAndroidInputCachePackageName(permissionInfo.second)
                         FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+                        //删除拷贝的缓存结构文件
+                        FileTool.deleteAllFiles(permissionInfo.first)
                         val state = _uiState.value
                         val biliAppInfoList = state.biliAppInfoList.toMutableList().map {
                             if (it.packageName == permissionInfo.second) {
@@ -243,6 +251,8 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                         FlutterSpData.setInputCacheDirPath(inputCacheDirPath)
                         FlutterSpData.setAndroidInputCachePackageName(appInfo.packageName)
                         FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+                        //删除拷贝的缓存结构文件
+                        FileTool.deleteAllFiles(inputCacheDirPath)
                     } else {
                         currGrantUriPermissionInfo = Pair(inputCacheDirPath, appInfo.packageName)
                         return
@@ -254,6 +264,8 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                     FlutterSpData.setInputCacheDirPath(FlutterSpData.cacheCopyTempPath)
                     FlutterSpData.setAndroidInputCachePackageName(appInfo.packageName)
                     FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWriteShizukuPermission)
+                    //删除拷贝的缓存结构文件
+                    FileTool.deleteAllFiles(FlutterSpData.cacheCopyTempPath)
                 }
 
                 else -> {}

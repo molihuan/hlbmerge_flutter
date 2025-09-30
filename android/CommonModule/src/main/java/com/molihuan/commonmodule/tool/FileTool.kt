@@ -37,6 +37,31 @@ object FileTool {
         return true
     }
 
+    //删除指定路径下的所有文件包括文件夹
+    @JvmStatic
+    fun deleteAllFiles(filePath: String): Boolean {
+        val file = File(filePath)
+        if (!file.exists()) {
+            return false
+        }
+
+        return try {
+            if (file.isFile) {
+                file.delete()
+            } else {
+                // 递归删除子文件和文件夹
+                file.listFiles()?.forEach { child ->
+                    deleteAllFiles(child.absolutePath)
+                }
+                // 删除空文件夹本身
+                file.delete()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
     @JvmStatic
     fun shareFile(context: Context, filePath: String): Boolean {
         val file = File(filePath)
