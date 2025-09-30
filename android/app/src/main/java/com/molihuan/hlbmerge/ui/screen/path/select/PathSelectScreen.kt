@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,17 +39,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.molihuan.hlbmerge.MainActivity
 import com.molihuan.hlbmerge.NavRoute
 import com.molihuan.hlbmerge.R
 import com.molihuan.hlbmerge.channel.main.MainMethodChannel
 import com.molihuan.hlbmerge.ui.components.BackCenterTopAppBar
 import com.molihuan.hlbmerge.ui.theme.AndroidTheme
+import com.molihuan.hlbmerge.utils.FileUtils
 import com.molihuan.hlbmerge.utils.ShizukuUtils
-import io.flutter.embedding.engine.FlutterEngineCache
-import io.flutter.plugin.common.MethodChannel
 import rikka.shizuku.Shizuku
 import timber.log.Timber
+import java.io.File
+
 
 @Composable
 fun PathSelectScreen(
@@ -109,7 +110,11 @@ fun PathSelectScreen(
                         biliAppList = state.biliAppInfoList,
                         showPermissionTips = state.showPermissionTips,
                         readSwitchChange = { index, status ->
-                            vm.changeBiliAppInfoCheck(index, check = status,urlPermissionLauncher = urlPermissionLauncher)
+                            vm.changeBiliAppInfoCheck(
+                                index,
+                                check = status,
+                                urlPermissionLauncher = urlPermissionLauncher
+                            )
                         },
                         modifier = Modifier.verticalScroll(rememberScrollState())
                     )
@@ -124,7 +129,11 @@ fun PathSelectScreen(
                         showPermissionTips = state.showPermissionTips,
                         biliAppList = state.biliAppInfoList,
                         readSwitchChange = { index, status ->
-                            vm.changeBiliAppInfoCheck(index, check = status,urlPermissionLauncher = urlPermissionLauncher)
+                            vm.changeBiliAppInfoCheck(
+                                index,
+                                check = status,
+                                urlPermissionLauncher = urlPermissionLauncher
+                            )
                         },
                         modifier = Modifier.verticalScroll(rememberScrollState())
                     )
@@ -169,7 +178,14 @@ private fun HasReadWritePermissionSection(
                     .padding(horizontal = 10.dp, vertical = 10.dp)
             ) {
                 Text("Bilibili版本", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                Text("是否读取", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "是否读取",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.clickable {
+                        val canAccessAndroidData = FileUtils.canAccessAndroidData()
+                        Timber.d("canAccessAndroidData: $canAccessAndroidData")
+                    })
             }
 
             //biliApp列表

@@ -8,18 +8,18 @@
 [![license: Apache-2.0 (shields.io)](https://img.shields.io/badge/license-Apache--2.0-brightgreen)](https://github.com/molihuan/mlhfileselectorlib/blob/master/LICENSE)[![Star](https://img.shields.io/github/stars/molihuan/hlbmerge_flutter.svg)](https://github.com/molihuan/hlbmerge_flutter)[![bilibili: 玲莫利 (shields.io)](https://img.shields.io/badge/bilibili-玲莫利-orange)](https://space.bilibili.com/454222981)[![CSDN: molihuan (shields.io)](https://img.shields.io/badge/CSDN-molihuan-blue)](https://blog.csdn.net/molihuan)
 
 <h3 align="center">提供Bilibili缓存视频合并的工具</h3>
-<p align="center">将Bilibili缓存文件合并导出为MP4，支持windows、mac、linux，支持B站手机客户端缓存，支持B站电脑客户端缓存</p>
-<p align="center">Merge and export Bilibili cache files into MP4, support caching on B-station mobile client and B-station computer client</p>
+<p align="center">将Bilibili缓存文件合并导出为MP4，支持Android、windows(10以上)、linux、mac、ios，支持B站Android客户端缓存，支持B站Windows客户端缓存</p>
+<p align="center">Combine and export Bilibili cache files as MP4, support Android, Windows, Linux, Mac, iOS, support Bilibili Android client cache, support Bilibili Windows client cache</p>
 
 ## 说明
 
-此软件是为了帮助网友合并哔哩哔哩缓存视频，将bilibili缓存视频合并导出为mp4，支持windows、mac、linux，你可以将它理解为一个专用的格式工厂，并不涉及破解相关内容，仅仅用于学习技术交流，严禁用于商业用途，如有侵权请联系我删库，对你带来困惑和不便我深感抱歉。
+此软件是为了帮助网友合并哔哩哔哩缓存视频，将bilibili缓存视频合并导出为mp4，支持Android、windows、linux、mac、ios，你可以将它理解为一个专用的格式工厂，并不涉及破解相关内容，仅仅用于学习技术交流，严禁用于商业用途，如有侵权请联系我删库，由此给你带来困惑和不便我深感抱歉。
 
 ## 特性
 
 - [x] 合并(导出)B站缓存(有声音视频，仅音频)
-- [x] 支持B站手机客户端缓存
-- [x] 支持B站电脑客户端缓存
+- [x] 支持B站Android客户端缓存
+- [x] 支持B站Windows客户端缓存
 
 ## 前言
 
@@ -65,6 +65,7 @@ Windows：使用Win 10打包，你的系统版本低不保证可用，如有问�
 视频链接：(选填，如果视频已经下架则把本地缓存文件打包压缩发我邮箱)
 
 ## 源码编译事项
+目前使用的是的鸿蒙flutter3.22这个比较稳定的版本
 
 ```sh
 # 创建项目
@@ -86,7 +87,7 @@ flutter build apk --release
 flutter build apk --release --split-per-abi
 
 ```
-Windows配置
+Windows ffmpeg配置
 ```sh
 ffmpeg version 4.3.1 Copyright (c) 2000-2020 the FFmpeg developers
   built with gcc 10.2.1 (GCC) 20200726
@@ -102,7 +103,7 @@ ffmpeg version 4.3.1 Copyright (c) 2000-2020 the FFmpeg developers
 Hyper fast Audio and Video encoder
 usage: ffmpeg [options] [[infile options] -i infile]... {[outfile options] outfile}
 ```
-Linux配置
+Linux ffmpeg配置
 ```sh
 ffmpeg version 4.3.1 Copyright (c) 2000-2020 the FFmpeg developers
   built with gcc 9.3.0 (crosstool-NG 1.24.0.133_b0863d8_dirty)

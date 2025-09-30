@@ -208,12 +208,23 @@ class PathSelectViewModel @Inject constructor() : ViewModel() {
                 }
 
                 PathSelectFunctionState.HasReadWritePermission -> {
-                    if (!isAndroid11) {
-                        //小于安卓11直接设置Android/data路径即可,可用直接读写
-                        FlutterSpData.setInputCacheDirPath(uriPath)
-                        FlutterSpData.setAndroidInputCachePackageName(appInfo.packageName)
-                        FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
-                        return@run
+                    //判断Android/data是否有读权限
+                    val accessAndroidData = FileUtils.canAccessAndroidData()
+                    if (accessAndroidData){
+                        if (isAndroid11) {
+                            //设置漏洞路径
+                            val vulnerabilityPath = "${FileUtils.androidDataVulnerabilityPath}/${appInfo.packageName}/download"
+                            FlutterSpData.setInputCacheDirPath(vulnerabilityPath)
+                            FlutterSpData.setAndroidInputCachePackageName(appInfo.packageName)
+                            FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+                            return@run
+                        }else{
+                            //小于安卓11直接设置Android/data路径即可,可用直接读写
+                            FlutterSpData.setInputCacheDirPath(uriPath)
+                            FlutterSpData.setAndroidInputCachePackageName(appInfo.packageName)
+                            FlutterSpData.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+                            return@run
+                        }
                     }
 
                     if (isAndroid14) {

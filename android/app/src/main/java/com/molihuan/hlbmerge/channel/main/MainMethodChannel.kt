@@ -139,6 +139,12 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
             }
         }
         if (fileCopy == null) {
+            val returnMap = mapOf<String, Any?>(
+                "code" to -1,
+                "msg" to "err:fileCopy == null",
+                "data" to null,
+            )
+            result.success(returnMap)
             return
         }
 
@@ -163,8 +169,8 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
                 errorCallback = {
                     val returnMap = mapOf<String, Any?>(
                         "code" to -1,
-                        "msg" to "err",
-                        "data" to it.message,
+                        "msg" to "err:${it.message}",
+                        "data" to null,
                     )
                     result.success(returnMap)
                 })
@@ -200,6 +206,12 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
             }
         }
         if (fileCopy == null) {
+            val returnMap = mapOf<String, Any?>(
+                "code" to -1,
+                "msg" to "err:fileCopy == null",
+                "data" to null,
+            )
+            result.success(returnMap)
             return
         }
 
@@ -225,8 +237,8 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
                 errorCallback = {
                     val returnMap = mapOf<String, Any?>(
                         "code" to -1,
-                        "msg" to "err",
-                        "data" to it.message,
+                        "msg" to "err:${it.message}",
+                        "data" to null,
                     )
                     result.success(returnMap)
                 })

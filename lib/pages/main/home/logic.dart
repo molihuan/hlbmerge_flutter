@@ -51,18 +51,17 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
       if (result.first == 0) {
         if (result.third == true) {
           state.hasPermission = true;
-          DialogTool.showLoading("正在读取缓存数据...");
+          DialogTool.showLoading(message: "正在读取缓存数据...");
           //拷贝缓存数据结构
           await MainChannel.copyCacheStructureFile();
-          print("关闭了读取弹窗");
           DialogTool.hideLoading();
+          print("关闭了读取弹窗");
           finalParseCacheData();
         } else {
           state.hasPermission = false;
         }
       }
     });
-
   }
 
   // 解析缓存数据,带权限判断
@@ -91,7 +90,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     if (dirPath.isEmpty) {
       return;
     }
-    DialogTool.showLoading("正在解析缓存数据...");
+    DialogTool.showLoading(message: "正在解析缓存数据...");
     _cacheDataManager.setCachePlatform(state.cachePlatform);
     List<CacheGroup>? cacheGroupList = _cacheDataManager.loadCacheData(dirPath);
     DialogTool.hideLoading();
@@ -403,21 +402,19 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
-    runPlatformFunc(
-        onDefault: () {
-          //暂时不需要
-        },
-        onAndroid: () {
-          _nativePageEventSubscription =
-              MainChannel.onNativePageEvent.listen((event) {
-            switch (event.first) {
-              case NativePageEventType.onReturnFlutterPageFromNativePage:
-                //刷新一下
-                refreshCacheData();
-                break;
-            }
-          });
-        });
+    runPlatformFunc(onDefault: () {
+      //暂时不需要
+    }, onAndroid: () {
+      _nativePageEventSubscription =
+          MainChannel.onNativePageEvent.listen((event) {
+        switch (event.first) {
+          case NativePageEventType.onReturnFlutterPageFromNativePage:
+            //刷新一下
+            refreshCacheData();
+            break;
+        }
+      });
+    });
   }
 
   @override
