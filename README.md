@@ -39,7 +39,7 @@
 - 输出目录不能有空格或特殊字符
 - 它不依赖网络这个不确定的因素，它只依赖本地缓存文件，只要本地有缓存文件，那么它就可以工作(即使视频已经下架)，需要和官方APP（手机版/电脑版均可）配合使用，官方APP进行缓存，它操作缓存文件进行合并导出mp4
 
-## 下载链接：[跳转](https://gitee.com/molihuan/hlbmerge_flutter/releases) 
+## 下载链接：[跳转](https://gitcode.com/bigmolihuan/hlbmerge_flutter/releases) 
 
 > 为了照顾国内网友,现在releases安装包仅在国内镜像仓库上传,望理解。
 
