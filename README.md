@@ -39,13 +39,17 @@
 - 输出目录不能有空格或特殊字符
 - 它不依赖网络这个不确定的因素，它只依赖本地缓存文件，只要本地有缓存文件，那么它就可以工作(即使视频已经下架)，需要和官方APP（手机版/电脑版均可）配合使用，官方APP进行缓存，它操作缓存文件进行合并导出mp4
 
-## 下载链接：[跳转](https://github.com/molihuan/hlbmerge_flutter/releases)
+## 下载链接：[跳转](https://gitee.com/molihuan/hlbmerge_flutter/releases) 
+
+> 为了照顾国内网友,现在releases安装包仅在国内镜像仓库上传,望理解。
 
 Linux版本：使用ubuntu-22.04.2-amd64打包，你的系统版本低不保证可用，如有问题请下载源码自行打包
 
 Mac版本：使用macOS ventura 13.4.1版本打包，你的系统版本低不保证可用，如有问题请下载源码自行打包
 
 Windows：使用Win 10打包，你的系统版本低不保证可用，如有问题请下载源码自行打包
+
+## 使用教程：[跳转](https://github.com/molihuan/hlbmerge_flutter/blob/master/res/tutorial) 
 
 ## 问题反馈
 
@@ -132,7 +136,7 @@ Hyper fast Audio and Video encoder
 
 教程或开源项目以及其依赖项目。
 
-## LICENSE
+## [LICENSE](./LICENSE)
 
 ```
 Copyright [2025] molihuan
@@ -149,5 +153,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
-
