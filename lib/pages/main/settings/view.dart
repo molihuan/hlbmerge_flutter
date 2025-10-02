@@ -42,6 +42,12 @@ class SettingsPage extends StatelessWidget {
                   logic.testFunc();
                 },
               ),
+              ListTile(
+                title: const Text("关于&教程"),
+                onTap: () async {
+                  logic.goAboutPage();
+                },
+              ),
             ],
           ))
         ],

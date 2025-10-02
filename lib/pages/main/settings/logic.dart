@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:hlbmerge/dao/cache_data_manager.dart';
 import 'package:hlbmerge/dao/sp_data_manager.dart';
+import 'package:hlbmerge/pages/app_pages.dart';
 import 'package:hlbmerge/utils/StrUtil.dart';
 import 'package:hlbmerge/models/cache_group.dart';
 import 'package:path_provider/path_provider.dart';
@@ -54,6 +55,10 @@ class SettingsLogic extends GetxController {
   void startPathSelectScreen() async {
     var result = await MainChannel.startActivity(ActivityScreen.pathSelectScreen.route);
     print(result);
+  }
+
+  void goAboutPage() {
+    Get.toNamed(AppRoutes.AboutPage);
   }
 
 
