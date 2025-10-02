@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:ffmpeg_hl/beans/Pair.dart';
 import 'package:get/get.dart';
 import 'package:hlbmerge/models/cache_group.dart';
-import 'package:hlbmerge/utils/FileUtil.dart';
+import 'package:hlbmerge/utils/FileUtils.dart';
 import 'package:hlbmerge/utils/JsonUtils.dart';
 import 'package:path/path.dart' as path;
 

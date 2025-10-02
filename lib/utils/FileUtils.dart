@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
-class FileUtil {
+class FileUtils {
   // 获取子目录列表
   static List<String> allDirStr(String path) {
-    return FileUtil.allDir(path).map((e) => e.path).toList();
+    return FileUtils.allDir(path).map((e) => e.path).toList();
   }
 
   // 获取子目录列表
@@ -18,7 +18,7 @@ class FileUtil {
 
   // 获取文件列表
   static List<String> allFileStr(String path) {
-    return FileUtil.allFile(path).map((e) => e.path).toList();
+    return FileUtils.allFile(path).map((e) => e.path).toList();
   }
 
   // 获取文件列表

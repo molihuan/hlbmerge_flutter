@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:hlbmerge/dao/sp_data_manager.dart';
-import 'package:hlbmerge/utils/FileUtil.dart';
+import 'package:hlbmerge/utils/FileUtils.dart';
 
 import 'state.dart';
 

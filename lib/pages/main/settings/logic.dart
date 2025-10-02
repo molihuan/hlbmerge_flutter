@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:hlbmerge/dao/cache_data_manager.dart';
 import 'package:hlbmerge/dao/sp_data_manager.dart';
 import 'package:hlbmerge/pages/app_pages.dart';
-import 'package:hlbmerge/utils/StrUtil.dart';
+import 'package:hlbmerge/utils/StrUtils.dart';
 import 'package:hlbmerge/models/cache_group.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -42,7 +42,7 @@ class SettingsLogic extends GetxController {
 
     print(dirPath);
     //判断路径中是否有空格
-    if (StrUtil.containsAnySpace(dirPath)) {
+    if (StrUtils.containsAnySpace(dirPath)) {
       Get.snackbar("提示", "路径中不能包含空格,请重新选择");
       return;
     }

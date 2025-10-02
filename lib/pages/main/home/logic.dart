@@ -17,9 +17,9 @@ import '../../../dao/sp_data_manager.dart';
 import '../../../models/cache_group.dart';
 import '../../../models/cache_item.dart';
 import '../../../service/ffmpeg/ffmpeg_task.dart';
-import '../../../utils/FileUtil.dart';
+import '../../../utils/FileUtils.dart';
 import '../../../utils/PlatformUtils.dart';
-import '../../../utils/StrUtil.dart';
+import '../../../utils/StrUtils.dart';
 import '../../uitools/DialogTool.dart';
 import 'state.dart';
 import 'package:path/path.dart' as path;
@@ -180,7 +180,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
           : "${title}_only${fileType.extension}.${fileType.extension}";
       var outputAudioPath = path.join(outputDirPath, outputFileName);
       //解密m4s
-      var result = await FileUtil.decryptPcM4sAfter202403(
+      var result = await FileUtils.decryptPcM4sAfter202403(
           exportTargetPath, outputAudioPath);
       if (result) {
         return Pair(true, "");
@@ -287,7 +287,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
       return;
     }
     DropItem dropItem = dropItemList.first;
-    var isDir = FileUtil.isDir(dropItem.path);
+    var isDir = FileUtils.isDir(dropItem.path);
     if (!isDir) {
       Get.snackbar("提示", "请拖入一个目录");
       return;
@@ -308,7 +308,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
 
     print(dirPath);
     //判断路径中是否有空格
-    if (StrUtil.containsAnySpace(dirPath)) {
+    if (StrUtils.containsAnySpace(dirPath)) {
       Get.snackbar("提示", "路径中不能包含空格,请重新选择");
       return;
     }

@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../pages/main/home/state.dart';
-import '../utils/FileUtil.dart';
+import '../utils/FileUtils.dart';
 import 'cache_data_manager.dart';
 
 class SpDataManager {
@@ -46,7 +46,7 @@ class SpDataManager {
   //获取默认的输出路径
   static String? _getDefaultOutputDirPath({void Function(String)? futureCallback}) {
     var outputDir = runPlatformFunc<Directory?>(onDefault: () {
-      var currExeDir = FileUtil.getCurrExeDir();
+      var currExeDir = FileUtils.getCurrExeDir();
       return Directory('${currExeDir.path}/outputDir');
     }, onAndroid: () {
       MainChannel.getDefaultOutputDirPath().then((result) {

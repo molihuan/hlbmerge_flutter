@@ -10,7 +10,7 @@ import '../../dao/cache_data_manager.dart';
 import '../../dao/sp_data_manager.dart';
 import '../../models/cache_item.dart';
 import '../../pages/main/home/logic.dart';
-import '../../utils/FileUtil.dart';
+import '../../utils/FileUtils.dart';
 import '../../utils/PlatformUtils.dart';
 
 enum FFmpegTaskStatus { pending, running, completed, failed }
@@ -98,7 +98,7 @@ class FFmpegTaskController extends GetxController {
           }
           var regex = r".*\.(m4s|blv)$";
           //将指定目录下所有m4s和blv文件(包括其子文件夹)设置为空文件
-          FileUtil.setEmptyFileByRegex(currPath, regex);
+          FileUtils.setEmptyFileByRegex(currPath, regex);
 
         });
   }
@@ -152,7 +152,7 @@ class FFmpegTaskController extends GetxController {
       var outputPath = path.join(outputDirPath, outputFileName);
 
       //判断输出文件是否存在,如果存在则重命名
-      outputPath = await FileUtil.getAvailableFilePath(outputPath);
+      outputPath = await FileUtils.getAvailableFilePath(outputPath);
 
       //输入路径
       if (audioPath != null && videoPath != null) {
@@ -161,8 +161,8 @@ class FFmpegTaskController extends GetxController {
             String tempAudioPath = "${audioPath}.hlb_temp.mp3";
             String tempVideoPath = "${videoPath}.hlb_temp.mp4";
             // 解密
-            await FileUtil.decryptPcM4sAfter202403(audioPath, tempAudioPath);
-            await FileUtil.decryptPcM4sAfter202403(videoPath, tempVideoPath);
+            await FileUtils.decryptPcM4sAfter202403(audioPath, tempAudioPath);
+            await FileUtils.decryptPcM4sAfter202403(videoPath, tempVideoPath);
             // 合并
             var resultPair = await ffmpegPlugin.mergeAudioVideo(
               tempAudioPath,
