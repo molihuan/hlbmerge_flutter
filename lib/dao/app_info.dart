@@ -51,6 +51,11 @@ class AppUpdateData {
     "appSize": appSize,
     "md5": md5,
   };
+
+  @override
+  String toString() {
+    return 'AppUpdateData{platform: $platform, enableUpdateCheck: $enableUpdateCheck, versionCode: $versionCode, versionName: $versionName, updateTime: $updateTime, updateContent: $updateContent, downloadUrl: $downloadUrl, downloadPageUrl: $downloadPageUrl, appSize: $appSize, md5: $md5}';
+  }
 }
 
 /// 整个接口返回数据
@@ -76,4 +81,9 @@ class AppInfo {
     "notice": notice,
     "updateData": updateData.map((e) => e.toJson()).toList(),
   };
+
+  @override
+  String toString() {
+    return 'AppInfo{notice: $notice, updateData: $updateData}';
+  }
 }
