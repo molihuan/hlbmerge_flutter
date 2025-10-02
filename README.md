@@ -49,6 +49,24 @@ Mac版本：使用macOS ventura 13.4.1版本打包，你的系统版本低不保
 
 Windows：使用Win 10打包，你的系统版本低不保证可用，如有问题请下载源码自行打包
 
+## 截图
+
+| 平台截图                                                                                                           |
+|----------------------------------------------------------------------------------------------------------------|
+| Android                                                                                                        |
+| [![preview-android-01.jpg](https://i.postimg.cc/6qBFDvvJ/preview-android-01.jpg)](https://postimg.cc/47F8cnPB) |
+| Windows                                                                                                        |
+| [![preview-windows-01.png](https://i.postimg.cc/qqpW933H/preview-windows-01.png)](https://postimg.cc/k6hjSDsT) |
+| Linux                                                                                                          |
+| [![preview-linux-01.png](https://i.postimg.cc/fTvZ8M1V/preview-linux-01.png)](https://postimg.cc/fJk6LQzs)     |
+| ohos                                                                                                           |
+| 待补充                                                                                                            |
+| Mac                                                                                                            |
+| 待补充                                                                                                            |
+| ios                                                                                                            |
+| 待补充                                                                                                            |
+
+
 ## 使用教程：[跳转](https://github.com/molihuan/hlbmerge_flutter/blob/master/res/tutorial) 
 
 ## 问题反馈
