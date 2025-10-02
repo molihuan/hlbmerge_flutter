@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:open_file/open_file.dart';
 
-import '../../../service/ffmpeg/ffmpeg_task.dart';
+
+import '../../../../service/ffmpeg/ffmpeg_task.dart';
 import 'logic.dart';
 import 'state.dart';
 import 'package:path/path.dart' as path;

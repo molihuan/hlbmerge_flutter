@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:hlbmerge/dao/sp_data_manager.dart';
-import 'package:hlbmerge/pages/app_pages.dart';
+
+import 'ui/pages/app_pages.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

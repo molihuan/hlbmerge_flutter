@@ -9,7 +9,7 @@ import '../../channel/main/main_channel.dart';
 import '../../dao/cache_data_manager.dart';
 import '../../dao/sp_data_manager.dart';
 import '../../models/cache_item.dart';
-import '../../pages/main/home/logic.dart';
+import '../../ui/pages/main/home/logic.dart';
 import '../../utils/FileUtils.dart';
 import '../../utils/PlatformUtils.dart';
 

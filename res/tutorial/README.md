@@ -15,3 +15,88 @@
      > 国内bilibili版本的缓存文件一般在:/storage/emulated/0/Android/data/tv.danmaku.bili/download/目录下,其他版本视具体情况而定。
 
 3. Android14及以上,仅可使用Shizuku授权使用,详情请参考上面Android 11~13第二条
+
+## 鸿蒙教程
+待补充
+
+## Windows教程
+
+1. 选择选择缓存文件夹并加载后还是空白请检查"缓存类型"是否选择正确,选择错误是无法解析的。
+
+2. 选择选择缓存文件夹并加载后还是空白请检查缓存目录格式是否与下列标准格式大致相同，如果完全不同请调整:
+
+   - Windows缓存文件目录标准格式参考:
+
+   ```sh
+   .
+   ├── 55444073	//一个标准的缓存文件结构
+   │   ├── 55444073_p1-1-30032.m4s
+   │   ├── 55444073_p1-1-30216.m4s
+   │   ├── dm1
+   │   ├── dm2
+   │   ├── group.jpg
+   │   ├── image.jpg
+   │   ├── .playurl
+   │   ├── .videoInfo
+   │   ├── videoInfo.json
+   │   └── view
+   └── 55444088
+       ├── 55444088_p1-1-30032.m4s
+       ├── 55444088_p1-1-30216.m4s
+       ├── dm1
+       ├── dm2
+       ├── group.jpg
+       ├── image.jpg
+       ├── .playurl
+       ├── .videoInfo
+       ├── videoInfo.json
+       └── view
+   ```
+
+   - Android缓存文件目录标准格式参考:
+
+   ```sh
+   .
+   ├── 115001356452955		//一个标准的缓存文件结构(只包含一个视频)
+   │   └── c_31596087333
+   │       ├── 80
+   │       │   ├── audio.m4s
+   │       │   ├── index.json
+   │       │   └── video.m4s
+   │       ├── danmaku.xml
+   │       └── entry.json
+   ├── 546538653		//一个标准视频合集的缓存文件结构(里面包含两个视频p1和p2)
+   │   ├── c_367013145
+   │   │   ├── 80
+   │   │   │   ├── audio.m4s
+   │   │   │   ├── index.json
+   │   │   │   └── video.m4s
+   │   │   ├── cover.jpg
+   │   │   ├── danmaku.pb
+   │   │   ├── danmaku.xml
+   │   │   └── entry.json
+   │   └── c_367033592
+   │       ├── 80
+   │       │   ├── audio.m4s
+   │       │   ├── index.json
+   │       │   └── video.m4s
+   │       ├── cover.jpg
+   │       ├── danmaku.pb
+   │       ├── danmaku.xml
+   │       └── entry.json
+   └── 810872		//一个标准的缓存文件结构(只包含一个视频)
+       └── c_1176840
+           ├── 64
+           │   ├── audio.m4s
+           │   ├── index.json
+           │   └── video.m4s
+           ├── cover.jpg
+           ├── danmaku.pb
+           ├── danmaku.xml
+           └── entry.json
+   ```
+   
+
+## Linux教程
+
+与Windows同理

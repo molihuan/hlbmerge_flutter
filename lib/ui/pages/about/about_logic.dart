@@ -3,8 +3,9 @@ import 'package:hlbmerge/utils/PlatformUtils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../dao/app_info.dart';
-import '../../utils/GetxHttpUtils.dart';
+
+import '../../../dao/app_info.dart';
+import '../../../utils/GetxHttpUtils.dart';
 import 'about_state.dart';
 
 class AboutLogic extends GetxController {
@@ -71,22 +72,29 @@ class AboutLogic extends GetxController {
 
         AppUpdateData? appUpdateDate;
         for (var item in appInfo.updateData) {
-          appUpdateDate = runPlatformFunc<AppUpdateData?>(
-              onDefault: () {
-                return null;
-              },
-              onAndroid: () {
-                if (item.platform == "android") {
-                  return item;
-                }
-                return null;
-              },
-              onWindows: () {
-                if (item.platform == "windows") {
-                  return item;
-                }
-                return null;
-              });
+          appUpdateDate = runPlatformFunc<AppUpdateData?>(onDefault: () {
+            return null;
+          }, onAndroid: () {
+            if (item.platform == "android") {
+              return item;
+            }
+            return null;
+          }, onWindows: () {
+            if (item.platform == "windows") {
+              return item;
+            }
+            return null;
+          }, onLinux: () {
+            if (item.platform == "linux") {
+              return item;
+            }
+            return null;
+          }, onOhos: () {
+            if (item.platform == "ohos") {
+              return item;
+            }
+            return null;
+          });
 
           if (appUpdateDate != null) {
             state.appUpdateData = appUpdateDate;

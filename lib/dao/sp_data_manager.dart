@@ -6,7 +6,8 @@ import 'package:hlbmerge/utils/PlatformUtils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../pages/main/home/state.dart';
+
+import '../ui/pages/main/home/state.dart';
 import '../utils/FileUtils.dart';
 import 'cache_data_manager.dart';
 

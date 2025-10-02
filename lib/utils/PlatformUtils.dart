@@ -9,6 +9,7 @@ T runPlatformFunc<T>({
   T Function()? onWindows,
   T Function()? onMacOS,
   T Function()? onLinux,
+  T Function()? onOhos,
   T Function()? onWeb,
   required T Function() onDefault, // 通用方法，必须提供
 }) {
@@ -24,6 +25,8 @@ T runPlatformFunc<T>({
     return (onMacOS ?? onDefault)();
   } else if (Platform.isLinux) {
     return (onLinux ?? onDefault)();
+  } else if (Platform.isOhos) {
+    return (onOhos ?? onDefault)();
   } else {
     return onDefault();
   }
@@ -63,13 +66,13 @@ T runPlatformFuncClassRecord<T extends Record>({
   }
 }
 
-
 Future<T> runPlatformFuncFuture<T>({
   FutureOr<T> Function()? onAndroid,
   FutureOr<T> Function()? onIOS,
   FutureOr<T> Function()? onWindows,
   FutureOr<T> Function()? onMacOS,
   FutureOr<T> Function()? onLinux,
+  FutureOr<T> Function()? onOhos,
   FutureOr<T> Function()? onWeb,
   required FutureOr<T> Function() onDefault, // 必须提供
 }) async {
@@ -87,6 +90,8 @@ Future<T> runPlatformFuncFuture<T>({
     func = onMacOS ?? onDefault;
   } else if (Platform.isLinux) {
     func = onLinux ?? onDefault;
+  } else if (Platform.isOhos) {
+    func = onOhos ?? onDefault;
   } else {
     func = onDefault;
   }

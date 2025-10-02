@@ -6,13 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:hlbmerge/dao/cache_data_manager.dart';
 import 'package:hlbmerge/dao/sp_data_manager.dart';
-import 'package:hlbmerge/pages/app_pages.dart';
 import 'package:hlbmerge/utils/StrUtils.dart';
-import 'package:hlbmerge/models/cache_group.dart';
-import 'package:path_provider/path_provider.dart';
 
-import '../../../channel/main/main_channel.dart';
-import '../../../channel/main/main_channel_android.dart';
+import '../../../../channel/main/main_channel.dart';
+import '../../../../channel/main/main_channel_android.dart';
+import '../../app_pages.dart';
 import 'state.dart';
 
 class SettingsLogic extends GetxController {

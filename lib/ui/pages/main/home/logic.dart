@@ -10,17 +10,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hlbmerge/channel/main/main_channel_interface.dart';
 
-import '../../../channel/main/main_channel.dart';
-import '../../../channel/main/main_channel_android.dart';
-import '../../../dao/cache_data_manager.dart';
-import '../../../dao/sp_data_manager.dart';
-import '../../../models/cache_group.dart';
-import '../../../models/cache_item.dart';
-import '../../../service/ffmpeg/ffmpeg_task.dart';
-import '../../../utils/FileUtils.dart';
-import '../../../utils/PlatformUtils.dart';
-import '../../../utils/StrUtils.dart';
-import '../../uitools/DialogTool.dart';
+
+import '../../../../channel/main/main_channel.dart';
+import '../../../../channel/main/main_channel_android.dart';
+import '../../../../dao/cache_data_manager.dart';
+import '../../../../dao/sp_data_manager.dart';
+import '../../../../models/cache_group.dart';
+import '../../../../models/cache_item.dart';
+import '../../../../service/ffmpeg/ffmpeg_task.dart';
+import '../../../../utils/FileUtils.dart';
+import '../../../../utils/PlatformUtils.dart';
+import '../../../../utils/StrUtils.dart';
+import '../../../uitools/DialogTool.dart';
 import 'state.dart';
 import 'package:path/path.dart' as path;
 

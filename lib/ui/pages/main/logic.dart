@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import '../../dao/cache_data_manager.dart';
-import '../../models/cache_group.dart';
 import 'progress/view.dart';
 import 'settings/view.dart';
 import 'home/view.dart';

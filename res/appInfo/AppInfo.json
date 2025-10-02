@@ -24,6 +24,30 @@
       "downloadPageUrl": "https://gitee.com/molihuan/hlbmerge_flutter/releases",
       "appSize": 0,
       "md5": ""
+    },
+    {
+      "platform": "linux",
+      "enableUpdateCheck": true,
+      "versionCode" : 205,
+      "versionName" : "2.0.5",
+      "updateTime": "2025-10-02",
+      "updateContent": "1. 添加了新功能",
+      "downloadUrl": "",
+      "downloadPageUrl": "https://gitee.com/molihuan/hlbmerge_flutter/releases",
+      "appSize": 0,
+      "md5": ""
+    },
+    {
+      "platform": "ohos",
+      "enableUpdateCheck": true,
+      "versionCode" : 205,
+      "versionName" : "2.0.5",
+      "updateTime": "2025-10-02",
+      "updateContent": "1. 添加了新功能",
+      "downloadUrl": "",
+      "downloadPageUrl": "https://gitee.com/molihuan/hlbmerge_flutter/releases",
+      "appSize": 0,
+      "md5": ""
     }
   ]
 }
