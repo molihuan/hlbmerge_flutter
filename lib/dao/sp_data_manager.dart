@@ -116,4 +116,14 @@ class SpDataManager {
     return AndroidParseCachePermission.values
         .firstWhereOrNull((element) => element.name == target);
   }
+
+  //是否单一输出目录
+  static const String singleOutputPathCheckedKey = 'singleOutputPathChecked';
+  static setSingleOutputPathChecked(bool checked){
+    prefs.setBool(singleOutputPathCheckedKey, checked);
+  }
+  static bool getSingleOutputPathChecked(){
+    return prefs.getBool(singleOutputPathCheckedKey) ?? false;
+  }
+
 }

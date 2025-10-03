@@ -19,7 +19,6 @@ class SettingsLogic extends GetxController {
   late final ffmpegHlPlugin = FfmpegHl();
   late final _cacheDataManager = CacheDataManager();
 
-
   //获取ffmpeg版本配置
   showAvcodecCfg() async {
     var cfgStr = await ffmpegHlPlugin.getAvcodecCfg();
@@ -50,15 +49,23 @@ class SettingsLogic extends GetxController {
     Get.snackbar("提示", "已选择输出路径:$dirPath");
   }
 
+  //跳转路径选择页面
   void startPathSelectScreen() async {
-    var result = await MainChannel.startActivity(ActivityScreen.pathSelectScreen.route);
+    var result =
+        await MainChannel.startActivity(ActivityScreen.pathSelectScreen.route);
     print(result);
   }
 
+  //跳转关于页面
   void goAboutPage() {
     Get.toNamed(AppRoutes.AboutPage);
   }
 
+  //改变是否单一输出目录
+  void changeSingleOutputPathChecked(bool checked) {
+    SpDataManager.setSingleOutputPathChecked(checked);
+    state.singleOutputPathChecked = checked;
+  }
 
   // 测试方法
   testFunc() async {

@@ -10,12 +10,16 @@ class SettingsState {
     outputDirPath = SpDataManager.getOutputDirPath(futureCallback: (path) {
       outputDirPath = path;
     }) ?? "";
+    singleOutputPathChecked = SpDataManager.getSingleOutputPathChecked();
   }
 
   //输出路径
   final _outputDirPath = ''.obs;
-
   set outputDirPath(value) => _outputDirPath.value = value;
-
   get outputDirPath => _outputDirPath.value;
+
+  //是否单一输出目录
+  final _singleOutputPathChecked = false.obs;
+  set singleOutputPathChecked(value) => _singleOutputPathChecked.value = value;
+  get singleOutputPathChecked => _singleOutputPathChecked.value;
 }

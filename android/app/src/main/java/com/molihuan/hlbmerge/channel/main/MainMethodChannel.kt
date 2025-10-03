@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
-import androidx.core.app.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.hjq.permissions.OnPermissionCallback
@@ -29,7 +28,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
 import java.lang.ref.WeakReference
-import kotlin.concurrent.thread
 
 @SuppressLint("StaticFieldLeak")
 object MainMethodChannel : Application.ActivityLifecycleCallbacks {
@@ -100,11 +98,25 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
                 copyCacheStructureFile(call, result)
             }
 
+            //通知系统导出文件完成
+            "notifySystemFileExportComplete" -> {
+                notifySystemFileExportComplete(call, result)
+            }
 
             else -> {
                 result.notImplemented()
             }
         }
+    }
+
+    private fun notifySystemFileExportComplete(
+        call: MethodCall,
+        result: MethodChannel.Result
+    ) {
+        //获取输出路径
+        val outputDirPath = FlutterSpData.getOutputDirPath()
+        FileUtils.refreshDirMediaStore(applicationContext, outputDirPath)
+        result.success(null)
     }
 
     //运行在携程中
@@ -149,7 +161,7 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
         }
 
         val inputCachePackageName = FlutterSpData.getAndroidInputCachePackageName()
-        if (inputCachePackageName.isNullOrBlank()){
+        if (inputCachePackageName.isNullOrBlank()) {
             val returnMap = mapOf<String, Any?>(
                 "code" to -1,
                 "msg" to "err:inputCachePackageName is null or blank",

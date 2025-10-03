@@ -3,7 +3,6 @@ package com.molihuan.hlbmerge.dao.flutter
 import android.app.Application
 import com.molihuan.hlbmerge.ui.screen.path.select.PathSelectFunctionState
 import com.molihuan.hlbmerge.utils.FileUtils
-import com.molihuan.hlbmerge.dao.flutter.FlutterSpUtils
 import java.io.File
 
 object FlutterSpData {
@@ -50,6 +49,13 @@ object FlutterSpData {
     fun getDefaultOutputDirPath(): String {
         val finalPath = appRootPathInDownload + File.separator + "outputDir"
         return finalPath
+    }
+
+    private const val KEY_OUTPUT_DIR_PATH = "flutter.outputDirPath"
+    //获取输入路径
+    @JvmStatic
+    fun getOutputDirPath(): String {
+        return FlutterSpUtils.getString(KEY_OUTPUT_DIR_PATH) ?: getDefaultOutputDirPath()
     }
 
     private const val KEY_ANDROID_INPUT_CACHE_PACKAGE_NAME = "flutter.androidInputCachePackageName"

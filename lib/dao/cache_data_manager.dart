@@ -261,7 +261,8 @@ class CacheDataManager {
       try {
         // 第一次直接尝试解析
         data = json.decode(content);
-      } catch (_) {
+      } catch (e) {
+        print('json文件解析失败: $e');
         // 如果失败，再尝试修复
         data = JsonUtils.tryFixJson(content);
       }

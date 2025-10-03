@@ -40,6 +40,10 @@ abstract class MainChannelInterface {
   Future<Triple<int, String, Map?>> copyCacheStructureFile() {
     throw UnimplementedError();
   }
+
+  void notifySystemFileExportComplete(){
+
+  }
 }
 // native页面事件类型
 enum NativePageEventType {

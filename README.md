@@ -30,7 +30,7 @@
 
 #### 项目地址：
 ##### [Github地址](https://github.com/molihuan/hlbmerge_flutter)
-##### [Gitee地址](https://gitee.com/molihuan/hlbmerge_flutter)
+##### [Gitcode地址](https://gitcode.com/bigmolihuan/hlbmerge_flutter)
 
 ## 注意
 

@@ -64,4 +64,7 @@ class MainChannel {
   static Future<Triple<int, String, Map?>> copyCacheStructureFile() async {
     return await interface.copyCacheStructureFile();
   }
+  static void notifySystemFileExportComplete(){
+    interface.notifySystemFileExportComplete();
+  }
 }

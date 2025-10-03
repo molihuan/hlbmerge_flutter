@@ -138,4 +138,9 @@ class MainChannelAndroid extends MainChannelInterface {
     }
     return returnError;
   }
+
+  @override
+  void notifySystemFileExportComplete() {
+    _platform.invokeMethod("notifySystemFileExportComplete");
+  }
 }

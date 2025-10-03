@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hlbmerge/channel/main/main_channel_interface.dart';
 
-
 import '../../../../channel/main/main_channel.dart';
 import '../../../../channel/main/main_channel_android.dart';
 import '../../../../dao/cache_data_manager.dart';
@@ -36,7 +35,6 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   void refreshCacheData() async {
     state.inputCacheDirPath =
         await SpDataManager.getInputCacheDirPathByReload() ?? "";
-
 
     runPlatformFunc(onDefault: () {
       if (state.inputCacheDirPath.isEmpty) {
@@ -262,12 +260,13 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   //获取输出目录
   static String? getOutputDirPath({String? groupTitle}) {
     var outputRootPath = SpDataManager.getOutputDirPath();
+    var singleOutputPathChecked = SpDataManager.getSingleOutputPathChecked();
     if (outputRootPath == null) {
       return null;
     }
 
     var outputDirPath;
-    if (groupTitle == null) {
+    if (groupTitle == null || singleOutputPathChecked) {
       outputDirPath = outputRootPath;
     } else {
       outputDirPath = path.join(outputRootPath, groupTitle);

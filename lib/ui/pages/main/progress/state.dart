@@ -6,8 +6,8 @@ class ProgressState {
   ProgressState() {
     ///Initialize variables
   }
-  final _outputChildDirList = <Directory>[].obs;
+  final _outputChildFileList = <FileSystemEntity>[].obs;
 
-  List<Directory> get outputChildDirList => _outputChildDirList.toList();
-  set outputChildDirList(List<Directory> value) => _outputChildDirList.assignAll(value);
+  List<FileSystemEntity> get outputChildFileList => _outputChildFileList.toList();
+  set outputChildFileList(List<FileSystemEntity> value) => _outputChildFileList.assignAll(value);
 }

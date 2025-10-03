@@ -36,6 +36,15 @@ class SettingsPage extends StatelessWidget {
                   },
                 );
               }),
+              //输出单一目录
+              Obx((){
+                return ListTile(
+                  title: Text("输出单一目录"),
+                  trailing: Switch(value: state.singleOutputPathChecked,onChanged: (v) {
+                    logic.changeSingleOutputPathChecked(v);
+                  },),
+                );
+              }),
               ListTile(
                 title: const Text("测试按钮"),
                 onTap: () async {

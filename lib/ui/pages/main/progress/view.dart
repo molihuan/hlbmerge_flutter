@@ -16,7 +16,6 @@ class ProgressPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final FFmpegTaskController taskController = Get.find();
 
     return Column(
       children: [
@@ -30,7 +29,6 @@ class ProgressPage extends StatelessWidget {
             ),
             FilledButton(
               onPressed: () {
-                taskController.clearTasks();
                 logic.loadOutputChildDirList();
               },
               child: const Text("归档"),
@@ -39,9 +37,9 @@ class ProgressPage extends StatelessWidget {
         )),
         Expanded(
           child: Obx(() {
-            final tasks = taskController.tasks;
-            final dirs = state.outputChildDirList;
-            final totalLength = tasks.length + dirs.length;
+            final tasks = logic.taskController.tasks;
+            final files = state.outputChildFileList;
+            final totalLength = tasks.length + files.length;
 
             return ListView.builder(
               itemCount: totalLength,
@@ -76,7 +74,7 @@ class ProgressPage extends StatelessWidget {
                 } else {
                   // 目录条目
                   final dirIndex = index - tasks.length;
-                  final item = dirs[dirIndex];
+                  final item = files[dirIndex];
                   return ListTile(
                     onTap: () {
                       OpenFile.open(item.path);
