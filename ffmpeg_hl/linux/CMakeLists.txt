@@ -15,15 +15,15 @@ set(PLUGIN_NAME "ffmpeg_hl_plugin")
 
 # Any new source files that you add to the plugin should be added here.
 list(APPEND PLUGIN_SOURCES
-  "ffmpeg_hl_plugin.cc"
-  "ffmpeg/ffmpeg_merge.cpp"
-  "ffmpeg/ffmpeg_merge.h"
+        "ffmpeg_hl_plugin.cc"
+        "ffmpeg/ffmpeg_merge.cpp"
+        "ffmpeg/ffmpeg_merge.h"
 )
 
 # Define the plugin library target. Its name must not be changed (see comment
 # on PLUGIN_NAME above).
 add_library(${PLUGIN_NAME} SHARED
-  ${PLUGIN_SOURCES}
+        ${PLUGIN_SOURCES}
 )
 
 # Apply a standard set of build settings that are configured in the
@@ -35,7 +35,7 @@ apply_standard_settings(${PLUGIN_NAME})
 # between plugins. This should not be removed; any symbols that should be
 # exported should be explicitly exported with the FLUTTER_PLUGIN_EXPORT macro.
 set_target_properties(${PLUGIN_NAME} PROPERTIES
-  CXX_VISIBILITY_PRESET hidden)
+        CXX_VISIBILITY_PRESET hidden)
 target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 
 # Source include directories and library dependencies. Add any plugin-specific
@@ -45,8 +45,8 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 #set(FFMPEG_DEV_ROOT "/home/moli/.vmr/versions/ffmpeg_versions/ffmpeg")
 
 set(FFMPEG_DEV_ROOT "${CMAKE_CURRENT_LIST_DIR}/third_party/ffmpeg")
-set(FFMPEG_ZIP_FILE "${CMAKE_BINARY_DIR}/third_party/ffmpeg_4.3.1_linux_amd64.tar.bz2")
-set(FFMPEG_ZIP_URL "https://github.com/molihuan/hlbmerge_flutter/releases/download/v2.0.5/ffmpeg_4.3.1_linux_amd64.tar.bz2")
+set(FFMPEG_ZIP_FILE "${CMAKE_BINARY_DIR}/third_party/ffmpeg_4.3.1_linux_amd64.tar.xz")
+set(FFMPEG_ZIP_URL "https://github.com/molihuan/hlbmerge_flutter/releases/download/v2.0.5/ffmpeg_4.3.1_linux_amd64.tar.xz")
 
 # -------------------
 # 判断是否已经存在 third_party/ffmpeg
@@ -97,7 +97,7 @@ endif()
 include_directories(${FFMPEG_DEV_ROOT}/include)
 
 target_include_directories(${PLUGIN_NAME} INTERFACE
-  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+        "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # 指定链接器查找库文件  FFmpeg
 link_directories(${FFMPEG_DEV_ROOT}/lib)
@@ -137,6 +137,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
 set_target_properties(${PLUGIN_NAME} PROPERTIES
         BUILD_WITH_INSTALL_RPATH TRUE
         INSTALL_RPATH "\$ORIGIN"
+        INSTALL_RPATH ${FFMPEG_DEV_ROOT}/lib
         INSTALL_RPATH_USE_LINK_PATH TRUE
 )
 
@@ -145,9 +146,9 @@ set_target_properties(${PLUGIN_NAME} PROPERTIES
 # This list could contain prebuilt libraries, or libraries created by an
 # external build triggered from this build file.
 set(ffmpeg_hl_bundled_libraries
-  ${FFMPEG_REAL_LIBS}
-  ${FFMPEG_SYMLINKS}
-  PARENT_SCOPE
+        ${FFMPEG_REAL_LIBS}
+        ${FFMPEG_SYMLINKS}
+        PARENT_SCOPE
 )
 
 # === Tests ===
@@ -156,40 +157,40 @@ set(ffmpeg_hl_bundled_libraries
 # Only enable test builds when building the example (which sets this variable)
 # so that plugin clients aren't building the tests.
 if (${include_${PROJECT_NAME}_tests})
-if(${CMAKE_VERSION} VERSION_LESS "3.11.0")
-message("Unit tests require CMake 3.11.0 or later")
-else()
-set(TEST_RUNNER "${PROJECT_NAME}_test")
-enable_testing()
+    if(${CMAKE_VERSION} VERSION_LESS "3.18.0")
+        message("Unit tests require CMake 3.18.0 or later")
+    else()
+        set(TEST_RUNNER "${PROJECT_NAME}_test")
+        enable_testing()
 
-# Add the Google Test dependency.
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/release-1.11.0.zip
-)
-# Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-# Disable install commands for gtest so it doesn't end up in the bundle.
-set(INSTALL_GTEST OFF CACHE BOOL "Disable installation of googletest" FORCE)
+        # Add the Google Test dependency.
+        include(FetchContent)
+        FetchContent_Declare(
+                googletest
+                URL https://github.com/google/googletest/archive/release-1.11.0.zip
+        )
+        # Prevent overriding the parent project's compiler/linker settings
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        # Disable install commands for gtest so it doesn't end up in the bundle.
+        set(INSTALL_GTEST OFF CACHE BOOL "Disable installation of googletest" FORCE)
 
-FetchContent_MakeAvailable(googletest)
+        FetchContent_MakeAvailable(googletest)
 
-# The plugin's exported API is not very useful for unit testing, so build the
-# sources directly into the test binary rather than using the shared library.
-add_executable(${TEST_RUNNER}
-  test/ffmpeg_hl_plugin_test.cc
-  ${PLUGIN_SOURCES}
-)
-apply_standard_settings(${TEST_RUNNER})
-target_include_directories(${TEST_RUNNER} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(${TEST_RUNNER} PRIVATE flutter)
-target_link_libraries(${TEST_RUNNER} PRIVATE PkgConfig::GTK)
-target_link_libraries(${TEST_RUNNER} PRIVATE gtest_main gmock)
+        # The plugin's exported API is not very useful for unit testing, so build the
+        # sources directly into the test binary rather than using the shared library.
+        add_executable(${TEST_RUNNER}
+                test/ffmpeg_hl_plugin_test.cc
+                ${PLUGIN_SOURCES}
+        )
+        apply_standard_settings(${TEST_RUNNER})
+        target_include_directories(${TEST_RUNNER} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+        target_link_libraries(${TEST_RUNNER} PRIVATE flutter)
+        target_link_libraries(${TEST_RUNNER} PRIVATE PkgConfig::GTK)
+        target_link_libraries(${TEST_RUNNER} PRIVATE gtest_main gmock)
 
-# Enable automatic test discovery.
-include(GoogleTest)
-gtest_discover_tests(${TEST_RUNNER})
+        # Enable automatic test discovery.
+        include(GoogleTest)
+        gtest_discover_tests(${TEST_RUNNER})
 
-endif()  # CMake version check
+    endif()  # CMake version check
 endif()  # include_${PROJECT_NAME}_tests

@@ -37,7 +37,7 @@ jobs:
       - uses: actions/upload-artifact@v4.6.2
         with:
           # Artifact name
-          name: release-windows.zip
+          name: hlbmerge_win_amd64.zip
           # 导出文件夹
-          path: build/windows/runner/Release/
+          path: build/windows/x64/runner/Release/
           # The desired behavior if no files are found using the provided path.

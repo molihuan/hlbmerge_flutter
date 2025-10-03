@@ -90,6 +90,7 @@ Windows：使用Win 10打包，你的系统版本低不保证可用，如有问�
 ## 源码编译事项
 目前使用的是的鸿蒙flutter3.22这个比较稳定的版本
 
+常用命令:
 ```sh
 # 创建项目
 # flutter create --org com.molihuan --platforms=android,ios,web,windows,macos,linux,ohos hlbmerge

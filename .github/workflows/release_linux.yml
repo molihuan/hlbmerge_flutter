@@ -1,0 +1,34 @@
+name: Release Linux
+on:
+  # 手动触发
+  workflow_dispatch:
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    steps:
+      # 使用本项目
+      - uses: actions/checkout@v5.0.0
+
+      #设置flutter
+      - uses: subosito/flutter-action@v2.14.0
+        with:
+          # The Flutter version to make available on the path
+          flutter-version: 3.22.0
+          # The Flutter build release channel
+          channel: # optional, default is stable
+
+      # Get flutter dependencies.
+      - run: flutter pub get
+
+      - name: Build for Linux
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ninja-build libgtk-3-dev libmpv-dev mpv
+          flutter build linux --debug
+
+      - name: Upload Artifact for Linux
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: hlbmerge_linux_amd64.zip
+          path: build/linux/*/debug/bundle/
