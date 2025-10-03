@@ -1,0 +1,10 @@
+{
+  "app": {
+    "bundleName": "com.molihuan.hlbmerge_flutter",
+    "vendor": "example",
+    "versionCode": 205,
+    "versionName": "2.0.5",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name"
+  }
+}

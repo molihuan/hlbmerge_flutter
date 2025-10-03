@@ -64,6 +64,8 @@ class SpDataManager {
         futureCallback?.call(path);
       });
       return null;
+    },onOhos: (){
+      return null;
     });
 
     if (outputDir == null) {

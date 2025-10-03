@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 
+bool get isOhos => Platform.operatingSystem == 'ohos';
+
 /// 跨平台方法，可选回调，返回值支持泛型
 T runPlatformFunc<T>({
   T Function()? onAndroid,
@@ -25,7 +27,7 @@ T runPlatformFunc<T>({
     return (onMacOS ?? onDefault)();
   } else if (Platform.isLinux) {
     return (onLinux ?? onDefault)();
-  } else if (Platform.isOhos) {
+  } else if (isOhos) {
     return (onOhos ?? onDefault)();
   } else {
     return onDefault();
@@ -40,7 +42,7 @@ T runPlatformFuncClass<T>({
 }) {
   if (kIsWeb) {
     return (onWeb ?? onDefault)();
-  } else if (Platform.isAndroid || Platform.isIOS) {
+  } else if (Platform.isAndroid || Platform.isIOS|| isOhos) {
     return (onMobile ?? onDefault)();
   } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     return (onDesktop ?? onDefault)();
@@ -57,7 +59,7 @@ T runPlatformFuncClassRecord<T extends Record>({
 }) {
   if (kIsWeb) {
     return (onWeb ?? onDefault)();
-  } else if (Platform.isAndroid || Platform.isIOS) {
+  } else if (Platform.isAndroid || Platform.isIOS || isOhos) {
     return (onMobile ?? onDefault)();
   } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     return (onDesktop ?? onDefault)();
@@ -90,7 +92,7 @@ Future<T> runPlatformFuncFuture<T>({
     func = onMacOS ?? onDefault;
   } else if (Platform.isLinux) {
     func = onLinux ?? onDefault;
-  } else if (Platform.isOhos) {
+  } else if (isOhos) {
     func = onOhos ?? onDefault;
   } else {
     func = onDefault;

@@ -1,0 +1,15 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "path_provider_ohos": "file:../har/path_provider_ohos.har",
+    "shared_preferences_ohos": "file:../har/shared_preferences_ohos.har",
+    "url_launcher_ohos": "file:../har/url_launcher_ohos.har",
+    "package_info_plus": "file:../har/package_info_plus.har",
+    "ffmpeg_hl": "file:../har/ffmpeg_hl.har"
+  }
+}

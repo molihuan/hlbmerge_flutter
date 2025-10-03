@@ -4,7 +4,7 @@
 # This file should be version controlled and should not be manually edited.
 
 version:
-  revision: "87bd7c9c6d1257a41baf2a8002d9782111ee5d7e"
+  revision: "e7955db84d147dcaf6c5c2085e3e86395df6f4d4"
   channel: "[user-branch]"
 
 project_type: plugin
@@ -13,29 +13,29 @@ project_type: plugin
 migration:
   platforms:
     - platform: root
-      create_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
-      base_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
+      create_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
+      base_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
     - platform: android
-      create_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
-      base_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
+      create_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
+      base_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
     - platform: ios
-      create_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
-      base_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
+      create_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
+      base_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
     - platform: linux
-      create_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
-      base_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
+      create_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
+      base_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
     - platform: macos
-      create_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
-      base_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
+      create_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
+      base_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
     - platform: web
-      create_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
-      base_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
+      create_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
+      base_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
     - platform: windows
-      create_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
-      base_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
+      create_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
+      base_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
     - platform: ohos
-      create_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
-      base_revision: 87bd7c9c6d1257a41baf2a8002d9782111ee5d7e
+      create_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
+      base_revision: e7955db84d147dcaf6c5c2085e3e86395df6f4d4
 
   # User provided section
 

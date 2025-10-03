@@ -1,0 +1,24 @@
+{
+  "modelVersion": "5.0.0",
+  "name": "hlbmerge_flutter",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "@ohos/flutter_ohos": "file:./har/flutter.har"
+  },
+  "devDependencies": {
+    "@ohos/hypium": "1.0.6"
+  },
+  "overrides": {
+    "@ohos/flutter_ohos": "file:./har/flutter.har",
+    "path_provider_ohos": "file:./har/path_provider_ohos.har",
+    "shared_preferences_ohos": "file:./har/shared_preferences_ohos.har",
+    "url_launcher_ohos": "file:./har/url_launcher_ohos.har",
+    "package_info_plus": "file:./har/package_info_plus.har",
+    "ffmpeg_hl": "file:./har/ffmpeg_hl.har",
+    "@ohos/flutter_module": "file:./entry"
+  }
+}
