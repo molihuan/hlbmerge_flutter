@@ -1,14 +1,13 @@
 # The Flutter tooling requires that developers have CMake 3.10 or later
 # installed. You should not increase this version, as doing so will cause
 # the plugin to fail to compile for some customers of the plugin.
-cmake_minimum_required(VERSION 3.10)
+#cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 
 # Project-level configuration.
 set(PROJECT_NAME "ffmpeg_hl")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
-# 指定 FFmpeg 安装目录，并将目录赋值给 FFMPEG_DEV_ROOT 变量，方便后续指令引用
-set(FFMPEG_DEV_ROOT "/home/moli/.vmr/versions/ffmpeg_versions/ffmpeg")
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed.
@@ -41,6 +40,58 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 
 # Source include directories and library dependencies. Add any plugin-specific
 # dependencies here.
+
+# 指定 FFmpeg 安装目录，并将目录赋值给 FFMPEG_DEV_ROOT 变量，方便后续指令引用
+#set(FFMPEG_DEV_ROOT "/home/moli/.vmr/versions/ffmpeg_versions/ffmpeg")
+
+set(FFMPEG_DEV_ROOT "${CMAKE_CURRENT_LIST_DIR}/third_party/ffmpeg")
+set(FFMPEG_ZIP_FILE "${CMAKE_BINARY_DIR}/third_party/ffmpeg_4.3.1_linux_amd64.tar.bz2")
+set(FFMPEG_ZIP_URL "https://github.com/molihuan/hlbmerge_flutter/releases/download/v2.0.5/ffmpeg_4.3.1_linux_amd64.tar.bz2")
+
+# -------------------
+# 判断是否已经存在 third_party/ffmpeg
+# -------------------
+if(NOT EXISTS ${FFMPEG_DEV_ROOT})
+    message(STATUS "FFmpeg folder not found: ${FFMPEG_DEV_ROOT}")
+
+    # 确保下载目录存在
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR})
+
+    # -------------------
+    # 下载 zip 文件
+    # -------------------
+    if(NOT EXISTS ${FFMPEG_ZIP_FILE})
+        message(STATUS "Downloading FFmpeg zip from ${FFMPEG_ZIP_URL} ...")
+        file(DOWNLOAD
+                ${FFMPEG_ZIP_URL}
+                ${FFMPEG_ZIP_FILE}
+                SHOW_PROGRESS
+                STATUS download_status
+                LOG log
+        )
+        list(GET download_status 0 status_code)
+        if(NOT status_code EQUAL 0)
+            message(FATAL_ERROR "Download failed: ${log}")
+        endif()
+    else()
+        message(STATUS "FFmpeg zip already exists, skipping download.")
+    endif()
+
+    # -------------------
+    # 解压 zip
+    # -------------------
+    message(STATUS "Extracting FFmpeg to ${FFMPEG_DEV_ROOT} ...")
+    file(MAKE_DIRECTORY ${FFMPEG_DEV_ROOT})
+    file(ARCHIVE_EXTRACT
+            INPUT ${FFMPEG_ZIP_FILE}
+            DESTINATION ${FFMPEG_DEV_ROOT}
+    )
+else()
+    message(STATUS "FFmpeg folder already exists, skipping download and extraction.")
+endif()
+
+
+
 
 # 指定 FFmpeg 头文件目录
 include_directories(${FFMPEG_DEV_ROOT}/include)
