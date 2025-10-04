@@ -1,1 +1,2 @@
 #include "ephemeral/Flutter-Generated.xcconfig"
+MACOSX_DEPLOYMENT_TARGET = 12.0
