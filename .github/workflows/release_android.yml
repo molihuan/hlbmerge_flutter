@@ -1,4 +1,4 @@
-name: Release Android Apk
+name: Release Android
 on:
   # 手动触发
   workflow_dispatch:
@@ -27,6 +27,26 @@ jobs:
 
       # Get flutter dependencies.
       - run: flutter pub get
+
+      # 从GitHub Secrets中恢复签名 keystore
+      - name: Restore signing keystore
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/hlbmerge.jks
+        #KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}只在上面这一句命令中有效
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      # 从GitHub Secrets中恢复 keystore.properties
+      - name: Generate keystore.properties
+        run: |
+          echo "storeFile=./hlbmerge.jks" > android/keystore.properties
+          echo "storePassword=${KEYSTORE_PASSWORD}" >> android/keystore.properties
+          echo "keyAlias=${KEY_ALIAS}" >> android/keystore.properties
+          echo "keyPassword=${KEY_PASSWORD}" >> android/keystore.properties
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       # 构建apk
       - name: Build APK

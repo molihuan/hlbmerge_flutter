@@ -11,6 +11,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+**/*.jks.base64
 /build
 /buildApks
 keystore.properties
