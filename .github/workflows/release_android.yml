@@ -22,6 +22,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v5.0.0
         with:
+          distribution: 'zulu'
           java-version: 17
 
       # Get flutter dependencies.

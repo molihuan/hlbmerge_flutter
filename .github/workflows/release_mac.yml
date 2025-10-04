@@ -21,9 +21,9 @@ jobs:
       # Get flutter dependencies.
       - run: flutter pub get
 
-#      - name: Build for macOS
-#        run: flutter build macos --release
-#
+      - name: Build for macOS
+        run: flutter build macos --release
+
 #      - name: Upload Artifact for macOS
 #        uses: actions/upload-artifact@v4.6.2
 #        with:
