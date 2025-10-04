@@ -105,7 +105,13 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     }
     DialogTool.showLoading(message: "正在解析缓存数据...");
     _cacheDataManager.setCachePlatform(state.cachePlatform);
-    List<CacheGroup>? cacheGroupList = _cacheDataManager.loadCacheData(dirPath);
+    List<CacheGroup>? cacheGroupList;
+    try{
+      cacheGroupList = _cacheDataManager.loadCacheData(dirPath);
+    }catch(e){
+      print(e);
+    }
+
     DialogTool.hideLoading();
     if (cacheGroupList == null) {
       Get.snackbar("提示", "没有解析到缓存数据");

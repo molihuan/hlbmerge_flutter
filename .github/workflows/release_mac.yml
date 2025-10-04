@@ -37,7 +37,7 @@ jobs:
         # - "*.app" 是我们要压缩的目标
         # - "-r" 表示递归地压缩整个 .app 目录
         # - "hlbmerge_macos.zip" 是输出的压缩文件名
-        run: zip -r hlbmerge_macos.zip build/macos/Build/Products/Release/*.app
+        run: zip -r hlbmerge_macos.zip build/macos/Build/Products/Release/hlbmerge.app
 
       # 上传压缩后的 .zip 文件
       - name: Upload macOS Artifact

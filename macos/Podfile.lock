@@ -1,0 +1,75 @@
+PODS:
+  - desktop_drop (0.0.1):
+    - FlutterMacOS
+  - ffmpeg_hl (0.0.1):
+    - FlutterMacOS
+  - ffmpeg_kit_flutter_new_min (7.1.1):
+    - ffmpeg_kit_flutter_new_min/min (= 7.1.1)
+    - FlutterMacOS
+  - ffmpeg_kit_flutter_new_min/min (7.1.1):
+    - FlutterMacOS
+  - file_picker (0.0.1):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+  - open_file_mac (0.0.1):
+    - FlutterMacOS
+  - package_info_plus (0.0.1):
+    - FlutterMacOS
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - url_launcher_macos (0.0.1):
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
+  - ffmpeg_hl (from `Flutter/ephemeral/.symlinks/plugins/ffmpeg_hl/macos`)
+  - ffmpeg_kit_flutter_new_min (from `Flutter/ephemeral/.symlinks/plugins/ffmpeg_kit_flutter_new_min/macos`)
+  - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - open_file_mac (from `Flutter/ephemeral/.symlinks/plugins/open_file_mac/macos`)
+  - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
+  - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
+  - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
+
+EXTERNAL SOURCES:
+  desktop_drop:
+    :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos
+  ffmpeg_hl:
+    :path: Flutter/ephemeral/.symlinks/plugins/ffmpeg_hl/macos
+  ffmpeg_kit_flutter_new_min:
+    :path: Flutter/ephemeral/.symlinks/plugins/ffmpeg_kit_flutter_new_min/macos
+  file_picker:
+    :path: Flutter/ephemeral/.symlinks/plugins/file_picker/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  open_file_mac:
+    :path: Flutter/ephemeral/.symlinks/plugins/open_file_mac/macos
+  package_info_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
+  path_provider_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
+  shared_preferences_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
+  url_launcher_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
+
+SPEC CHECKSUMS:
+  desktop_drop: e52397f93b3daec9fe1d504f1d5a21b76403d8ae
+  ffmpeg_hl: 0fc1ff552e33c2c41e0cfc0982105fa0e6cd1022
+  ffmpeg_kit_flutter_new_min: 9a859120bdef0222d153a51b9cbda0cc5873909a
+  file_picker: e716a70a9fe5fd9e09ebc922d7541464289443af
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  open_file_mac: 0e554648e2a87ce59e9438e3e5ca3e552e90d89a
+  package_info_plus: f5790acc797bf17c3e959e9d6cf162cc68ff7523
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  url_launcher_macos: c82c93949963e55b228a30115bd219499a6fe404
+
+PODFILE CHECKSUM: 8014903d13c212d5832684a0b9f334da1a6dcc22
+
+COCOAPODS: 1.15.2

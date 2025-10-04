@@ -56,7 +56,7 @@ class CacheDataManager {
         case CachePlatform.android:
           return loadAndroidCacheData(rootDir);
         default:
-          return null;
+          return loadWinCacheData(rootDir);
       }
     }, onAndroid: () {
       return loadAndroidCacheData(rootDir);

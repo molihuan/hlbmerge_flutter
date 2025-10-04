@@ -62,7 +62,7 @@ Windows：使用Win 10打包，你的系统版本低不保证可用，如有问�
 | ohos                                                                                                           |
 | 待补充                                                                                                            |
 | Mac                                                                                                            |
-| 待补充                                                                                                            |
+| [![preview-mac-01.png](https://i.postimg.cc/kGYs9cnf/preview-mac-01.png)](https://postimg.cc/BPDHB2PK)    |
 | ios                                                                                                            |
 | 待补充                                                                                                            |
 

@@ -66,6 +66,8 @@ class SpDataManager {
       return null;
     },onOhos: (){
       return null;
+    },onMacOS: (){
+      return null;
     });
 
     if (outputDir == null) {
