@@ -1,0 +1,1 @@
+ldd ../build/linux/x64/debug/bundle/hlbmerge

@@ -30,5 +30,5 @@ jobs:
       - name: Upload Artifact for Linux
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: hlbmerge_linux_amd64.zip
-          path: build/linux/*/debug/bundle/
+          name: hlbmerge_linux_amd64
+          path: build/linux/x64/debug/bundle/
