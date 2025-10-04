@@ -1,0 +1,50 @@
+name: Release Android Apk
+on:
+  # 手动触发
+  workflow_dispatch:
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    steps:
+      # 使用本项目
+      - uses: actions/checkout@v5.0.0
+
+      #设置flutter
+      - uses: subosito/flutter-action@v2.14.0
+        with:
+          # The Flutter version to make available on the path
+          flutter-version: 3.22.0
+          # The Flutter build release channel
+          channel: # optional, default is stable
+
+      # 设置jdk
+      - name: Set up JDK
+        uses: actions/setup-java@v5.0.0
+        with:
+          java-version: 17
+
+      # Get flutter dependencies.
+      - run: flutter pub get
+
+      # 构建apk
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload Artifact x86_64-release.apk
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: app-x86_64-release
+          path: build/app/outputs/flutter-apk/app-x86_64-release.apk
+
+      - name: Upload Artifact armeabi-v7a-release.apk
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: app-armeabi-v7a-release
+          path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+
+      - name: Upload Artifact arm64-v8a-release.apk
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: app-arm64-v8a-release
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk

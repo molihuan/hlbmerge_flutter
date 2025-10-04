@@ -1,0 +1,49 @@
+name: Release Mac
+on:
+  # 手动触发
+  workflow_dispatch:
+jobs:
+  build:
+    name: Build
+    runs-on: macos-14
+    steps:
+      # 使用本项目
+      - uses: actions/checkout@v5.0.0
+
+      #设置flutter
+      - uses: subosito/flutter-action@v2.14.0
+        with:
+          # The Flutter version to make available on the path
+          flutter-version: 3.22.0
+          # The Flutter build release channel
+          channel: # optional, default is stable
+
+      # Get flutter dependencies.
+      - run: flutter pub get
+
+#      - name: Build for macOS
+#        run: flutter build macos --release
+#
+#      - name: Upload Artifact for macOS
+#        uses: actions/upload-artifact@v4.6.2
+#        with:
+#          name: hlbmerge_macos_app
+#          path: build/macos/Build/Products/Release/*.app
+
+
+      #  将 .app 文件压缩成 .zip 文件
+      - name: Create zip archive of .app
+        # - "build/macos/Build/Products/Release/" 是 .app 所在的目录
+        # - "*.app" 是我们要压缩的目标
+        # - "-r" 表示递归地压缩整个 .app 目录
+        # - "hlbmerge_macos.zip" 是输出的压缩文件名
+        run: zip -r hlbmerge_macos.zip build/macos/Build/Products/Release/*.app
+
+      # 上传压缩后的 .zip 文件
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          # 上传产物的名称
+          name: hlbmerge_macos_release
+          # 上传文件的路径，现在是 .zip 文件
+          path: hlbmerge_macos.zip
