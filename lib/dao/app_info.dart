@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// 列表里的每条更新信息
 class AppUpdateData {
   final String platform;
@@ -75,6 +77,11 @@ class AppInfo {
           .map((e) => AppUpdateData.fromJson(e))
           .toList(),
     );
+  }
+
+  static AppInfo fromJsonString(String jsonString) {
+    final Map<String, dynamic> jsonMap = json.decode(jsonString);
+    return AppInfo.fromJson(jsonMap);
   }
 
   Map<String, dynamic> toJson() => {

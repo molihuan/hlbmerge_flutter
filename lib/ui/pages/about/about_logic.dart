@@ -16,6 +16,8 @@ class AboutLogic extends GetxController {
 
   final appInfoGiteeUrl =
       "https://gitee.com/molihuan/hlbmerge_flutter/raw/master/res/appInfo/AppInfo.json";
+  final appInfoGitcodeUrl =
+      "https://raw.gitcode.com/bigmolihuan/hlbmerge_flutter/raw/master/res/appInfo/AppInfo.json";
   final appInfoGithubUrl =
       "https://raw.githubusercontent.com/molihuan/hlbmerge_flutter/master/res/appInfo/AppInfo.json";
 
@@ -61,14 +63,22 @@ class AboutLogic extends GetxController {
   //获取网络app数据
   Future<void> loadRemoteAppInfo() async {
     // 网络appInfo
-    final res = await httpUtils.getRequest(appInfoGiteeUrl);
+    final res = await httpUtils.getRequest(appInfoGitcodeUrl);
     final appInfoBody = res.body;
-    if (res.isOk &&
-        appInfoBody != null &&
-        appInfoBody is Map<String, dynamic>) {
+    //print("获取appInfo结果:"+appInfoBody);
+    if (res.isOk && appInfoBody != null) {
+
       try {
-        final appInfo = AppInfo.fromJson(appInfoBody);
-        print(appInfo);
+        AppInfo? appInfo;
+        if(appInfoBody is Map<String, dynamic>){
+          appInfo = AppInfo.fromJson(appInfoBody);
+        }else if(appInfoBody is String){
+          appInfo = AppInfo.fromJsonString(appInfoBody);
+        }
+        print("appInfo: $appInfo");
+        if(appInfo == null){
+          return;
+        }
 
         AppUpdateData? appUpdateDate;
         for (var item in appInfo.updateData) {
@@ -94,6 +104,11 @@ class AboutLogic extends GetxController {
               return item;
             }
             return null;
+          },onMacOS: () {
+            if (item.platform == "mac") {
+              return item;
+            }
+            return null;
           });
 
           if (appUpdateDate != null) {
@@ -105,7 +120,7 @@ class AboutLogic extends GetxController {
         print(e);
       }
     } else {
-      //Get.snackbar("错误", res.statusText ?? "未知错误");
+      print("请求appInfo失败:${res.statusText}");
     }
   }
 

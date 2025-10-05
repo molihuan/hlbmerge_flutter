@@ -48,6 +48,18 @@
       "downloadPageUrl": "https://gitcode.com/bigmolihuan/hlbmerge_flutter/releases",
       "appSize": 0,
       "md5": ""
+    },
+    {
+      "platform": "mac",
+      "enableUpdateCheck": true,
+      "versionCode" : 205,
+      "versionName" : "2.0.5",
+      "updateTime": "2025-10-02",
+      "updateContent": "1. 添加了新功能",
+      "downloadUrl": "",
+      "downloadPageUrl": "https://gitcode.com/bigmolihuan/hlbmerge_flutter/releases",
+      "appSize": 0,
+      "md5": ""
     }
   ]
 }
