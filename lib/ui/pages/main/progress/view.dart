@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:open_file/open_file.dart';
 
 
 import '../../../../service/ffmpeg/ffmpeg_task.dart';
@@ -77,7 +76,7 @@ class ProgressPage extends StatelessWidget {
                   final item = files[dirIndex];
                   return ListTile(
                     onTap: () {
-                      OpenFile.open(item.path);
+                      logic.openFile(item.path);
                     },
                     title: Text(path.basename(item.path)),
                     subtitle: Text("位置: ${item.path}"),

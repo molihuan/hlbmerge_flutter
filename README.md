@@ -88,7 +88,7 @@ Windows：使用Win 10打包，你的系统版本低不保证可用，如有问�
 视频链接：(选填，如果视频已经下架则把本地缓存文件打包压缩发我邮箱)
 
 ## 源码编译事项
-目前使用的是的鸿蒙flutter3.22这个比较稳定的版本
+目前使用的是的鸿蒙flutter3.27.4
 
 常用命令:
 ```sh
@@ -111,7 +111,7 @@ flutter build apk --release
 flutter build apk --release --split-per-abi
 
 ```
-Windows ffmpeg配置
+Windows ffmpeg配置,cmake构建时会自动下载ffmpeg,但是没有做文件完整性校验,请保持网络通畅,如果构建失败请尝试flutter clean后重新构建
 ```sh
 ffmpeg version 4.3.1 Copyright (c) 2000-2020 the FFmpeg developers
   built with gcc 10.2.1 (GCC) 20200726
@@ -127,7 +127,7 @@ ffmpeg version 4.3.1 Copyright (c) 2000-2020 the FFmpeg developers
 Hyper fast Audio and Video encoder
 usage: ffmpeg [options] [[infile options] -i infile]... {[outfile options] outfile}
 ```
-Linux ffmpeg配置
+Linux ffmpeg配置,cmake构建时会自动下载ffmpeg,但是没有做文件完整性校验,请保持网络通畅,如果构建失败请尝试flutter clean后重新构建
 ```sh
 ffmpeg version 4.3.1 Copyright (c) 2000-2020 the FFmpeg developers
   built with gcc 9.3.0 (crosstool-NG 1.24.0.133_b0863d8_dirty)

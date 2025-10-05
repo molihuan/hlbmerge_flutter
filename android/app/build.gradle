@@ -39,8 +39,9 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.molihuan.hlbmerge"
 //    compileSdk = flutter.compileSdkVersion
+//    ndkVersion = flutter.ndkVersion
     compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    ndkVersion "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -53,10 +54,12 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
 //        minSdk = flutter.minSdkVersion
+//        targetSdk = flutter.targetSdkVersion
         minSdk = 24
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        multiDexEnabled true
     }
 
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hlbmerge/utils/PlatformUtils.dart';
-import 'package:open_file/open_file.dart';
 
 import 'logic.dart';
 import 'state.dart';

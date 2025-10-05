@@ -21,7 +21,8 @@ dependencies:
 #  file_picker:
 #    git:
 #      url: "https://gitcode.com/openharmony-sig/fluttertpc_file_picker.git"
-  file_picker: ^8.3.2
+#  file_picker: ^8.3.2
+  file_picker: ^10.3.3
   # 路径
   path_provider:
     git:
@@ -46,13 +47,15 @@ dependencies:
     path: ./ffmpeg_hl
   # 数据存储
   shared_preferences:
-      git:
-        url: "https://gitcode.com/openharmony-sig/flutter_packages.git"
-        path: "packages/shared_preferences/shared_preferences"
+    git:
+      url: "https://gitcode.com/openharmony-sig/flutter_packages.git"
+      path: "packages/shared_preferences/shared_preferences"
   # 拖拽
-  desktop_drop: ^0.6.1
-  # 打开文件或目录
-  open_file: ^3.5.10
+#  desktop_drop: ^0.6.1
+  desktop_drop:
+    git:
+      url: "https://gitee.com/molihuan/flutter-plugins.git"
+      path: "packages/desktop_drop"
 
 #强制覆盖
 dependency_overrides:
