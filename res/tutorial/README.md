@@ -7,6 +7,12 @@
    - 通过DocumentUri授权,点击对应Bilibili版本后的读取开关即可开始授权(本地必须要有缓存文件),适用于Android 11~13,如果无法授权请使用其他方法。
 
    - 通过Shizuku授权,适用于Android 11及以上系统,点击"Shizuku授权"按钮即可开始授权,授权后打开对应bilibili版本读取开关即可
+     ### 特别注意:使用Shizuku授权方式导出缓存文件的方式极其不稳定,很有可能失败,可以多尝试几次,我的建议是将Shizuku软件以小窗的形式保持在前台运行,这样的成功率高。
+     > 关于Shizuku:
+     > 
+     > Shizuku官网:[https://shizuku.rikka.app/](https://shizuku.rikka.app/)
+     > 
+     > Shizuku开源地址:[https://github.com/RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku)
 
    - 使用其他的文件管理器将:bilibili本地缓存文件移动出Android/data目录,然后在"选择缓存"页面选择"自定义路径"，弹窗中选择你移动出来的文件路径即可
 
@@ -98,5 +104,9 @@
    
 
 ## Linux教程
+
+与Windows同理
+
+## Mac教程
 
 与Windows同理

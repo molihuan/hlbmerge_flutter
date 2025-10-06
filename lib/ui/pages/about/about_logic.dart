@@ -12,7 +12,7 @@ class AboutLogic extends GetxController {
   final AboutState state = AboutState();
   final openSourceUrl = 'https://github.com/molihuan/hlbmerge_flutter';
   final tutorialUrl =
-      'https://github.com/molihuan/hlbmerge_flutter/blob/master/res/tutorial';
+      'https://github.com/molihuan/hlbmerge_flutter/blob/master/res/tutorial/README.md';
 
   final appInfoGiteeUrl =
       "https://gitee.com/molihuan/hlbmerge_flutter/raw/master/res/appInfo/AppInfo.json";

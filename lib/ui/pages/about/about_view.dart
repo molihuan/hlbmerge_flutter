@@ -31,7 +31,7 @@ class AboutPage extends StatelessWidget {
               },
             ),
             ListTile(
-              title: const Text('教程'),
+              title: const Text('使用教程'),
               onTap: () {
                 logic.goTutorialUrl();
               },

@@ -67,7 +67,7 @@ Windows：使用Win 10打包，你的系统版本低不保证可用，如有问�
 | 待补充                                                                                                            |
 
 
-## 使用教程：[跳转](https://github.com/molihuan/hlbmerge_flutter/blob/master/res/tutorial) 
+## 使用教程：[跳转](https://github.com/molihuan/hlbmerge_flutter/blob/master/res/tutorial/README.md) 
 
 ## 问题反馈
 
