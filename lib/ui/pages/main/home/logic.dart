@@ -54,7 +54,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
       }
       //判断是否有读写权限
       var result = await MainChannel.hasReadWritePermission();
-      print("安卓权限判断结果:${result}");
+      //print("安卓权限判断结果:${result}");
       if (result.first == 0) {
         if (result.third == true) {
           state.hasPermission = true;
@@ -85,7 +85,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     }, onAndroid: () async {
       //判断是否有读写权限
       var result = await MainChannel.hasReadWritePermission();
-      print("安卓权限判断结果:${result}");
+      //print("安卓权限判断结果:${result}");
       if (result.first == 0) {
         if (result.third == true) {
           state.hasPermission = true;

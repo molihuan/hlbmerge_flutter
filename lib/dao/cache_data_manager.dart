@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ffmpeg_hl/beans/Pair.dart';
 import 'package:get/get.dart';
+import 'package:hlbmerge/dao/sp_data_manager.dart';
 import 'package:hlbmerge/models/cache_group.dart';
 import 'package:hlbmerge/utils/FileUtils.dart';
 import 'package:hlbmerge/utils/JsonUtils.dart';
@@ -19,6 +20,7 @@ enum CachePlatform {
   mac("Mac缓存"),
   //手机
   android("安卓缓存");
+
   final String title; // 枚举字段
 
   const CachePlatform(this.title); // 构造函数
@@ -41,6 +43,9 @@ class CacheDataManager {
     _cachePlatform = platform;
   }
 
+  //导出文件时是否需要添加序号
+  bool isAddIndex = true;
+
   List<CacheGroup>? loadCacheData(String targetPath) {
     //判断路径是否存在并且是否是文件夹
     var rootDir = Directory(targetPath);
@@ -49,13 +54,15 @@ class CacheDataManager {
       return null;
     }
 
+    isAddIndex = SpDataManager.getExportFileAddIndex();
+
     return runPlatformFunc<List<CacheGroup>?>(onDefault: () {
       switch (_cachePlatform) {
         case CachePlatform.win:
           return loadWinCacheData(rootDir);
         case CachePlatform.android:
           return loadAndroidCacheData(rootDir);
-        default:
+        case CachePlatform.mac:
           return loadWinCacheData(rootDir);
       }
     }, onAndroid: () {
@@ -155,6 +162,18 @@ class CacheDataManager {
       }
     }
 
+    //遍历缓存组列表并将每一个缓存组里的cacheItemList按item的p进行排序,如果其中有p为空的则往后排
+    for (var cacheGroup in cacheGroupList) {
+      cacheGroup.cacheItemList.sort((a, b) {
+        // 如果a的p为空，排在后面
+        if (a.p == null) return 1;
+        // 如果b的p为空，排在前面
+        if (b.p == null) return -1;
+        // 都不为空时，按p值升序排列
+        return a.p! - b.p!;
+      });
+    }
+
     print(cacheGroupList);
     return cacheGroupList;
   }
@@ -242,6 +261,18 @@ class CacheDataManager {
       }
     }
 
+    //遍历缓存组列表并将每一个缓存组里的cacheItemList按item的p进行排序,如果其中有p为空的则往后排
+    for (var cacheGroup in cacheGroupList) {
+      cacheGroup.cacheItemList.sort((a, b) {
+        // 如果a的p为空，排在后面
+        if (a.p == null) return 1;
+        // 如果b的p为空，排在前面
+        if (b.p == null) return -1;
+        // 都不为空时，按p值升序排列
+        return a.p! - b.p!;
+      });
+    }
+
     print(cacheGroupList);
     return cacheGroupList;
   }
@@ -272,15 +303,25 @@ class CacheDataManager {
 
       if (data.containsKey('page_data')) {
         final pageData = data['page_data'];
-        item.title = _getMapString(pageData, 'part');
-        item.cId = _getMapString(pageData, 'cid');
+        if (pageData != null) {
+          item.title = _getMapString(pageData, 'part');
+          item.cId = _getMapString(pageData, 'cid');
+          //获取p
+          item.p = _getMapInt(pageData, 'page');
+        }
       }
 
       if (data.containsKey('ep')) {
         final epData = data['ep'];
-        if(epData != null){
+        if (epData != null) {
           item.title =
               _getFirstNonNull([() => _getMapString(epData, 'index_title')]);
+          //获取p
+          item.p = _getFirstNonNull([
+            () => _getMapInt(epData, 'index'),
+            () => _getMapInt(epData, 'page'),
+            () => _getMapInt(epData, 'sort_index'),
+          ]);
         }
       }
 
@@ -292,6 +333,11 @@ class CacheDataManager {
         () => item.avId,
         () => item.cId,
       ]);
+
+      //判断是否需要添加序号
+      if (isAddIndex && item.p != null) {
+        item.title = "${item.p}.${item.title}";
+      }
 
       item.coverUrl = _getMapString(data, 'cover');
 
@@ -333,6 +379,14 @@ class CacheDataManager {
         () => _getMapString(data, 'p'),
       ]);
 
+      //获取p
+      item.p = _getMapInt(data, 'p');
+
+      //判断是否需要添加序号
+      if (isAddIndex && item.p != null) {
+        item.title = "${item.p}.${item.title}";
+      }
+
       item.coverPath = item.coverPath ?? _getMapString(data, 'coverPath');
       item.coverUrl = _getMapString(data, 'coverUrl');
 
@@ -358,11 +412,38 @@ class CacheDataManager {
     return null;
   }
 
+  //获取map中的int值
+  static int? _getMapInt(dynamic data, String key) {
+    if (data is Map && data.containsKey(key)) {
+      final value = data[key];
+      return value is int ? value : int.tryParse(value?.toString() ?? "");
+    }
+    return null;
+  }
+
   // 获取第一个非空的值
-  static String? _getFirstNonNull(List<String? Function()> getters) {
+  // static String? _getFirstNonNull(List<String? Function()> getters) {
+  //   for (var get in getters) {
+  //     final value = get();
+  //     if (value != null && value.trim().isNotEmpty) return value;
+  //   }
+  //   return null;
+  // }
+
+  // 获取第一个非空的值
+  static T? _getFirstNonNull<T>(List<T? Function()> getters) {
     for (var get in getters) {
       final value = get();
-      if (value != null && value.trim().isNotEmpty) return value;
+      if (value != null) {
+        if (value is String) {
+          // 判断字符串是否为空
+          if (value.trim().isNotEmpty) {
+            return value;
+          }
+        } else {
+          return value;
+        }
+      }
     }
     return null;
   }

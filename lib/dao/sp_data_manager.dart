@@ -6,7 +6,6 @@ import 'package:hlbmerge/utils/PlatformUtils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import '../ui/pages/main/home/state.dart';
 import '../utils/FileUtils.dart';
 import 'cache_data_manager.dart';
@@ -45,7 +44,8 @@ class SpDataManager {
   }
 
   //获取默认的输出路径
-  static String? _getDefaultOutputDirPath({void Function(String)? futureCallback}) {
+  static String? _getDefaultOutputDirPath(
+      {void Function(String)? futureCallback}) {
     var outputDir = runPlatformFunc<Directory?>(onDefault: () {
       var currExeDir = FileUtils.getCurrExeDir();
       return Directory('${currExeDir.path}/outputDir');
@@ -64,9 +64,9 @@ class SpDataManager {
         futureCallback?.call(path);
       });
       return null;
-    },onOhos: (){
+    }, onOhos: () {
       return null;
-    },onMacOS: (){
+    }, onMacOS: () {
       return null;
     });
 
@@ -92,6 +92,7 @@ class SpDataManager {
   static String? getInputCacheDirPath() {
     return prefs.getString(inputCacheDirPathKey);
   }
+
   static Future<String?> getInputCacheDirPathByReload() async {
     await prefs.reload(); // 确保读的是最新的
     return prefs.getString(inputCacheDirPathKey);
@@ -109,12 +110,17 @@ class SpDataManager {
   }
 
   //key
-  static const String androidParseCachePermissionKey = 'androidParseCachePermission';
+  static const String androidParseCachePermissionKey =
+      'androidParseCachePermission';
+
   //安卓解析缓存权限
-  static setAndroidParseCachePermission(AndroidParseCachePermission permission){
+  static setAndroidParseCachePermission(
+      AndroidParseCachePermission permission) {
     prefs.setString(androidParseCachePermissionKey, permission.name);
   }
-  static Future<AndroidParseCachePermission?> getAndroidParseCachePermission() async {
+
+  static Future<AndroidParseCachePermission?>
+      getAndroidParseCachePermission() async {
     await prefs.reload();
     String? target = prefs.getString(androidParseCachePermissionKey);
     return AndroidParseCachePermission.values
@@ -123,11 +129,37 @@ class SpDataManager {
 
   //是否单一输出目录
   static const String singleOutputPathCheckedKey = 'singleOutputPathChecked';
-  static setSingleOutputPathChecked(bool checked){
+
+  static setSingleOutputPathChecked(bool checked) {
     prefs.setBool(singleOutputPathCheckedKey, checked);
   }
-  static bool getSingleOutputPathChecked(){
+
+  static bool getSingleOutputPathChecked() {
     return prefs.getBool(singleOutputPathCheckedKey) ?? false;
   }
 
+  //导出弹幕文件Checked
+  static const String exportDanmakuFileCheckedKey = 'exportDanmakuFileChecked';
+  static setExportDanmakuFileChecked(bool checked) {
+    prefs.setBool(exportDanmakuFileCheckedKey, checked);
+  }
+  static bool getExportDanmakuFileChecked() {
+    return prefs.getBool(exportDanmakuFileCheckedKey) ?? false;
+  }
+
+  //导出时添加序号
+  static const String exportFileAddIndexKey = 'exportFileAddIndex';
+
+  static setExportFileAddIndex(bool checked) {
+    prefs.setBool(exportFileAddIndexKey, checked);
+  }
+
+  static bool getExportFileAddIndex() {
+    return prefs.getBool(exportFileAddIndexKey) ??
+        runPlatformFunc(onDefault: () {
+          return false;
+        }, onAndroid: () {
+          return true;
+        });
+  }
 }

@@ -46,6 +46,9 @@ class CacheItem {
   String? groupCoverUrl;
   String? groupTitle;
 
+  // 在缓存组中的p(顺序/章节索引)
+  int? p;
+
   //判断是否可以合并音视频
   bool canMergeAudioVideo(){
     //如果audioPath和videoPath其中有一个为空,并且blvPathList也为空,则返回false,表示不能合并,其他返回true
@@ -54,6 +57,6 @@ class CacheItem {
 
   @override
   String toString() {
-    return 'CacheItem{checked: $checked, path: $path, parentPath: $parentPath, danmakuPath: $danmakuPath, jsonPath: $jsonPath, audioPath: $audioPath, videoPath: $videoPath, blvPathList: $blvPathList, title: $title, subTitle: $subTitle, coverPath: $coverPath, coverUrl: $coverUrl, avId: $avId, bvId: $bvId, cId: $cId, groupId: $groupId, groupCoverPath: $groupCoverPath, groupCoverUrl: $groupCoverUrl, groupTitle: $groupTitle}';
+    return 'CacheItem{checked: $checked, path: $path, parentPath: $parentPath, danmakuPath: $danmakuPath, jsonPath: $jsonPath, audioPath: $audioPath, videoPath: $videoPath, blvPathList: $blvPathList, title: $title, subTitle: $subTitle, coverPath: $coverPath, coverUrl: $coverUrl, avId: $avId, bvId: $bvId, cId: $cId, groupId: $groupId, groupCoverPath: $groupCoverPath, groupCoverUrl: $groupCoverUrl, groupTitle: $groupTitle, p: $p}';
   }
 }

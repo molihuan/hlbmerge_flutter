@@ -11,6 +11,7 @@ import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.XXPermissions
 import com.hjq.permissions.permission.PermissionLists
 import com.hjq.permissions.permission.base.IPermission
+import com.molihuan.commonmodule.tool.FileTool
 import com.molihuan.commonmodule.tool.ToastTool
 import com.molihuan.hlbmerge.AndroidActivity
 import com.molihuan.hlbmerge.NavRoute
@@ -174,6 +175,8 @@ object MainMethodChannel : Application.ActivityLifecycleCallbacks {
         val srcDir = "${FileUtils.androidDataPath}/${inputCachePackageName}/download"
         val targetDir = FlutterSpData.cacheCopyTempPath
         runOnCoroutine {
+            //先删除拷贝缓存临时目录
+            FileTool.deleteAllFiles(FlutterSpData.cacheCopyTempPath)
             //复制缓存整体结构,m4s,blv文件只做0拷贝
             fileCopy.zeroCopyFile(
                 srcDir,

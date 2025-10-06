@@ -67,6 +67,18 @@ class SettingsLogic extends GetxController {
     state.singleOutputPathChecked = checked;
   }
 
+  //导出时添加序号
+  void changeExportFileAddIndexChecked(bool checked) {
+    SpDataManager.setExportFileAddIndex(checked);
+    state.exportFileAddIndex = checked;
+  }
+
+  //导出弹幕文件Checked
+  void changeExportDanmakuFileChecked(bool checked) {
+    SpDataManager.setExportDanmakuFileChecked(checked);
+    state.exportDanmakuFileChecked = checked;
+  }
+
   // 测试方法
   testFunc() async {
     // var platformVersion = await ffmpegHlPlugin.getPlatformVersion();

@@ -38,9 +38,27 @@ class SettingsPage extends StatelessWidget {
               //输出单一目录
               Obx((){
                 return ListTile(
-                  title: Text("输出单一目录"),
+                  title: const Text("导出到单一目录"),
                   trailing: Switch(value: state.singleOutputPathChecked,onChanged: (v) {
                     logic.changeSingleOutputPathChecked(v);
+                  },),
+                );
+              }),
+              //导出时添加序号
+              Obx((){
+                return ListTile(
+                  title: const Text("导出时添加序号"),
+                  trailing: Switch(value: state.exportFileAddIndex,onChanged: (v) {
+                    logic.changeExportFileAddIndexChecked(v);
+                  },),
+                );
+              }),
+              //导出时导出弹幕文件
+              Obx((){
+                return ListTile(
+                  title: const Text("导出时导出弹幕文件"),
+                  trailing: Switch(value: state.exportDanmakuFileChecked,onChanged: (v) {
+                    logic.changeExportDanmakuFileChecked(v);
                   },),
                 );
               }),

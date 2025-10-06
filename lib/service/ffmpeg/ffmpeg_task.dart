@@ -49,10 +49,20 @@ class FFmpegTaskController extends GetxController {
   final int _maxConcurrency = 1;
   int _runningCount = 0;
 
+  //是否导出弹幕文件
+  bool _isExportDanmakuFile = false;
+
   // 添加任务
   void addTask(FFmpegTaskBean task) {
+    _beforeAddTask(task);
     _tasks.add(task);
     _schedule();
+  }
+
+  //添加任务之前
+  _beforeAddTask(FFmpegTaskBean task) async {
+    //读取配置
+    _isExportDanmakuFile = SpDataManager.getExportDanmakuFileChecked();
   }
 
   // 调度任务
@@ -93,34 +103,33 @@ class FFmpegTaskController extends GetxController {
         onDefault: () {},
         onAndroid: () async {
           var currPath = task.cacheItem.path;
-          if (currPath == null){
+          if (currPath == null) {
             return;
           }
           var regex = r".*\.(m4s|blv)$";
           //将指定目录下所有m4s和blv文件(包括其子文件夹)设置为空文件
-          FileUtils.setEmptyFileByRegex(currPath, regex);
-
+          //TODO 待完善
+          //FileUtils.setEmptyFileByRegex(currPath, regex);
         });
   }
+
   Future<bool> _runFFmpegTaskBefore(FFmpegTaskBean task) async {
-    return await runPlatformFunc(
-        onDefault: () {
-          return Future.value(true);
-        },
-        onAndroid: () async {
-          var copyTempDirPath = SpDataManager.getInputCacheDirPath() ?? "";
-          var sufPath = task.cacheItem.path?.replaceFirst(copyTempDirPath, "");
-          if (sufPath == null){
-            return Future.value(false);
-          }
-          //拷贝缓存数据
-          var copyResult = await MainChannel.copyCacheAudioVideoFile(sufPath);
-          if(copyResult.first == 0){
-            return Future.value(true);
-          }else{
-            return Future.value(false);
-          }
-        });
+    return await runPlatformFunc(onDefault: () {
+      return Future.value(true);
+    }, onAndroid: () async {
+      var copyTempDirPath = SpDataManager.getInputCacheDirPath() ?? "";
+      var sufPath = task.cacheItem.path?.replaceFirst(copyTempDirPath, "");
+      if (sufPath == null) {
+        return Future.value(false);
+      }
+      //拷贝缓存数据
+      var copyResult = await MainChannel.copyCacheAudioVideoFile(sufPath);
+      if (copyResult.first == 0) {
+        return Future.value(true);
+      } else {
+        return Future.value(false);
+      }
+    });
   }
 
   // 运行单个任务
@@ -154,9 +163,13 @@ class FFmpegTaskController extends GetxController {
       //判断输出文件是否存在,如果存在则重命名
       outputPath = await FileUtils.getAvailableFilePath(outputPath);
 
+      //结果pair
+      var resultPair = Pair(false, "缺少输入源");
+
       //输入路径
       if (audioPath != null && videoPath != null) {
         switch (cachePlatform) {
+          case CachePlatform.mac:
           case CachePlatform.win:
             String tempAudioPath = "${audioPath}.hlb_temp.mp3";
             String tempVideoPath = "${videoPath}.hlb_temp.mp4";
@@ -164,7 +177,7 @@ class FFmpegTaskController extends GetxController {
             await FileUtils.decryptPcM4sAfter202403(audioPath, tempAudioPath);
             await FileUtils.decryptPcM4sAfter202403(videoPath, tempVideoPath);
             // 合并
-            var resultPair = await ffmpegPlugin.mergeAudioVideo(
+            resultPair = await ffmpegPlugin.mergeAudioVideo(
               tempAudioPath,
               tempVideoPath,
               outputPath,
@@ -180,20 +193,19 @@ class FFmpegTaskController extends GetxController {
               }
             });
 
-            return resultPair;
-          default:
+            break;
+
+          case CachePlatform.android:
             // 合并
-            var resultPair = await ffmpegPlugin.mergeAudioVideo(
+            resultPair = await ffmpegPlugin.mergeAudioVideo(
               audioPath,
               videoPath,
               outputPath,
             );
-            return resultPair;
+            break;
         }
-      }
-
-      //blv格式
-      if (blvList != null && blvList.isNotEmpty) {
+      } else if (blvList != null && blvList.isNotEmpty) {
+        //blv格式
         //排序
         blvList.sort((a, b) {
           final regex = RegExp(r'(\d+)\.blv$');
@@ -206,18 +218,29 @@ class FFmpegTaskController extends GetxController {
         });
         print("排序后的blvList:$blvList");
         // 合并
-        var resultPair = await ffmpegPlugin.mergeVideos(
+        resultPair = await ffmpegPlugin.mergeVideos(
           blvList,
           outputPath,
         );
-        return resultPair;
       }
 
-      return Pair(false, "缺少输入源");
+      if(resultPair.first){
+        //导出弹幕文件
+        if (_isExportDanmakuFile) {
+          final srcPath = item.danmakuPath;
+          final destPath = FileUtils.changeFileExtension(outputPath, "xml");;
+          if (srcPath != null) {
+            FileUtils.copyFile(srcPath, destPath);
+          }
+        }
+      }
+
+      return resultPair;
     });
 
     if (result == null) {
       print("$title 合并未知错误");
+      throw Exception("合并未知错误");
       return;
     }
 
@@ -225,6 +248,7 @@ class FFmpegTaskController extends GetxController {
       print("$title 合并完成");
     } else {
       print("$title 合并错误 ${result.second}");
+      throw Exception("$title 合并错误 ${result.second}");
     }
   }
 }

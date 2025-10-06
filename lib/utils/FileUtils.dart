@@ -138,6 +138,49 @@ class FileUtils {
     }
   }
 
+  // 修改文件后缀
+  static String changeFileExtension(String filePath, String newExtension) {
+    final dir = p.dirname(filePath);
+    final baseName = p.basenameWithoutExtension(filePath);
+    return p.join(dir, '$baseName.$newExtension');
+  }
+
+  //文件复制
+  static Future<void> copyFile(String srcPath, String destPath) async {
+    print("$srcPath copy to $destPath");
+    final srcFile = File(srcPath);
+    final destFile = File(destPath);
+
+    try {
+      // 确保目标目录存在
+      await destFile.parent.create(recursive: true);
+
+      // 检查源文件是否存在
+      if (!await srcFile.exists()) {
+        throw FileSystemException('源文件不存在', srcPath);
+      }
+
+      // 检查目标文件是否已存在，如果存在则先删除
+      if (await destFile.exists()) {
+        await destFile.delete();
+      }
+
+      // 复制文件
+      await srcFile.copy(destPath);
+    } on FileSystemException catch (e) {
+      // 处理文件系统异常，特别是只读文件系统的情况
+      if (e.osError?.errorCode == 30) { // Read-only file system
+        print('目标文件系统为只读，无法复制文件: $destPath');
+        rethrow;
+      }
+      rethrow;
+    } catch (e) {
+      // 处理其他异常
+      print('文件复制失败: $e');
+      rethrow;
+    }
+  }
+
 }
 
 //文件格式枚举
