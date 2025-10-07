@@ -172,6 +172,17 @@ class CacheDataManager {
         // 都不为空时，按p值升序排列
         return a.p! - b.p!;
       });
+
+      //判断是否需要添加序号
+      if (isAddIndex && 1 < cacheGroup.cacheItemList.length) {
+        for (var item in cacheGroup.cacheItemList) {
+          if (item.p != null) {
+            item.title = "${item.p}.${item.title}";
+          }
+        }
+      }
+
+
     }
 
     print(cacheGroupList);
@@ -271,6 +282,16 @@ class CacheDataManager {
         // 都不为空时，按p值升序排列
         return a.p! - b.p!;
       });
+
+      //判断是否需要添加序号
+      if (isAddIndex && 1 < cacheGroup.cacheItemList.length) {
+        for (var item in cacheGroup.cacheItemList) {
+          if (item.p != null) {
+            item.title = "${item.p}.${item.title}";
+          }
+        }
+      }
+
     }
 
     print(cacheGroupList);
@@ -334,11 +355,6 @@ class CacheDataManager {
         () => item.cId,
       ]);
 
-      //判断是否需要添加序号
-      if (isAddIndex && item.p != null) {
-        item.title = "${item.p}.${item.title}";
-      }
-
       item.coverUrl = _getMapString(data, 'cover');
 
       // item.groupId = _getMapString(data, 'groupId');
@@ -381,11 +397,6 @@ class CacheDataManager {
 
       //获取p
       item.p = _getMapInt(data, 'p');
-
-      //判断是否需要添加序号
-      if (isAddIndex && item.p != null) {
-        item.title = "${item.p}.${item.title}";
-      }
 
       item.coverPath = item.coverPath ?? _getMapString(data, 'coverPath');
       item.coverUrl = _getMapString(data, 'coverUrl');

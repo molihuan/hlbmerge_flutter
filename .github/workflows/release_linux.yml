@@ -24,7 +24,8 @@ jobs:
       - name: Build for Linux
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y ninja-build libgtk-3-dev libmpv-dev mpv
+#          sudo apt-get install -y ninja-build libgtk-3-dev libmpv-dev mpv
+          sudo apt-get install -y ninja-build libgtk-3-dev
           flutter build linux --debug
 
       - name: Upload Artifact for Linux
