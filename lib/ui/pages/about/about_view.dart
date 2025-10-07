@@ -18,6 +18,7 @@ class AboutPage extends StatelessWidget {
       body: Container(
         child: ListView(
           children: [
+            _buildAppIntroduction(context),
             //软件版本
             Obx(() {
               return _buildAppVersionView();
@@ -42,12 +43,36 @@ class AboutPage extends StatelessWidget {
     );
   }
 
+  Widget _buildAppIntroduction(BuildContext context) {
+    final widget = Column(
+      children: [
+        //app ico
+        Image.asset(
+          "assets/icos/app_logo.png",
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+        ),
+        //app name
+        Container(margin: const EdgeInsets.symmetric(vertical: 10),child: const Text("HLB站缓存合并", style: TextStyle(fontSize: 20)),),
+        //app介绍
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 50),
+          child: const Text(
+            "将B站缓存文件合并导出为MP4,支持Android、windows(10以上)、linux、mac、ios,支持B站Android客户端缓存,支持B站Windows客户端缓存",
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
+    );
+    return widget;
+  }
+
   Widget _buildAppVersionView() {
     final appUpdateData = state.appUpdateData;
     if (appUpdateData == null ||
         appUpdateData.enableUpdateCheck != true ||
-        (logic.localVersionCode >= appUpdateData.versionCode)
-    ) {
+        (logic.localVersionCode >= appUpdateData.versionCode)) {
       return ListTile(
         title: const Text('软件版本'),
         trailing: Text(state.appVersionName),
