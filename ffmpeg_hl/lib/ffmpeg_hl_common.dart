@@ -55,7 +55,16 @@ class FfmpegHlCommon extends FfmpegHlPlatform {
     if (ReturnCode.isSuccess(returnCode)) {
       return Future.value(Pair(true, "合并成功"));
     } else {
-      return Future.value(Pair(false, "合并失败"));
+      var errMsg = await session.getFailStackTrace();
+      if(errMsg == null || errMsg.trim().isEmpty){
+        final logs = await session.getLogs();
+        //打印
+        // for (var log in logs) {
+        //   print(log.getMessage());
+        // }
+        errMsg = logs.last.getMessage();
+      }
+      return Future.value(Pair(false, "$errMsg"));
     }
   }
 

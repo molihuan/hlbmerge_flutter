@@ -49,7 +49,15 @@ class ProgressPage extends StatelessWidget {
                   return ListTile(
                     onTap: () {},
                     title: Text("任务: ${task.cacheItem.title}"),
-                    subtitle: Text("${task.groupTitle ?? ''}"),
+                    subtitle: Obx((){
+                      final status = task.status.value;
+                      switch (status) {
+                        case FFmpegTaskStatus.failed:
+                          return SelectableText("失败:${task.errorMsg.value}");
+                        default:
+                          return Text("${task.groupTitle ?? ''}");
+                      }
+                    }),
                     trailing: Obx(() {
                       final status = task.status.value;
                       return Text(

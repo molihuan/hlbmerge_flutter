@@ -13,13 +13,20 @@ import '../../ui/pages/main/home/logic.dart';
 import '../../utils/FileUtils.dart';
 import '../../utils/PlatformUtils.dart';
 
-enum FFmpegTaskStatus { pending, running, completed, failed }
+enum FFmpegTaskStatus {
+  pending,
+  running,
+  completed,
+  failed
+}
 
 class FFmpegTaskBean {
   final CacheItem cacheItem;
   final String? groupTitle;
   final Rx<FFmpegTaskStatus> status;
   final CachePlatform cachePlatform;
+  //失败的原因
+  final Rx<String?> errorMsg = (null as String?).obs;
 
   FFmpegTaskBean({
     required this.cacheItem,
@@ -89,8 +96,9 @@ class FFmpegTaskController extends GetxController {
     // 执行
     _runFFmpegTask(task).then((_) {
       task.status.value = FFmpegTaskStatus.completed;
-    }).catchError((_) {
+    }).catchError((e) {
       task.status.value = FFmpegTaskStatus.failed;
+      task.errorMsg.value = e.toString();
     }).whenComplete(() {
       _runFFmpegTaskAfter(task);
       _runningCount--;
@@ -138,13 +146,25 @@ class FFmpegTaskController extends GetxController {
         groupTitle: task.groupTitle);
   }
 
+  //处理特殊字符
+  String? _handleSpecialCharacters(String? str) {
+    if (str == null) {
+      return null;
+    }
+    final regExp = RegExp(r'[?]');
+    return str.replaceAll(regExp, "_");
+  }
+
   // 合并音视频
   Future<void> mergeAudioVideo(CacheItem item, CachePlatform cachePlatform,
       {String? groupTitle}) async {
     var audioPath = item.audioPath;
     var videoPath = item.videoPath;
-    var title = item.title;
+    // 处理特殊字符
+    var title = _handleSpecialCharacters(item.title);
     var blvList = item.blvPathList;
+    // 处理特殊字符
+    groupTitle = _handleSpecialCharacters(groupTitle);
 
     var result =
         await runPlatformFuncFuture<Pair<bool, String>?>(onDefault: () async {
@@ -247,8 +267,8 @@ class FFmpegTaskController extends GetxController {
     if (result.first) {
       print("$title 合并完成");
     } else {
-      print("$title 合并错误 ${result.second}");
-      throw Exception("$title 合并错误 ${result.second}");
+      print("合并错误:${result.second}");
+      throw Exception("合并错误:${result.second}");
     }
   }
 }
