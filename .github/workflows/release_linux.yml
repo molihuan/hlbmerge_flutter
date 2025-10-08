@@ -16,7 +16,7 @@ jobs:
           # The Flutter version to make available on the path
           flutter-version: 3.27.4
           # The Flutter build release channel
-          channel: # optional, default is stable
+          channel: stable # optional, default is stable
 
       # Get flutter dependencies.
       - run: flutter pub get
