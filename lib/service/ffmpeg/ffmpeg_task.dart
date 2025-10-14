@@ -2,7 +2,9 @@ import 'dart:core';
 import 'dart:io';
 import 'package:ffmpeg_hl/beans/Pair.dart';
 import 'package:ffmpeg_hl/ffmpeg_hl.dart';
+import 'package:ffmpeg_hl/utils/FFmpegHlStrUtil.dart';
 import 'package:get/get.dart';
+import 'package:hlbmerge/utils/StrUtils.dart';
 import 'package:path/path.dart' as path;
 
 import '../../channel/main/main_channel.dart';
@@ -151,8 +153,14 @@ class FFmpegTaskController extends GetxController {
     if (str == null) {
       return null;
     }
-    final regExp = RegExp(r'[?]');
-    return str.replaceAll(regExp, "_");
+    var result = runPlatformFunc<String?>(onDefault: (){
+      return StrUtils.sanitizeAndroidFileName(str);
+    },onWindows: (){
+      return StrUtils.sanitizeWindowsFileName(str);
+    },onLinux: (){
+      return StrUtils.sanitizeLinuxFileName(str);
+    });
+    return result;
   }
 
   // 合并音视频

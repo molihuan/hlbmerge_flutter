@@ -1,5 +1,5 @@
 import 'package:ffmpeg_hl/beans/Pair.dart';
-import 'package:ffmpeg_hl/utils/StrUtil.dart';
+import 'package:ffmpeg_hl/utils/FFmpegHlStrUtil.dart';
 
 import 'ffmpeg_hl_platform_interface.dart';
 

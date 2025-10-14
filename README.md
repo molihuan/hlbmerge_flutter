@@ -32,11 +32,12 @@
 ##### [Github地址](https://github.com/molihuan/hlbmerge_flutter)
 ##### [Gitcode地址](https://gitcode.com/bigmolihuan/hlbmerge_flutter)
 
-## 注意
+# 注意 ! ! !
 
 - 此软件存放的目录不能有空格或特殊字符
 - 读取缓存视频的目录不能有空格或特殊字符
 - 输出目录不能有空格或特殊字符
+- 视频名称或标题不能有特殊字符(虽然做了兼容处理,但可能无法兼顾到所有的特殊字符)
 - 它不依赖网络这个不确定的因素，它只依赖本地缓存文件，只要本地有缓存文件，那么它就可以工作(即使视频已经下架)，需要和官方APP（手机版/电脑版均可）配合使用，官方APP进行缓存，它操作缓存文件进行合并导出mp4
 
 ## 下载链接：[跳转](https://gitcode.com/bigmolihuan/hlbmerge_flutter/releases) 
