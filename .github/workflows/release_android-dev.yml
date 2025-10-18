@@ -1,0 +1,129 @@
+name: Release Android-dev
+on:
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: '要构建的分支'
+        required: true
+        default: 'dev'
+        type: string
+      tag:
+        description: 'Release版本标签 (例如: v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+        type: string
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    steps:
+      # 检出代码
+      - uses: actions/checkout@v5.0.0
+        with:
+          # 指定拉取的分支
+          ref: ${{ github.event.inputs.branch }}
+
+      # 设置flutter环境
+      - uses: subosito/flutter-action@v2.14.0
+        with:
+          flutter-version: 3.27.4
+          channel: stable
+
+      # 设置JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v5.0.0
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      # 获取flutter依赖
+      - run: flutter pub get
+
+      # 从GitHub Secrets中恢复签名keystore
+      - name: Restore signing keystore
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/hlbmerge.jks
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      # 从GitHub Secrets中恢复keystore.properties
+      - name: Generate keystore.properties
+        run: |
+          echo "storeFile=./hlbmerge.jks" > android/keystore.properties
+          echo "storePassword=${KEYSTORE_PASSWORD}" >> android/keystore.properties
+          echo "keyAlias=${KEY_ALIAS}" >> android/keystore.properties
+          echo "keyPassword=${KEY_PASSWORD}" >> android/keystore.properties
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      # 构建APK - 优化的镜像切换方案
+      - name: Build APK with optimized mirror switching
+        run: |
+          # 设置Gradle参数
+          export GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.internal.http.connectionTimeout=120000 -Dorg.gradle.internal.http.socketTimeout=120000"
+          
+          # 直接使用官方源构建（在GitHub环境中最可靠）
+          echo "使用官方镜像进行构建..."
+          cd android
+          
+          # 备份原始配置
+          cp build.gradle build.gradle.backup
+          
+          # 切换到官方源
+          sed -i 's|https://maven.aliyun.com/repository/public||g' build.gradle
+          sed -i 's|https://maven.aliyun.com/repository/google||g' build.gradle
+          
+          # 确保包含官方仓库
+          if ! grep -q "google()" build.gradle; then
+            echo "添加官方仓库..."
+            sed -i '/repositories {/a\        google()\n        mavenCentral()' build.gradle
+          fi
+          
+          cd ..
+          
+          # 带重试的构建（主要应对网络波动）
+          for i in {1..2}; do
+            echo "构建尝试: $i/2"
+            if flutter build apk --release --split-per-abi; then
+              echo "构建成功!"
+              break
+            else
+              if [ $i -eq 1 ]; then
+                echo "第一次构建失败，清理缓存后重试..."
+                # 只清理Gradle缓存，不清理Flutter缓存以节省时间
+                cd android && ./gradlew clean && cd ..
+              else
+                echo "所有构建尝试都失败"
+                exit 1
+              fi
+            fi
+          done
+
+      # 创建Release并上传APK文件
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          # 使用手动输入的标签 - 这样就能分隔不同版本了
+          tag_name: ${{ github.event.inputs.tag }}
+          generate_release_notes: true
+          name: Release ${{ github.event.inputs.tag }}
+          replace: true
+          files: |
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 合并上传所有APK文件为一个Artifact，设置3天后自动删除
+      - name: Upload All APKs as Artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: app-release-apks
+          path: build/app/outputs/flutter-apk/
+          # 设置3天后自动删除
+          retention-days: 3
