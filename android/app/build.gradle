@@ -48,6 +48,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+//构建添加指定kotlin版本
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.molihuan.hlbmerge"

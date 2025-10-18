@@ -14,12 +14,16 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
-      body:SafeArea(
+      body: SafeArea(
         child: logic.getCurrPage(),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: state.currPageIndex,
         onTap: logic.changePage,
+        // 使用主题颜色
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '首页'),
           BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: '进度'),

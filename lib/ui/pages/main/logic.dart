@@ -29,11 +29,21 @@ class MainLogic extends GetxController {
     // TODO: implement onReady
     super.onReady();
 
-    // 设置状态栏样式
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    // 设置状态栏样式 - 根据主题动态调整
+    _updateSystemUI();
+  }
+
+  // 更新系统UI样式
+  void _updateSystemUI() {
+    final brightness = Get.theme.brightness;
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent, // 状态栏背景色
-      statusBarIconBrightness: Brightness.dark, // 状态栏图标颜色
-      statusBarBrightness: Brightness.light, // iOS 状态栏文字颜色
+      statusBarIconBrightness: brightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark, // 动态调整状态栏图标颜色
+      statusBarBrightness: brightness == Brightness.dark
+          ? Brightness.dark
+          : Brightness.light, // iOS 状态栏文字颜色
     ));
   }
 
