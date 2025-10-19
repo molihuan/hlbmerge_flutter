@@ -110,6 +110,8 @@ flutter build apk --release
 
 # Android分割 ABI 构建，减小 apk 大小
 flutter build apk --release --split-per-abi
+# 生成图标
+flutter pub run flutter_launcher_icons
 
 ```
 Windows ffmpeg配置,cmake构建时会自动下载ffmpeg,但是没有做文件完整性校验,请保持网络通畅,如果构建失败请尝试flutter clean后重新构建

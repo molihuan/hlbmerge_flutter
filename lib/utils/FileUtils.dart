@@ -146,7 +146,7 @@ class FileUtils {
   }
 
   //文件复制
-  static Future<void> copyFile(String srcPath, String destPath) async {
+  static Future<bool> copyFile(String srcPath, String destPath) async {
     print("$srcPath copy to $destPath");
     final srcFile = File(srcPath);
     final destFile = File(destPath);
@@ -157,7 +157,8 @@ class FileUtils {
 
       // 检查源文件是否存在
       if (!await srcFile.exists()) {
-        throw FileSystemException('源文件不存在', srcPath);
+        //throw FileSystemException('源文件不存在', srcPath);
+        return Future.value(false);
       }
 
       // 检查目标文件是否已存在，如果存在则先删除
@@ -169,16 +170,18 @@ class FileUtils {
       await srcFile.copy(destPath);
     } on FileSystemException catch (e) {
       // 处理文件系统异常，特别是只读文件系统的情况
-      if (e.osError?.errorCode == 30) { // Read-only file system
-        print('目标文件系统为只读，无法复制文件: $destPath');
-        rethrow;
-      }
-      rethrow;
+      // if (e.osError?.errorCode == 30) { // Read-only file system
+      //   print('目标文件系统为只读，无法复制文件: $destPath');
+      //   rethrow;
+      // }
+      // rethrow;
+      return Future.value(false);
     } catch (e) {
       // 处理其他异常
       print('文件复制失败: $e');
-      rethrow;
+      return Future.value(false);
     }
+    return Future.value(true);
   }
 
 }

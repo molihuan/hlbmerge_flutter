@@ -31,6 +31,9 @@ jobs:
 
       # Get flutter dependencies.
       - run: flutter pub get
+
+      - run: flutter pub run flutter_launcher_icons
+
       # Build apk.打包各架构版本
       - run: flutter build windows
       # Upload generated apk to the artifacts.

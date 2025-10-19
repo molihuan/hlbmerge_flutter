@@ -20,6 +20,9 @@ jobs:
 
       # Get flutter dependencies.
       - run: flutter pub get
+
+      - run: flutter pub run flutter_launcher_icons
+
       - name: Build for Linux
         run: |
           sudo apt-get update -y

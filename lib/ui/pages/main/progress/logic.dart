@@ -30,7 +30,7 @@ class ProgressLogic extends GetxController {
     var fileList = targetDir.listSync();
     //过滤出文件夹和后缀为.mp4的文件
     state.outputChildFileList = fileList.where((it) {
-      return FileUtils.isDir(it.path) || it.path.endsWith(".mp4");
+      return FileUtils.isDir(it.path) || it.path.endsWith(".mp4")|| it.path.endsWith(".mp3");
     }).toList();
     //通知系统文件导出完成
     MainChannel.notifySystemFileExportComplete();

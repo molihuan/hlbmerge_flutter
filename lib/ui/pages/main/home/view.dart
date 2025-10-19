@@ -734,7 +734,7 @@ class HomePage extends StatelessWidget {
     } else if (coverUrl != null) {
       return NetworkImage(coverUrl);
     } else {
-      return const AssetImage("assets/icos/app_logo.png");
+      return const AssetImage("assets/icons/app_logo.png");
     }
   }
 }

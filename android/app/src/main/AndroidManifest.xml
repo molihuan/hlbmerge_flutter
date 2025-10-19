@@ -34,7 +34,7 @@
     <application
         android:name=".App"
         android:requestLegacyExternalStorage="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:label="@string/app_name"
         android:enableOnBackInvokedCallback="true">
         <activity

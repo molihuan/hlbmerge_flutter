@@ -106,9 +106,9 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     DialogTool.showLoading(message: "正在解析缓存数据...");
     _cacheDataManager.setCachePlatform(state.cachePlatform);
     List<CacheGroup>? cacheGroupList;
-    try{
+    try {
       cacheGroupList = _cacheDataManager.loadCacheData(dirPath);
-    }catch(e){
+    } catch (e) {
       print(e);
     }
 
@@ -124,18 +124,25 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     Get.snackbar("提示", "解析缓存数据成功");
   }
 
-  void exportFileByCacheGroup(FileFormat fileType) {
+  exportFileByCacheGroup(FileFormat fileType) async {
+    DialogTool.showLoading(message: "正在导出文件...");
     for (int i = 0; i < state.cacheGroupList.length; i++) {
       CacheGroup cacheGroup = state.cacheGroupList[i];
       if (cacheGroup.checked) {
-        exportFileByCacheItem(i, fileType, alwaysExport: true);
+        await exportFileByCacheItem(i, fileType, alwaysExport: true, alwaysShowDialog: true);
       }
     }
+    DialogTool.hideLoading();
+    Get.snackbar("提示", "导出完成");
   }
 
   //导出
-  void exportFileByCacheItem(int cacheGroupIndex, FileFormat fileType,
-      {bool alwaysExport = false}) async {
+  exportFileByCacheItem(int cacheGroupIndex, FileFormat fileType,
+      {bool alwaysExport = false, bool alwaysShowDialog = false}) async {
+    if(!alwaysShowDialog){
+      DialogTool.showLoading(message: "正在导出文件...");
+    }
+
     //获取缓存组
     CacheGroup cacheGroup = state.cacheGroupList[cacheGroupIndex];
 
@@ -150,15 +157,44 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
 
     for (int i = 0; i < needExportCacheItemList.length; i++) {
       CacheItem item = needExportCacheItemList[i];
+      var beforeResult = await _exportFileBefore(item);
+      if (!beforeResult) {
+        break;
+      }
       await exportFile(item, fileType, groupTitle: cacheGroup.title);
     }
+    if(!alwaysShowDialog){
+      DialogTool.hideLoading();
+      Get.snackbar("提示", "导出完成");
+    }
+  }
+
+  Future<bool> _exportFileBefore(CacheItem item) async {
+    return await runPlatformFunc(onDefault: () {
+      return Future.value(true);
+    }, onAndroid: () async {
+      var copyTempDirPath = SpDataManager.getInputCacheDirPath() ?? "";
+      var sufPath = item.path?.replaceFirst(copyTempDirPath, "");
+      if (sufPath == null || sufPath.isEmpty) {
+        return Future.value(false);
+      }
+      //拷贝缓存数据
+      var copyResult = await MainChannel.copyCacheAudioVideoFile(sufPath);
+      if (copyResult.first == 0) {
+        return Future.value(true);
+      } else {
+        return Future.value(false);
+      }
+    });
   }
 
   //导出
   exportFile(CacheItem item, FileFormat fileType, {String? groupTitle}) async {
-    var title = item.title;
-
-    var exportTargetPath;
+    var title = FFmpegTaskController.handleSpecialCharacters(item.title);
+    // 处理特殊字符
+    groupTitle = FFmpegTaskController.handleSpecialCharacters(groupTitle);
+    //判断导出文件类型
+    String? exportTargetPath;
     switch (fileType) {
       case FileFormat.mp4:
         exportTargetPath = item.videoPath;
@@ -183,15 +219,39 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
       var outputFileName = title == null
           ? "${DateTime.now().millisecondsSinceEpoch}_only${fileType.extension}.${fileType.extension}"
           : "${title}_only${fileType.extension}.${fileType.extension}";
-      var outputAudioPath = path.join(outputDirPath, outputFileName);
-      //解密m4s
-      var result = await FileUtils.decryptPcM4sAfter202403(
-          exportTargetPath, outputAudioPath);
-      if (result) {
-        return Pair(true, "");
+      var outputPath = path.join(outputDirPath, outputFileName);
+      //判断输出文件是否存在,如果存在则重命名
+      outputPath = await FileUtils.getAvailableFilePath(outputPath);
+
+      //结果pair
+      var resultPair = Pair(false, "缺少输入源");
+      //判断缓存平台类型
+      switch (state.cachePlatform) {
+        case CachePlatform.mac:
+        case CachePlatform.win:
+          //解密m4s
+          var status = await FileUtils.decryptPcM4sAfter202403(
+              exportTargetPath!, outputPath);
+          if (status) {
+            resultPair = Pair(true, "");
+          } else {
+            resultPair = Pair(false, "解密失败");
+          }
+
+          break;
+        case CachePlatform.android:
+          var status = await FileUtils.copyFile(exportTargetPath!, outputPath);
+          if (status) {
+            resultPair = Pair(true, "");
+          } else {
+            resultPair = Pair(false, "失败");
+          }
+          break;
       }
-      return Pair(false, "解密失败");
+
+      return resultPair;
     });
+
     if (result == null) {
       print("${title}导出未知错误");
       return;

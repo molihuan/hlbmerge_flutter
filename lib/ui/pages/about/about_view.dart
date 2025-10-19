@@ -48,7 +48,7 @@ class AboutPage extends StatelessWidget {
       children: [
         //app ico
         Image.asset(
-          "assets/icos/app_logo.png",
+          "assets/icons/app_logo.png",
           width: 80,
           height: 80,
           fit: BoxFit.cover,

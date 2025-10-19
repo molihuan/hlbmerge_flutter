@@ -149,7 +149,7 @@ class FFmpegTaskController extends GetxController {
   }
 
   //处理特殊字符
-  String? _handleSpecialCharacters(String? str) {
+  static String? handleSpecialCharacters(String? str) {
     if (str == null) {
       return null;
     }
@@ -169,10 +169,10 @@ class FFmpegTaskController extends GetxController {
     var audioPath = item.audioPath;
     var videoPath = item.videoPath;
     // 处理特殊字符
-    var title = _handleSpecialCharacters(item.title);
+    var title = handleSpecialCharacters(item.title);
     var blvList = item.blvPathList;
     // 处理特殊字符
-    groupTitle = _handleSpecialCharacters(groupTitle);
+    groupTitle = handleSpecialCharacters(groupTitle);
 
     var result =
         await runPlatformFuncFuture<Pair<bool, String>?>(onDefault: () async {

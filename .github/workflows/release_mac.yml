@@ -21,6 +21,8 @@ jobs:
       # Get flutter dependencies.
       - run: flutter pub get
 
+      - run: flutter pub run flutter_launcher_icons
+
       - name: Build release for macOS
         run: flutter build macos --release
 

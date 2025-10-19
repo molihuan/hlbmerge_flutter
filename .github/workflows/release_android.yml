@@ -28,6 +28,8 @@ jobs:
       # Get flutter dependencies.
       - run: flutter pub get
 
+      - run: flutter pub run flutter_launcher_icons
+
       # 从GitHub Secrets中恢复签名 keystore
       - name: Restore signing keystore
         run: |
