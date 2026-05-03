@@ -8,6 +8,8 @@ import 'package:hlbmerge/utils/PlatformUtils.dart';
 
 
 import '../../../../dao/cache_data_manager.dart';
+import '../../../../models/cache_group.dart';
+import 'home_selection_utils.dart';
 import 'logic.dart';
 import 'state.dart';
 
@@ -250,39 +252,70 @@ class HomePage extends StatelessWidget {
 
   //手机顶部栏
   Widget _buildPhoneTopBar(BuildContext context) {
-    var searchTextField = Expanded(
-        child: Container(
-      child: TextField(
-        controller: TextEditingController(text: "还没做"),
-        onChanged: (value) {},
-        decoration: InputDecoration(
-            labelText: '搜索',
-            border: const OutlineInputBorder(),
-            hintText: '请输入搜索内容',
-            enabledBorder: OutlineInputBorder(
-              borderSide: state.isTextFieldDragging
-                  ? const BorderSide(color: Colors.blue, width: 2)
-                  : const BorderSide(
-                      color: Colors.grey,
-                    ),
+    if (state.isMultiSelectMode) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 1,
+              offset: const Offset(0, 1.5),
             ),
-            focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.blue, width: 2), // 聚焦状态边框颜色
-            ),
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-            suffixIcon: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
               children: [
+                Expanded(child: _buildSelectionSummaryChip(context)),
                 IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.search),
+                  tooltip: '清空已选',
+                  onPressed: state.selectionSnapshot.hasSelection
+                      ? () {
+                          logic.clearSelections();
+                        }
+                      : null,
+                  icon: const Icon(Icons.playlist_remove),
                 ),
+                IconButton(
+                  tooltip: state.isAllGroupListChecked ? '取消全选结果' : '全选结果',
+                  onPressed: () {
+                    logic.changeAllGroupListChecked(!state.isAllGroupListChecked);
+                  },
+                  icon: Icon(state.isAllGroupListChecked
+                      ? Icons.check_box
+                      : Icons.check_box_outline_blank),
+                ),
+                _buildEditBtn(),
               ],
-            )),
-      ),
-    ));
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: logic.searchTextController,
+              onChanged: logic.updateSearchKeyword,
+              decoration: InputDecoration(
+                labelText: '搜索',
+                border: const OutlineInputBorder(),
+                hintText: '支持标题、路径、视频子项模糊搜索',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: state.searchKeyword.isEmpty
+                    ? null
+                    : IconButton(
+                        onPressed: () {
+                          logic.clearSearchKeyword();
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
@@ -300,17 +333,10 @@ class HomePage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          state.isMultiSelectMode
-              ? const SizedBox.shrink()
-              : const Text("缓存",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-          state.isMultiSelectMode
-              ? _buildSelectAllBtn()
-              : const SizedBox.shrink(),
-          state.isMultiSelectMode ? searchTextField : const SizedBox.shrink(),
-          const SizedBox(width: 5),
+          const Text("缓存",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
           Row(children: [
-            state.isMultiSelectMode ? const SizedBox.shrink() : IconButton(
+            IconButton(
               icon: const Icon(
                 Icons.refresh,
               ),
@@ -330,116 +356,180 @@ class HomePage extends StatelessWidget {
   Widget _buildBody(BuildContext context) {
     Widget content;
     if (state.hasPermission) {
-      content = ListView.builder(
-        // itemCount 和 itemBuilder 保持我们之前优化好的版本
-        itemCount: state.cacheGroupList.length,
-        itemBuilder: (context, index) {
-          var item = state.cacheGroupList[index];
+      final visibleCacheGroupList = state.visibleCacheGroupList;
+      if (visibleCacheGroupList.isEmpty) {
+        content = Center(
+          child: Text(
+            state.searchKeyword.isEmpty ? '暂无缓存数据' : '没有匹配的视频',
+            style: const TextStyle(color: Colors.grey),
+          ),
+        );
+      } else {
+        content = Scrollbar(
+          controller: logic.groupListScrollController,
+          thumbVisibility: true,
+          trackVisibility: true,
+          interactive: true,
+          thickness: 6,
+          radius: const Radius.circular(999),
+          child: ListView.builder(
+            controller: logic.groupListScrollController,
+            itemCount: visibleCacheGroupList.length,
+            itemBuilder: (context, index) {
+              var item = visibleCacheGroupList[index];
+              final bool isSelected =
+                  state.isMultiSelectMode &&
+                  HomeSelectionUtils.hasVisibleSelection(item);
+              final String? selectionLabel = _buildSelectionLabel(item);
 
-          return InkWell(
-            onTap: () {
-              if (state.isMultiSelectMode) {
-                logic.changeGroupListChecked(index, !item.checked);
-              } else {
-                _showCacheItemListDialog(context, index);
-              }
-            },
-            onLongPress: () {
-              logic.changeMultiSelectMode(!state.isMultiSelectMode);
-              logic.changeGroupListChecked(index, true);
-            },
-            child: Container(
-              height: _itemScreenCfg.itemHeight,
-              padding: _itemScreenCfg.itemPadding,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // 1. 复选框部分 (保持不变)
-                  Obx(() {
-                    return state.isMultiSelectMode
-                        ? Container(
-                            margin: EdgeInsets.only(
-                                right: _itemScreenCfg.checkboxMargin),
-                            child: Checkbox(
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                value: item.checked,
-                                onChanged: (v) {
-                                  var checked = v ?? false;
-                                  logic.changeGroupListChecked(index, checked);
-                                }),
-                          )
-                        : const SizedBox.shrink();
-                  }),
-                  // 2. 图片部分 (保持不变)
-                  SizedBox(
+              return InkWell(
+                onTap: () {
+                  if (state.isMultiSelectMode) {
+                    logic.changeGroupSelection(item, !item.checked);
+                  } else {
+                    _showCacheItemListDialog(context, item);
+                  }
+                },
+                onLongPress: () {
+                  logic.changeMultiSelectMode(true);
+                  logic.changeGroupSelection(item, true);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.45)
+                          : Colors.transparent,
+                    ),
+                    color: isSelected
+                        ? Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.08)
+                        : Colors.transparent,
+                  ),
+                  child: Container(
                     height: _itemScreenCfg.itemHeight,
-                    child: AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          image: DecorationImage(
-                            image:
-                                _buildCoverImage(item.coverPath, item.coverUrl),
-                            fit: BoxFit.cover,
+                    padding: _itemScreenCfg.itemPadding,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Obx(() {
+                          return state.isMultiSelectMode
+                              ? Container(
+                                  margin: EdgeInsets.only(
+                                      right: _itemScreenCfg.checkboxMargin),
+                                  child: Checkbox(
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      value: item.checked,
+                                      onChanged: (v) {
+                                        var checked = v ?? false;
+                                        logic.changeGroupSelection(item, checked);
+                                      }),
+                                )
+                              : const SizedBox.shrink();
+                        }),
+                        SizedBox(
+                          height: _itemScreenCfg.itemHeight,
+                          child: AspectRatio(
+                            aspectRatio: 16 / 9,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                image: DecorationImage(
+                                  image: _buildCoverImage(
+                                      item.coverPath, item.coverUrl),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        Expanded(
+                          child: Container(
+                            height: _itemScreenCfg.itemHeight,
+                            margin: const EdgeInsets.only(left: 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                    child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          item.title ?? "无标题",
+                                          style: TextStyle(
+                                            fontSize:
+                                                _itemScreenCfg.titleFontSize,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    if (selectionLabel != null)
+                                      _buildSelectionBadge(context,
+                                          label: selectionLabel),
+                                    if (state.isMultiSelectMode && isSelected)
+                                      IconButton(
+                                        tooltip: '取消此组选择',
+                                        onPressed: () {
+                                          logic.clearGroupSelection(item);
+                                        },
+                                        icon: const Icon(Icons.close, size: 18),
+                                        constraints: const BoxConstraints(
+                                            minWidth: 32, minHeight: 32),
+                                        padding: EdgeInsets.zero,
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                  ],
+                                )),
+                                SizedBox(
+                                  height: _itemScreenCfg.itemHeight * 0.3,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: [
+                                        Text("路径:",
+                                            style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize:
+                                                    _itemScreenCfg.pathFontSize)),
+                                        SelectableText(
+                                          '${item.path}',
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize:
+                                                  _itemScreenCfg.pathFontSize),
+                                          maxLines: 1,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  // 3. 文字信息部分 (已解决溢出问题)
-                  Expanded(
-                    child: Container(
-                      height: _itemScreenCfg.itemHeight,
-                      margin: const EdgeInsets.only(left: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                              child: Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              item.title ?? "无标题",
-                              style: TextStyle(
-                                fontSize: _itemScreenCfg.titleFontSize,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              maxLines: 2,
-                            ),
-                          )),
-                          SizedBox(
-                            height: _itemScreenCfg.itemHeight * 0.3,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  Text("路径:",
-                                      style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize:
-                                              _itemScreenCfg.pathFontSize)),
-                                  SelectableText(
-                                    '${item.path}',
-                                    style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: _itemScreenCfg.pathFontSize),
-                                    maxLines: 1,
-                                  )
-                                ],
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
+                ),
+              );
+            },
+          ),
+        );
+      }
     } else {
       // 权限申请页面的逻辑不变
       content = Container(
@@ -477,10 +567,11 @@ class HomePage extends StatelessWidget {
   }
 
   //缓存项列表弹窗
-  void _showCacheItemListDialog(BuildContext context, int cacheGroupIndex) {
+  void _showCacheItemListDialog(BuildContext context, CacheGroup cacheGroup) {
     var itemHeight = _itemScreenCfg.itemHeight - 15;
     var titleFontSize = _itemScreenCfg.titleFontSize - 1;
     var pathFontSize = _itemScreenCfg.pathFontSize - 1;
+    final dialogScrollController = ScrollController();
     showDialog(
       context: context,
       barrierDismissible: true, // 点击空白关闭
@@ -492,9 +583,10 @@ class HomePage extends StatelessWidget {
             width: double.infinity,
             height: double.infinity, // 全屏
             color: Colors.black.withOpacity(0.5), // 蒙层效果
-            child: Obx(() {
-              var cacheItemList =
-                  state.cacheGroupList[cacheGroupIndex].cacheItemList;
+            child: StatefulBuilder(builder: (context, setState) {
+              final cacheItemList = cacheGroup.cacheItemList;
+              final isAllCacheItemChecked = cacheItemList.isNotEmpty &&
+                  cacheItemList.every((item) => item.checked);
               return Stack(
                 children: [
                   // 居中内容
@@ -517,121 +609,136 @@ class HomePage extends StatelessWidget {
                             ),
                           ),
                           Expanded(
-                              child: ListView.builder(
-                            itemCount: cacheItemList.length,
-                            itemExtent: itemHeight,
-                            itemBuilder: (context, index) {
-                              var item = cacheItemList[index];
+                              child: Scrollbar(
+                            controller: dialogScrollController,
+                            thumbVisibility: true,
+                            trackVisibility: true,
+                            interactive: true,
+                            thickness: 6,
+                            radius: const Radius.circular(999),
+                            child: ListView.builder(
+                              controller: dialogScrollController,
+                              itemCount: cacheItemList.length,
+                              itemExtent: itemHeight,
+                              itemBuilder: (context, index) {
+                                var item = cacheItemList[index];
 
-                              return InkWell(
-                                onTap: () {
-                                  logic.changeCacheItemListChecked(
-                                      cacheGroupIndex, index, !item.checked);
-                                },
-                                child: Container(
-                                  padding:  EdgeInsets.symmetric(vertical: _itemScreenCfg.itemPadding.vertical - 2),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        margin: EdgeInsets.only(
-                                            right:
-                                                _itemScreenCfg.checkboxMargin),
-                                        child: Checkbox(
-                                            value: item.checked,
-                                            materialTapTargetSize:
-                                                MaterialTapTargetSize
-                                                    .shrinkWrap,
-                                            onChanged: (v) {
-                                              var checked = v ?? false;
-                                              logic.changeCacheItemListChecked(
-                                                  cacheGroupIndex,
-                                                  index,
-                                                  checked);
-                                            }),
-                                      ),
-
-                                      SizedBox(
-                                        height: itemHeight,
-                                        child: AspectRatio(
-                                          aspectRatio: 16 / 9,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(5),
-                                              image: DecorationImage(
-                                                image: _buildCoverImage(
-                                                    item.coverPath,
-                                                    item.coverUrl),
-                                                fit: BoxFit.cover,
+                                return InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      logic.changeCacheItemSelection(
+                                          cacheGroup, index, !item.checked);
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical:
+                                            _itemScreenCfg.itemPadding.vertical -
+                                                2),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.only(
+                                              right: _itemScreenCfg
+                                                  .checkboxMargin),
+                                          child: Checkbox(
+                                              value: item.checked,
+                                              materialTapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                              onChanged: (v) {
+                                                var checked = v ?? false;
+                                                setState(() {
+                                                  logic.changeCacheItemSelection(
+                                                      cacheGroup,
+                                                      index,
+                                                      checked);
+                                                });
+                                              }),
+                                        ),
+                                        SizedBox(
+                                          height: itemHeight,
+                                          child: AspectRatio(
+                                            aspectRatio: 16 / 9,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                                image: DecorationImage(
+                                                  image: _buildCoverImage(
+                                                      item.coverPath,
+                                                      item.coverUrl),
+                                                  fit: BoxFit.cover,
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      //文字
-                                      Expanded(
-                                        child: Container(
-                                          height: itemHeight, // 整个内容区域的固定高度
-                                          margin:
-                                              const EdgeInsets.only(left: 5),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              // 标题文本区域
-                                              Expanded(
-                                                  child: Container(
-                                                alignment: Alignment.centerLeft,
-                                                child: Text(
-                                                  item.title ?? "",
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                    fontSize: titleFontSize,
-                                                    fontWeight: FontWeight.bold,
+                                        Expanded(
+                                          child: Container(
+                                            height: itemHeight,
+                                            margin:
+                                                const EdgeInsets.only(left: 5),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Expanded(
+                                                    child: Container(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Text(
+                                                    item.title ?? "",
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: titleFontSize,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
-                                                ),
-                                              )),
-                                              // 路径文本区域
-                                              SizedBox(
-                                                height: itemHeight * 0.3,
-                                                // 例如，给路径文本分配 30% 的 itemHeight
-                                                child: SingleChildScrollView(
-                                                  scrollDirection:
-                                                      Axis.horizontal,
-                                                  child: Row(
-                                                    children: [
-                                                      Text("路径:",
+                                                )),
+                                                SizedBox(
+                                                  height: itemHeight * 0.3,
+                                                  child: SingleChildScrollView(
+                                                    scrollDirection:
+                                                        Axis.horizontal,
+                                                    child: Row(
+                                                      children: [
+                                                        Text("路径:",
+                                                            style: TextStyle(
+                                                              fontSize:
+                                                                  pathFontSize,
+                                                              color:
+                                                                  Colors.grey,
+                                                            )),
+                                                        SelectableText(
+                                                          item.path ?? "",
                                                           style: TextStyle(
                                                             fontSize:
                                                                 pathFontSize,
                                                             color: Colors.grey,
-                                                          )),
-                                                      SelectableText(
-                                                        item.path ?? "",
-                                                        style: TextStyle(
-                                                          fontSize:
-                                                              pathFontSize,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      )
-                                                    ],
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           )),
                           Container(
                               margin:
@@ -645,11 +752,12 @@ class HomePage extends StatelessWidget {
                                     right: 10, left: 15, bottom: 15),
                                 child: InkWell(
                                   onTap: () {
-                                    logic.changeAllCacheItemListChecked(
-                                        cacheGroupIndex,
-                                        !state.isAllCacheItemListChecked);
+                                    setState(() {
+                                      logic.changeAllCacheItemListChecked(
+                                          cacheGroup, !isAllCacheItemChecked);
+                                    });
                                   },
-                                  child: state.isAllCacheItemListChecked
+                                  child: isAllCacheItemChecked
                                       ? const Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
@@ -683,21 +791,23 @@ class HomePage extends StatelessWidget {
                               ElevatedButton(
                                 onPressed: () {
                                   logic.exportFileByCacheItem(
-                                      cacheGroupIndex, FileFormat.mp3);
+                                      state.cacheGroupList.indexOf(cacheGroup),
+                                      FileFormat.mp3);
                                 },
                                 child: const Text("提取音频"),
                               ),
                               ElevatedButton(
                                 onPressed: () {
                                   logic.exportFileByCacheItem(
-                                      cacheGroupIndex, FileFormat.mp4);
+                                      state.cacheGroupList.indexOf(cacheGroup),
+                                      FileFormat.mp4);
                                 },
                                 child: const Text("提取视频"),
                               ),
                               ElevatedButton(
                                 onPressed: () {
                                   logic.mergeAudioVideoByCacheItem(
-                                      cacheGroupIndex);
+                                      state.cacheGroupList.indexOf(cacheGroup));
                                   Get.snackbar("提示", "已添加任务,请前往进度页面查看");
                                 },
                                 child: const Text("合并音视频"),
@@ -706,7 +816,7 @@ class HomePage extends StatelessWidget {
                                 onPressed: () {
                                   //取消全选
                                   logic.changeAllCacheItemListChecked(
-                                      cacheGroupIndex, false);
+                                      cacheGroup, false);
                                   Navigator.of(context).pop();
                                 },
                                 child: const Text("关闭"),
@@ -723,7 +833,64 @@ class HomePage extends StatelessWidget {
           ),
         );
       },
+    ).whenComplete(dialogScrollController.dispose);
+  }
+
+  Widget _buildSelectionSummaryChip(BuildContext context) {
+    final snapshot = state.selectionSnapshot;
+    final resultCount = state.visibleCacheGroupList.length;
+    final totalCount = state.cacheGroupList.length;
+    final summaryText = snapshot.selectedItemCount > 0
+        ? '已选 ${snapshot.selectedDisplayCount} 组 · ${snapshot.selectedItemCount} 项'
+        : '已选 ${snapshot.selectedDisplayCount} 组';
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        _buildSelectionBadge(context, label: summaryText),
+        _buildSelectionBadge(context,
+            label: '筛选结果 $resultCount/$totalCount', highlighted: false),
+      ],
     );
+  }
+
+  Widget _buildSelectionBadge(BuildContext context,
+      {required String label, bool highlighted = true}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: highlighted
+            ? colorScheme.primary.withOpacity(0.12)
+            : colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: highlighted ? colorScheme.primary : Colors.grey.shade700,
+        ),
+      ),
+    );
+  }
+
+  String? _buildSelectionLabel(CacheGroup group) {
+    final int selectedItemCount =
+        HomeSelectionUtils.selectedItemCountForGroup(group);
+    if (group.checked && selectedItemCount > 0) {
+      return '已选 · $selectedItemCount 项';
+    }
+    if (group.checked) {
+      return '已选';
+    }
+    if (selectedItemCount > 0) {
+      return '已选 $selectedItemCount 项';
+    }
+    return null;
   }
 
   //封面图片

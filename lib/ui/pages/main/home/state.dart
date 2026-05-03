@@ -3,6 +3,7 @@ import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import '../../../../dao/cache_data_manager.dart';
 import '../../../../dao/sp_data_manager.dart';
 import '../../../../models/cache_group.dart';
+import 'home_selection_utils.dart';
 
 
 
@@ -36,6 +37,9 @@ class HomeState {
   set cacheGroupList(List<CacheGroup> value) =>
       _cacheGroupList.assignAll(value);
 
+  List<CacheGroup> get visibleCacheGroupList =>
+      HomeSelectionUtils.filterCacheGroups(_cacheGroupList, searchKeyword);
+
   void changeGroupListCheckedAndRefresh(int index, bool value) {
     changeGroupListChecked(index, value);
     refreshGroupList();
@@ -66,6 +70,12 @@ class HomeState {
 
   set isMultiSelectMode(bool value) => _isMultiSelectMode.value = value;
 
+  final _searchKeyword = ''.obs;
+
+  String get searchKeyword => _searchKeyword.value;
+
+  set searchKeyword(String value) => _searchKeyword.value = value;
+
   // 缓存组是否全选
   final _isAllGroupListChecked = false.obs;
 
@@ -92,6 +102,9 @@ class HomeState {
   final _hasPermission = false.obs;
   bool get hasPermission => _hasPermission.value;
   set hasPermission(bool value) => _hasPermission.value = value;
+
+  HomeSelectionSnapshot get selectionSnapshot =>
+      HomeSelectionUtils.buildSelectionSnapshot(_cacheGroupList);
 
   //Android解析权限
   final _androidParseCachePermission = AndroidParseCachePermission.readWrite.obs;

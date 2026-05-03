@@ -21,12 +21,15 @@ import '../../../../utils/FileUtils.dart';
 import '../../../../utils/PlatformUtils.dart';
 import '../../../../utils/StrUtils.dart';
 import '../../../uitools/DialogTool.dart';
+import 'home_selection_utils.dart';
 import 'state.dart';
 import 'package:path/path.dart' as path;
 
 class HomeLogic extends SuperController with WidgetsBindingObserver {
   final HomeState state = HomeState();
   late final _cacheDataManager = CacheDataManager();
+  final ScrollController groupListScrollController = ScrollController();
+  final TextEditingController searchTextController = TextEditingController();
 
   // 任务控制器
   final FFmpegTaskController taskController = Get.put(FFmpegTaskController());
@@ -120,6 +123,7 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
     }
 
     state.cacheGroupList = cacheGroupList;
+    state.isAllGroupListChecked = _judgeAllVisibleGroupListChecked();
     // print(cacheGroupList);
     Get.snackbar("提示", "解析缓存数据成功");
   }
@@ -387,28 +391,59 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   //改变多选状态
   changeMultiSelectMode(bool value) {
     state.isMultiSelectMode = value;
-    // 取消全选
-    changeAllGroupListChecked(false);
+    if (!value) {
+      clearSearchKeyword();
+    }
+    state.isAllGroupListChecked = _judgeAllVisibleGroupListChecked();
   }
 
-  // 改变缓存组选择状态
-  void changeGroupListChecked(int index, bool value) {
-    state.changeGroupListCheckedAndRefresh(index, value);
-    var isAllChecked = _judgeAllGroupListChecked();
-    state.isAllGroupListChecked = isAllChecked;
+  void updateSearchKeyword(String value) {
+    state.searchKeyword = value;
+    state.isAllGroupListChecked = _judgeAllVisibleGroupListChecked();
+  }
+
+  void clearSearchKeyword() {
+    state.searchKeyword = '';
+    searchTextController.clear();
+    state.isAllGroupListChecked = _judgeAllVisibleGroupListChecked();
+  }
+
+  void changeGroupSelection(CacheGroup group, bool value) {
+    group.checked = value;
+    state.refreshGroupList();
+    state.isAllGroupListChecked = _judgeAllVisibleGroupListChecked();
+  }
+
+  void clearGroupSelection(CacheGroup group) {
+    HomeSelectionUtils.clearGroupSelection(group);
+    state.refreshGroupList();
+    state.isAllGroupListChecked = _judgeAllVisibleGroupListChecked();
+    state.isAllCacheItemListChecked = false;
+  }
+
+  void clearSelections() {
+    HomeSelectionUtils.clearSelections(state.cacheGroupList);
+    state.refreshGroupList();
+    state.isAllGroupListChecked = false;
+    state.isAllCacheItemListChecked = false;
   }
 
   // 改变缓存项选择状态
-  void changeCacheItemListChecked(int cacheGroupIndex, int index, bool value) {
-    state.changeCacheItemListCheckedAndRefresh(cacheGroupIndex, index, value);
-    var isAllChecked = _judgeAllCacheItemListChecked(cacheGroupIndex);
-    state.isAllCacheItemListChecked = isAllChecked;
+  void changeCacheItemSelection(CacheGroup cacheGroup, int index, bool value) {
+    cacheGroup.cacheItemList[index].checked = value;
+    state.refreshGroupList();
+    state.isAllCacheItemListChecked = _judgeAllCacheItemListChecked(cacheGroup);
   }
 
   // 判断缓存组是否全选
-  bool _judgeAllGroupListChecked() {
-    for (int i = 0; i < state.cacheGroupList.length; i++) {
-      if (!state.cacheGroupList[i].checked) {
+  bool _judgeAllVisibleGroupListChecked() {
+    final visibleCacheGroupList = state.visibleCacheGroupList;
+    if (visibleCacheGroupList.isEmpty) {
+      return false;
+    }
+
+    for (int i = 0; i < visibleCacheGroupList.length; i++) {
+      if (!visibleCacheGroupList[i].checked) {
         return false;
       }
     }
@@ -416,11 +451,13 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   }
 
   //判断缓存项是否全选
-  bool _judgeAllCacheItemListChecked(int cacheGroupIndex) {
-    for (int i = 0;
-        i < state.cacheGroupList[cacheGroupIndex].cacheItemList.length;
-        i++) {
-      if (!state.cacheGroupList[cacheGroupIndex].cacheItemList[i].checked) {
+  bool _judgeAllCacheItemListChecked(CacheGroup cacheGroup) {
+    if (cacheGroup.cacheItemList.isEmpty) {
+      return false;
+    }
+
+    for (int i = 0; i < cacheGroup.cacheItemList.length; i++) {
+      if (!cacheGroup.cacheItemList[i].checked) {
         return false;
       }
     }
@@ -429,23 +466,23 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
 
   //缓存组全选
   void changeAllGroupListChecked(bool value) {
-    for (int i = 0; i < state.cacheGroupList.length; i++) {
-      state.changeGroupListChecked(i, value);
+    final visibleCacheGroupList = state.visibleCacheGroupList;
+    for (int i = 0; i < visibleCacheGroupList.length; i++) {
+      visibleCacheGroupList[i].checked = value;
     }
     state.refreshGroupList();
 
-    state.isAllGroupListChecked = value;
+    state.isAllGroupListChecked = value && visibleCacheGroupList.isNotEmpty;
   }
 
   //缓存项全选
-  void changeAllCacheItemListChecked(int cacheGroupIndex, bool value) {
-    for (int i = 0;
-        i < state.cacheGroupList[cacheGroupIndex].cacheItemList.length;
-        i++) {
-      state.changeCacheItemListChecked(cacheGroupIndex, i, value);
+  void changeAllCacheItemListChecked(CacheGroup cacheGroup, bool value) {
+    for (int i = 0; i < cacheGroup.cacheItemList.length; i++) {
+      cacheGroup.cacheItemList[i].checked = value;
     }
     state.refreshGroupList();
-    state.isAllCacheItemListChecked = value;
+    state.isAllCacheItemListChecked =
+        value && cacheGroup.cacheItemList.isNotEmpty;
   }
 
   changeTextFieldDragging(bool value) {
@@ -510,6 +547,8 @@ class HomeLogic extends SuperController with WidgetsBindingObserver {
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _nativePageEventSubscription?.cancel();
+    groupListScrollController.dispose();
+    searchTextController.dispose();
     super.onClose();
   }
 
