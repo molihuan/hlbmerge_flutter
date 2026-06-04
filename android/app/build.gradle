@@ -36,6 +36,16 @@ if (keystorePropertiesFile.exists()) {
     }
 }
 
+def releaseStoreFilePath = keystoreProperties.getProperty("storeFile")
+def hasReleaseKeystore = keystorePropertiesFile.exists() &&
+        releaseStoreFilePath != null &&
+        !releaseStoreFilePath.trim().isEmpty() &&
+        keystoreProperties.getProperty("storePassword") &&
+        keystoreProperties.getProperty("keyAlias") &&
+        keystoreProperties.getProperty("keyPassword") &&
+        rootProject.file(releaseStoreFilePath).exists() &&
+        rootProject.file(releaseStoreFilePath).length() > 0
+
 android {
     namespace = "com.molihuan.hlbmerge"
 //    compileSdk = flutter.compileSdkVersion
@@ -94,8 +104,8 @@ android {
 
     signingConfigs {
         release {
-            if (keystorePropertiesFile.exists()) {
-                storeFile file(keystoreProperties['storeFile'])
+            if (hasReleaseKeystore) {
+                storeFile rootProject.file(releaseStoreFilePath)
                 storePassword keystoreProperties['storePassword']
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword keystoreProperties['keyPassword']
@@ -105,8 +115,7 @@ android {
 
     buildTypes {
         debug {
-//            signingConfig = signingConfigs.debug
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
             minifyEnabled false
             shrinkResources false
         }
@@ -114,7 +123,9 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
 //            signingConfig = signingConfigs.debug
-            signingConfig signingConfigs.release
+            signingConfig hasReleaseKeystore
+                    ? signingConfigs.release
+                    : signingConfigs.debug
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

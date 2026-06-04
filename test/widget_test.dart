@@ -1,30 +1,87 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:hlbmerge/main.dart';
+import 'package:hlbmerge/dao/sp_data_manager.dart';
+import 'package:hlbmerge/models/cache_group.dart';
+import 'package:hlbmerge/models/cache_item.dart';
+import 'package:hlbmerge/ui/pages/main/home/logic.dart';
+import 'package:hlbmerge/ui/pages/main/home/view.dart';
+
+CacheGroup _buildGroup(String title, {int itemCount = 0}) {
+  final group = CacheGroup()..title = title;
+  group.cacheItemList = List.generate(itemCount, (index) {
+    return CacheItem()
+      ..title = '$title-$index'
+      ..path = '/cache/$title/$index';
+  });
+  return group;
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  setUp(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({});
+    await SpDataManager.init();
+    Get.reset();
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  tearDown(() async {
+    Get.reset();
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('home page renders a draggable scrollbar for cache groups',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: Scaffold(
+          body: HomePage(),
+        ),
+      ),
+    );
+
+    final logic = Get.find<HomeLogic>();
+    logic.state.hasPermission = true;
+    logic.state.cacheGroupList =
+        List.generate(24, (index) => _buildGroup('group-$index', itemCount: 1));
+
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(Scrollbar), findsOneWidget);
+  });
+
+  testWidgets('tapping a cache group opens the item dialog without GetX errors',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: Scaffold(
+          body: HomePage(),
+        ),
+      ),
+    );
+
+    final logic = Get.find<HomeLogic>();
+    final group = _buildGroup('group-0', itemCount: 2);
+    group.cacheItemList[0].title = 'episode-0';
+    group.cacheItemList[1].title = 'episode-1';
+    logic.state.hasPermission = true;
+    logic.state.cacheGroupList = [group];
+
+    await tester.pump();
+
+    await tester.tap(find.text('group-0'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('请选择需要合并的缓存项'), findsOneWidget);
+
+    await tester.tap(find.byType(Checkbox).first);
+    await tester.pumpAndSettle();
+
+    expect(
+      logic.state.cacheGroupList.first.cacheItemList.first.checked,
+      isTrue,
+    );
   });
 }
