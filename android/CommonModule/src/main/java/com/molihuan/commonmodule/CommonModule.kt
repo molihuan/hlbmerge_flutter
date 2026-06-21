@@ -14,7 +14,7 @@ object CommonModule {
         if (!debug) {
             //线上模式
             //删除临时文件
-            FileTool.deleteTempFiles()
+            //FileTool.deleteTempFiles()
         }
     }
 }

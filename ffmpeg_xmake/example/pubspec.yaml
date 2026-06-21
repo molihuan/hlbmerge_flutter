@@ -1,0 +1,70 @@
+name: ffmpeg_hl_example
+description: "Demonstrates how to use the ffmpeg_hl plugin."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  ffmpeg_hl:
+    path: ../
+
+  cupertino_icons: ^1.0.8
+  ffi: ^2.1.3
+
+  flutter_riverpod: ^3.3.1
+  # 文件选择
+  file_picker_ohos:
+    git:
+      url: https://gitcode.com/CPF-Flutter/fluttertpc_file_picker.git
+      path: ./
+      ref: br_v10.3.8_ohos
+
+  path_provider:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/path_provider/path_provider
+      ref: master
+  # 实体类序列化 https://github.com/rrousselGit/freezed
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.11.0
+
+  # url
+  url_launcher:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/url_launcher/url_launcher
+      ref: br_url_launcher_v6.3.1_ohos
+  # 分享
+  share_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/share_plus/share_plus
+      ref: br_share_plus-v10.1.1_ohos
+
+dependency_overrides:
+  #强制覆盖
+  path_provider:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/path_provider/path_provider
+      ref: master
+  test_api: 0.7.11
+  web: 1.1.1
+
+dev_dependencies:
+#  flutter_test:
+#    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.12.2
+  freezed: ^3.2.5
+  json_serializable: ^6.13.0
+
+
+flutter:
+  uses-material-design: true

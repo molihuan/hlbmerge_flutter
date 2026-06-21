@@ -1,0 +1,439 @@
+package com.molihuan.hlbmerge.ui.screen.path.select
+
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.result.ActivityResult
+import androidx.annotation.DrawableRes
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.hjq.permissions.OnPermissionCallback
+import com.hjq.permissions.XXPermissions
+import com.hjq.permissions.permission.PermissionLists
+import com.hjq.permissions.permission.base.IPermission
+import com.molihuan.commonmodule.tool.AppTool
+import com.molihuan.commonmodule.tool.FileTool
+import com.molihuan.commonmodule.tool.ToastTool
+import com.molihuan.hlbmerge.App
+import com.molihuan.hlbmerge.R
+import com.molihuan.hlbmerge.repository.SettingsRepository
+import com.molihuan.hlbmerge.service.copy.ShizukuFileCopy
+import com.molihuan.hlbmerge.utils.FileUtils
+import com.molihuan.hlbmerge.utils.ShizukuUtils
+import com.molihuan.hlbmerge.utils.UriUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
+
+
+class PathSelectViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(PathSelectUiState())
+    val uiState = _uiState.asStateFlow()
+
+    private val REQUEST_CODE_SHIZUKU_PERMISSION = 1112
+
+    private val isAndroid11 = AppTool.isAndroid11()
+    private val isAndroid14 = AppTool.isAndroid14()
+
+    // 当前授权Uri权限时输入的缓存目录
+    private var currGrantUriPermissionInfo: Pair<String, String>? = null
+
+    //测试
+    fun test() {
+        val srcDir = "/storage/emulated/0/Android/data/tv.danmaku.bili/download"
+        val targetDir = "/storage/emulated/0/Download/HLB站缓存视频合并/cacheCopyTempDir"
+        viewModelScope.launch(Dispatchers.IO) {
+            //复制缓存整体结构,m4s,blv文件只做0拷贝
+            ShizukuFileCopy().zeroCopyFile(srcDir, targetDir, excludeRegex = ".*\\.(m4s|blv)$")
+            //只复制m4s,blv文件
+//            ShizukuFileCopy().copyFile(srcDir, targetDir, includeRegex = ".*\\.(m4s|blv)$")
+            withContext(Dispatchers.Main) {
+                ToastTool.toast("读取缓存完成")
+            }
+        }
+    }
+
+    fun init(context: Context) {
+        //test()
+
+        val androidInputCachePackageName = SettingsRepository.getAndroidInputCachePackageName()
+
+        val biliAppInfoList: List<BiliAppInfo> = listOf(
+            BiliAppInfo(
+                "哔哩哔哩",
+                "tv.danmaku.bili",
+                R.mipmap.ico_bilibili
+            ),
+            BiliAppInfo(
+                "哔哩哔哩(概念版)",
+                "com.bilibili.app.blue",
+                R.mipmap.ico_bilibili_blue
+            ),
+            BiliAppInfo(
+                "哔哩哔哩(谷歌版)",
+                "com.bilibili.app.in",
+                R.mipmap.ico_bilibili
+            ),
+            BiliAppInfo(
+                "哔哩哔哩(HD)",
+                "tv.danmaku.bilibilihd",
+                R.mipmap.ico_bilibili
+            ),
+            BiliAppInfo(
+                "bilimiao",
+                "com.a10miaomiao.bilimiao",
+                R.mipmap.ic_bilimiao_33
+            ),
+        ).map { item ->
+            val isInstall = AppTool.isAppInstall(item.packageName)
+            item.copy(
+                check = isInstall && (item.packageName == androidInputCachePackageName),
+                isInstall = isInstall,
+            )
+        }
+
+        if (androidInputCachePackageName == context.packageName){
+            //自定义输入缓存目录
+            val inputPath = SettingsRepository.getInputCacheDirPath()
+            _uiState.update {
+                it.copy( customInputPath = inputPath)
+            }
+        }
+
+        val grantedPermission = XXPermissions.isGrantedPermission(
+            context,
+            PermissionLists.getManageExternalStoragePermission()
+        )
+        if (grantedPermission) {
+            val shizukuAvailableAndHasPermission = ShizukuUtils.isShizukuAvailableAndHasPermission()
+            if (shizukuAvailableAndHasPermission) {
+                //有读写权限且有Shizuku权限
+                _uiState.update {
+                    it.copy(
+                        showPermissionTips = isAndroid11,
+                        biliAppInfoList = biliAppInfoList,
+                        functionState = PathSelectFunctionState.HasReadWriteShizukuPermission
+                    )
+                }
+            } else {
+                //有读写权限但无Shizuku权限
+                _uiState.update {
+                    it.copy(
+                        showPermissionTips = isAndroid11,
+                        biliAppInfoList = biliAppInfoList,
+                        functionState = PathSelectFunctionState.HasReadWritePermission
+                    )
+                }
+            }
+        } else {
+            //没有读写权限
+            _uiState.update {
+                it.copy(
+                    biliAppInfoList = biliAppInfoList,
+                    showPermissionTips = isAndroid11,
+                    functionState = PathSelectFunctionState.NoReadWritePermission
+                )
+            }
+        }
+    }
+
+    fun updateFunctionState(functionState: PathSelectFunctionState) {
+        SettingsRepository.setAndroidParseCacheDataPermission(functionState)
+        _uiState.update {
+            it.copy(functionState = functionState)
+        }
+    }
+
+    //uri权限回调结果
+    fun onUrlPermissionResult(context: Context, result: ActivityResult) {
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                // 从 result.data (这是一个 Intent) 中提取数据
+                result.data?.let { data ->
+                    val uri: Uri? = data.data
+                    if (uri == null) {
+                        return@let
+                    }
+
+                    val takeFlags: Int =
+                        data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
+                    @SuppressLint("WrongConstant")
+                    context.contentResolver
+                        .takePersistableUriPermission(
+                            uri,
+                            takeFlags
+                        )
+
+                    currGrantUriPermissionInfo?.let { permissionInfo ->
+                        SettingsRepository.setInputCacheDirPath(permissionInfo.first)
+                        SettingsRepository.setAndroidInputCachePackageName(permissionInfo.second)
+                        SettingsRepository.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+                        //删除拷贝的缓存结构文件
+                        FileTool.deleteAllFiles(permissionInfo.first)
+                        val state = _uiState.value
+                        val biliAppInfoList = state.biliAppInfoList.toMutableList().map {
+                            if (it.packageName == permissionInfo.second) {
+                                it.copy(check = true)
+                            } else {
+                                it.copy(check = false)
+                            }
+                        }
+                        _uiState.update {
+                            it.copy(biliAppInfoList = biliAppInfoList)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    //更新biliAppInfo Check
+    fun changeBiliAppInfoCheck(
+        index: Int,
+        check: Boolean,
+        urlPermissionLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
+    ) {
+
+        //如果能进入这里肯定是有读写权限的
+        val state = _uiState.value
+        val appInfo = state.biliAppInfoList[index]
+
+        val uriPath = "${FileUtils.androidDataPath}/${appInfo.packageName}/download"
+        run {
+
+            if (!check) {
+                //ToastTool.toast("您已开启读取此项,无需再次开启")
+                SettingsRepository.setInputCacheDirPath("")
+                SettingsRepository.setAndroidInputCachePackageName("")
+                SettingsRepository.setAndroidParseCacheDataPermission(PathSelectFunctionState.NoReadWritePermission)
+                return@run
+            }
+
+            when (state.functionState) {
+                PathSelectFunctionState.NoReadWritePermission -> {
+                    ToastTool.toast("请先授予读写权限")
+                    return
+                }
+
+                PathSelectFunctionState.HasReadWritePermission -> {
+                    //判断Android/data是否有读权限
+                    val accessAndroidData = FileUtils.canAccessAndroidData()
+                    if (accessAndroidData) {
+                        if (isAndroid11) {
+                            //设置漏洞路径
+                            val vulnerabilityPath =
+                                "${FileUtils.androidDataVulnerabilityPath}/${appInfo.packageName}/download"
+                            SettingsRepository.setInputCacheDirPath(vulnerabilityPath)
+                            SettingsRepository.setAndroidInputCachePackageName(appInfo.packageName)
+                            SettingsRepository.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+                            return@run
+                        } else {
+                            //小于安卓11直接设置Android/data路径即可,可用直接读写
+                            SettingsRepository.setInputCacheDirPath(uriPath)
+                            SettingsRepository.setAndroidInputCachePackageName(appInfo.packageName)
+                            SettingsRepository.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+                            return@run
+                        }
+                    }
+
+                    if (isAndroid14) {
+                        //安卓14及以上必须使用Shizuku
+                        ToastTool.toast("请先授予Shizuku权限")
+                        return
+                    }
+
+
+                    //11~13授予Uri权限
+                    val inputCacheDirPath = SettingsRepository.cacheCopyTempPath
+
+                    val hasPermission =
+                        grantUriPermission(path = uriPath, urlPermissionLauncher)
+                    if (hasPermission) {
+                        SettingsRepository.setInputCacheDirPath(inputCacheDirPath)
+                        SettingsRepository.setAndroidInputCachePackageName(appInfo.packageName)
+                        SettingsRepository.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+                        //删除拷贝的缓存结构文件
+                        FileTool.deleteAllFiles(inputCacheDirPath)
+                    } else {
+                        currGrantUriPermissionInfo = Pair(inputCacheDirPath, appInfo.packageName)
+                        return
+                    }
+                }
+
+                PathSelectFunctionState.HasReadWriteShizukuPermission -> {
+                    Timber.d("Shizuku模式check")
+                    SettingsRepository.setInputCacheDirPath(SettingsRepository.cacheCopyTempPath)
+                    SettingsRepository.setAndroidInputCachePackageName(appInfo.packageName)
+                    SettingsRepository.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWriteShizukuPermission)
+                    //删除拷贝的缓存结构文件
+                    FileTool.deleteAllFiles(SettingsRepository.cacheCopyTempPath)
+                }
+
+                else -> {}
+
+            }
+        }
+
+        val biliAppInfoList = state.biliAppInfoList.toMutableList().map {
+            if (it.packageName == appInfo.packageName) {
+                it.copy(check = check)
+            } else {
+                it.copy(check = false)
+            }
+        }
+        _uiState.update {
+            it.copy(biliAppInfoList = biliAppInfoList, customInputPath = null)
+        }
+    }
+
+
+    //自定义路径check
+    fun changeCustomPathCheck(context: Context, checked: Boolean) {
+        if (checked) {
+            //将默认路径清除
+            changeShowSelectCustomInputDialog(true)
+        } else {
+            SettingsRepository.setInputCacheDirPath("")
+            SettingsRepository.setAndroidInputCachePackageName("")
+            SettingsRepository.setAndroidParseCacheDataPermission(PathSelectFunctionState.NoReadWritePermission)
+        }
+    }
+
+    fun onCustomInputDirPathSelected(context: Context, path: String) {
+        //将预定义的选项取消
+        val state = _uiState.value
+        val appInfoList = state.biliAppInfoList.toMutableList()
+        val newAppInfoList = appInfoList.map {
+            if (it.check) {
+                it.copy(check = false)
+            } else {
+                it
+            }
+        }
+        _uiState.update {
+            it.copy(biliAppInfoList = newAppInfoList, customInputPath = path)
+        }
+        //删除拷贝的缓存结构文件
+        FileTool.deleteAllFiles(SettingsRepository.cacheCopyTempPath)
+
+
+        Timber.d("选择的自定义路径: $path")
+        SettingsRepository.setInputCacheDirPath(path)
+        SettingsRepository.setAndroidInputCachePackageName(context.packageName)
+        SettingsRepository.setAndroidParseCacheDataPermission(PathSelectFunctionState.HasReadWritePermission)
+        changeShowSelectCustomInputDialog(false)
+    }
+
+    //改变选择自定义路径弹窗显示
+    fun changeShowSelectCustomInputDialog(show: Boolean) {
+        _uiState.update {
+            it.copy(showSelectCustomInputDialog = show)
+        }
+    }
+
+
+    // Shizuku权限回调
+    fun onShizukuRequestPermissionResult(requestCode: Int, grantResult: Int) {
+        if (requestCode == REQUEST_CODE_SHIZUKU_PERMISSION) {
+            if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                return
+            }
+            SettingsRepository.setInputCacheDirPath(SettingsRepository.cacheCopyTempPath)
+            _uiState.update { it.copy(functionState = PathSelectFunctionState.HasReadWriteShizukuPermission) }
+        }
+    }
+
+    // 授予Uri权限,如果运行时有权限会直接返回true,运行时没有权限会返回 false,并且会自动请求权限，后续的结果请在回调中处理。
+    fun grantUriPermission(
+        path: String,
+        urlPermissionLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
+    ): Boolean {
+        val uriPair = UriUtils.hasUriPermission(App.context, path)
+        val uriStr = uriPair.first
+        if (uriStr == null) {
+            val intent = UriUtils.getGrantUriPermissionIntent(uriPair.second)
+            urlPermissionLauncher.launch(intent)
+            return false
+        }
+        return true
+    }
+
+    fun grantReadWritePermission(activity: Activity?) {
+        if (activity == null) {
+            return
+        }
+        XXPermissions.with(activity)
+            .permission(PermissionLists.getManageExternalStoragePermission())
+            // 设置不触发错误检测机制（局部设置）
+            //.unchecked()
+            .request(object : OnPermissionCallback {
+
+                override fun onResult(
+                    grantedList: MutableList<IPermission>,
+                    deniedList: MutableList<IPermission>
+                ) {
+                    val allGranted = deniedList.isEmpty()
+                    if (!allGranted) {
+                        // 判断请求失败的权限是否被用户勾选了不再询问的选项
+                        val doNotAskAgain =
+                            XXPermissions.isDoNotAskAgainPermissions(activity, deniedList)
+                        // 在这里处理权限请求失败的逻辑
+                        return
+                    }
+                    // 在这里处理权限请求成功的逻辑
+                    updateFunctionState(PathSelectFunctionState.HasReadWritePermission)
+                }
+            })
+    }
+}
+
+data class PathSelectUiState(
+    val functionState: PathSelectFunctionState = PathSelectFunctionState.HasReadWritePermission,
+    val biliAppInfoList: List<BiliAppInfo> = listOf(
+        BiliAppInfo(
+            "哔哩哔哩",
+            "tv.danmaku.bili",
+            R.mipmap.ico_bilibili
+        )
+    ),
+    val shizukuPermissionStatus: Int = PackageManager.PERMISSION_DENIED,
+    val showPermissionTips: Boolean = true,
+    //自定义路径,null表示没有自定义
+    val customInputPath: String? = null,
+    //是否显示选择自定义路径弹窗
+    val showSelectCustomInputDialog: Boolean = false,
+)
+
+sealed class PathSelectFunctionState(val title: String) {
+    //无读写权限
+    object NoReadWritePermission : PathSelectFunctionState("NoPermission")
+
+    //有读写授予权限
+    object HasReadWritePermission : PathSelectFunctionState("ReadWritePermission")
+
+    //有读写授予权限，并且有uri权限
+    object HasReadWriteUriPermission : PathSelectFunctionState("ReadWriteUriPermission")
+
+
+    //有读写授予权限，并且有shizuku权限
+    object HasReadWriteShizukuPermission : PathSelectFunctionState("ReadWriteShizukuPermission")
+}
+
+data class BiliAppInfo(
+    val name: String,
+    val packageName: String,
+    @DrawableRes
+    val icon: Int? = null,
+    val isInstall: Boolean = false,
+    val check: Boolean = false,
+)

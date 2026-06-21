@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>FFmpeg WASM Demo</title>
+</head>
+<body>
+
+<h2>FFmpeg WASM Demo</h2>
+
+<button id="versionBtn">
+    打印版本号
+</button>
+
+<hr>
+
+<div>
+    <p>视频文件</p>
+    <input type="file" id="videoInput">
+</div>
+
+<div>
+    <p>音频文件</p>
+    <input type="file" id="audioInput">
+</div>
+
+<br>
+
+<button id="mergeBtn">
+    合并音视频
+</button>
+
+<pre id="log"></pre>
+
+<script src="./ffmpeg_core.js"></script>
+
+<script>
+    (async function() {
+
+
+
+    const Module = await ffmpeg_core();
+
+    const log = (msg) => {
+        document.getElementById("log").textContent += msg + "\n";
+    };
+
+    log("WASM加载完成");
+
+    function allocString(Module, str) {
+        const len = Module.lengthBytesUTF8(str) + 1;
+        const ptr = Module._malloc(len);
+        Module.stringToUTF8(str, ptr, len);
+        return ptr;
+    }
+
+    //
+    // 打印版本号
+    //
+    document.getElementById("versionBtn").onclick = () => {
+
+        const ptr = Module._get_ffmpeg_version();
+
+        const version =
+            Module.UTF8ToString(ptr);
+
+        Module._free(ptr);
+
+        log("FFmpeg Version: " + version);
+    };
+
+    //
+    // 合并音视频
+    //
+    document.getElementById("mergeBtn").onclick =
+    async () => {
+
+        const videoFile =
+            document.getElementById("videoInput")
+                .files[0];
+
+        const audioFile =
+            document.getElementById("audioInput")
+                .files[0];
+
+        if (!videoFile || !audioFile) {
+            log("请选择视频和音频");
+            return;
+        }
+
+        log("读取文件中...");
+
+        const videoBytes =
+            new Uint8Array(
+                await videoFile.arrayBuffer()
+            );
+
+        const audioBytes =
+            new Uint8Array(
+                await audioFile.arrayBuffer()
+            );
+
+        //
+        // 写入 WASM 虚拟文件系统
+        //
+        Module.FS.writeFile(
+            "/video.mp4",
+            videoBytes
+        );
+
+        Module.FS.writeFile(
+            "/audio.mp3",
+            audioBytes
+        );
+
+        //
+        // 创建 C 字符串
+        //
+        const videoPtr = allocString(Module, "/video.mp4");
+        const audioPtr = allocString(Module, "/audio.mp3");
+        const outputPtr = allocString(Module, "/merged.mp4");
+
+        log("开始合并...");
+
+        const errorPtr =
+            Module._run_merge_audio_video(
+                videoPtr,
+                audioPtr,
+                outputPtr
+            );
+
+        Module._free(videoPtr);
+        Module._free(audioPtr);
+        Module._free(outputPtr);
+
+        //
+        // 检查返回值
+        //
+        if (errorPtr !== 0) {
+
+            const error =
+                Module.UTF8ToString(
+                    errorPtr
+                );
+
+            Module._free(errorPtr);
+
+            log("失败: " + error);
+
+            return;
+        }
+
+        log("合并成功");
+
+        //
+        // 读取输出文件
+        //
+        const result =
+            Module.FS.readFile(
+                "/merged.mp4"
+            );
+
+        log(
+            "输出大小: " +
+            result.length +
+            " bytes"
+        );
+
+        //
+        // 下载
+        //
+        const blob =
+            new Blob(
+                [result],
+                { type: "video/mp4" }
+            );
+
+        const url =
+            URL.createObjectURL(blob);
+
+        const a =
+            document.createElement("a");
+
+        a.href = url;
+        a.download = "merged.mp4";
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        a.remove();
+
+        URL.revokeObjectURL(url);
+    };
+   })();
+</script>
+
+</body>
+</html>

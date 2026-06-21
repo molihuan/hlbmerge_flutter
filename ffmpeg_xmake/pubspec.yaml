@@ -1,0 +1,43 @@
+name: ffmpeg_hl
+description: "A new Flutter FFI plugin project."
+version: 0.0.2
+homepage:
+
+environment:
+  sdk: ^3.9.2
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.2
+  # https://pub-web.flutter-io.cn/packages/universal_ffi
+  # https://github.com/vm75/universal_ffi
+  universal_ffi: ^1.2.0
+
+dev_dependencies:
+  ffi: ^2.1.3
+  ffigen: ^13.0.0
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  assets:
+    - assets/wasm/
+
+  plugin:
+    platforms:
+      android:
+        ffiPlugin: true
+      ohos:
+        ffiPlugin: true
+      ios:
+        ffiPlugin: true
+      linux:
+        ffiPlugin: true
+      macos:
+        ffiPlugin: true
+      windows:
+        ffiPlugin: true
+      web:

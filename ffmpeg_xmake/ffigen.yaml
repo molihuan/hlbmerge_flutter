@@ -1,0 +1,24 @@
+# Run with `dart run ffigen --config ffigen.yaml`.
+name: FfmpegHlBindings
+description: |
+  Bindings for `src/ffmpeg_hl.h`.
+
+  Regenerate bindings with `dart run ffigen --config ffigen.yaml`.
+output: 'lib/g/ffmpeg_hl_native_bindings.g.dart'
+headers:
+  entry-points:
+    - 'src/ffmpeg_hl.h'
+  include-directives:
+    - 'src/ffmpeg_hl.h'
+#    - 'src/xmake/include/ffmpeg_merge.h'
+#compiler-opts:
+#  - '-Isrc/xmake/include'
+preamble: |
+  // ignore_for_file: always_specify_types
+  // ignore_for_file: camel_case_types
+  // ignore_for_file: non_constant_identifier_names
+comments:
+  style: any
+  length: full
+llvm-path:
+  - 'C:/Users/moli/.vmr/versions/llvm'

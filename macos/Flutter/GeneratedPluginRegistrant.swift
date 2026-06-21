@@ -6,21 +6,21 @@ import FlutterMacOS
 import Foundation
 
 import desktop_drop
-import ffmpeg_hl
-import ffmpeg_kit_flutter_new_min
-import file_picker
+import file_picker_ohos
+import file_selector_macos
+import mmkv_ios
 import package_info_plus
 import path_provider_foundation
-import shared_preferences_foundation
+import share_plus
 import url_launcher_macos
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   DesktopDropPlugin.register(with: registry.registrar(forPlugin: "DesktopDropPlugin"))
-  FfmpegHlPlugin.register(with: registry.registrar(forPlugin: "FfmpegHlPlugin"))
-  FFmpegKitFlutterPlugin.register(with: registry.registrar(forPlugin: "FFmpegKitFlutterPlugin"))
   FilePickerPlugin.register(with: registry.registrar(forPlugin: "FilePickerPlugin"))
+  FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))
+  MMKVPlugin.register(with: registry.registrar(forPlugin: "MMKVPlugin"))
   FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
-  SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
+  SharePlusMacosPlugin.register(with: registry.registrar(forPlugin: "SharePlusMacosPlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
 }

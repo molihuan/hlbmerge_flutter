@@ -1,0 +1,3 @@
+[submodule "ffmpeg_xmake"]
+	path = ffmpeg_xmake
+	url = https://github.com/molihuan/ffmpeg_xmake.git

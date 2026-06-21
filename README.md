@@ -94,6 +94,16 @@ B站的"学习视频"经常失效/下架，此软件可以将缓存的"学习视
 # 创建项目
 # flutter create --org com.molihuan --platforms=android,ios,web,windows,macos,linux,ohos hlbmerge
 
+# 创建插件
+# flutter create --org com.molihuan --template=plugin_ffi --platforms=android,ios,windows,macos,linux,ohos ffmpeg_hl
+
+# 更新子模块
+git submodule update --remote ffmpeg_xmake
+# 代码生成
+dart run pigeon --input pigeons/api.dart
+
+dart run build_runner watch -d
+
 # windows打包
 flutter build windows
 

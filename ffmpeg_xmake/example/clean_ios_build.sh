@@ -1,0 +1,1 @@
+rm -rf build/ios ios/Podfile.lock ios/Pods

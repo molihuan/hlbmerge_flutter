@@ -1,0 +1,63 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+# Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
+/pubspec.lock
+**/doc/api/
+.dart_tool/
+.flutter-plugins-dependencies
+/build/
+/coverage/
+
+/src/xmake/.xmake
+
+/src/xmake/build/*
+
+# 保留
+!/src/xmake/build/android/
+!/src/xmake/build/harmony/
+!/src/xmake/build/windows/
+!/src/xmake/build/wasm/
+
+# 先忽略目录中的所有内容
+/src/xmake/build/*/*/*
+
+# 再放行特定后缀
+!/src/xmake/build/android/**/*.so
+!/src/xmake/build/harmony/**/*.so
+!/src/xmake/build/windows/**/*.dll
+!/src/xmake/build/windows/**/*.lib
+!/src/xmake/build/windows/**/*.exp
+!/src/xmake/build/wasm/*/*.html
+!/src/xmake/build/wasm/*/function_injection.js
+
+/src/xmake/.cache
+src/xmake/compile_commands.json
+**/.xmake/
+src/cmake-build-*
+
+android/src/main/jniLibs
+ohos/libs

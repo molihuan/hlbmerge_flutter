@@ -1,0 +1,52 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\moli\\.ohos\\config\\default_ohos_XC8njgI1x2NnDr5xPj3X0EJLXYsNevVNELmP9pgyU3U=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001AFB5926FACB010CF77A0842E4120CDDFF1D761376956B081F61025D7BF1C7AF45A3F63C7FC47C",
+          "profile": "C:\\Users\\moli\\.ohos\\config\\default_ohos_XC8njgI1x2NnDr5xPj3X0EJLXYsNevVNELmP9pgyU3U=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\moli\\.ohos\\config\\default_ohos_XC8njgI1x2NnDr5xPj3X0EJLXYsNevVNELmP9pgyU3U=.p12",
+          "storePassword": "0000001A1ADC38C4899858D8802BEA7BE91A75095A13ECCFB8A6FC472EA5262C1423A0E3C3AD269E3FA0"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compatibleSdkVersion": "5.1.0(18)",
+        "runtimeOS": "HarmonyOS",
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug"
+      },
+      {
+        "name": "profile"
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}

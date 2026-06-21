@@ -2,19 +2,16 @@ package com.molihuan.hlbmerge
 
 import android.app.Application
 import com.molihuan.commonmodule.CommonModule
-import com.molihuan.hlbmerge.channel.main.MainMethodChannel
-import com.molihuan.hlbmerge.dao.flutter.FlutterSpData
 import com.molihuan.hlbmerge.log.LogUtils
-import dagger.hilt.android.HiltAndroidApp
+import com.molihuan.hlbmerge.repository.SettingsRepository
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
 
-@HiltAndroidApp
-class App: Application() {
+class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        instance = this
+        context = this
         //缓存flutter引擎
         cacheFlutterEngine()
         prepareInit()
@@ -37,8 +34,8 @@ class App: Application() {
             .put(packageName, flutterEngine)
 
         //注册监听
-        MainMethodChannel.register(flutterEngine.dartExecutor.binaryMessenger, this)
-        registerActivityLifecycleCallbacks(MainMethodChannel)
+//        MainMethodChannel.register(flutterEngine.dartExecutor.binaryMessenger, this)
+//        registerActivityLifecycleCallbacks(MainMethodChannel)
     }
 
     /**
@@ -48,8 +45,7 @@ class App: Application() {
     private fun prepareInit() {
         LogUtils.init()
         CommonModule.init(this)
-        // flutter sp 数据存储
-        FlutterSpData.init(this)
+        SettingsRepository.init(this)
     }
 
     /**
@@ -61,7 +57,12 @@ class App: Application() {
 
     companion object {
         @JvmStatic
-        lateinit var instance: App
+        lateinit var context: Application
             private set
+
+        @JvmStatic
+        fun getFlutterEngine(): FlutterEngine? {
+            return FlutterEngineCache.getInstance().get(context.packageName)
+        }
     }
 }

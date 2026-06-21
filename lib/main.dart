@@ -1,33 +1,42 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_navigation/get_navigation.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:hlbmerge/dao/sp_data_manager.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hlbmerge/utils/platform_util.dart';
+import 'package:nativeapi/nativeapi.dart';
 
-import 'ui/pages/app_pages.dart';
-
+import 'features/export/merge/ffmpeg_server.dart';
+import 'log/provider_logger.dart';
+import 'repository/app_repository.dart';
+import 'ui/screen/app/app_screen.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await SpDataManager.init();
-  runApp(const MyApp());
+  await _init();
+  // Provider 监听
+  final List<ProviderObserver> providerObservers = [];
+  if (kDebugMode) {
+    providerObservers.add(ProviderLogger());
+  }
+
+  runApp(ProviderScope(observers: providerObservers, child: const AppScreen()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+// 初始化
+_init() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-  @override
-  Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      /// 初始路由
-      initialRoute: AppPages.INITIAL,
-      /// 所有的页面
-      getPages: AppPages.routes,
-    );
-  }
+  await runPlatformGroupAsync(
+    onDesktop: () {
+      // 窗口居中
+      final windowManager = WindowManager.instance;
+      final window = windowManager.getCurrent();
+      window?.show();
+      window?.center();
+    },
+    orElse: () {},
+  );
+
+  // 初始化仓库
+  await AppRepository.init();
+  // 初始化 FFmpeg
+  await FFmpegServer.init();
 }

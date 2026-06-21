@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "hlbmerge" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "hlbmerge" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.molihuan. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.molihuan. All rights reserved." "\0"
             VALUE "OriginalFilename", "hlbmerge.exe" "\0"
             VALUE "ProductName", "hlbmerge" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

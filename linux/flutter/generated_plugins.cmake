@@ -4,11 +4,15 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
-  ffmpeg_hl
+  file_selector_linux
+  mmkv_linux
   url_launcher_linux
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  cnativeapi
+  ffmpeg_hl
+  jni
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

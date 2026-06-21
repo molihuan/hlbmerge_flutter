@@ -1,0 +1,507 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:tuple/tuple.dart';
+
+
+import '../../repository/settings_repository.dart';
+import '../../utils/json_util.dart';
+import '../../utils/platform_util.dart';
+import 'merge/model/cache_group.dart';
+import 'merge/model/cache_item.dart';
+
+//枚举,缓存平台
+enum CachePlatform {
+  //win
+  win("Windows缓存"),
+  //mac
+  mac("Mac缓存"),
+  //手机
+  android("Android缓存");
+
+  final String title; // 枚举字段
+
+  const CachePlatform(this.title); // 构造函数
+}
+
+//m4s文件类型
+enum M4sFileType {
+  //视频
+  video,
+  //音频
+  audio,
+}
+
+//输出文件模式
+enum OutputFileMode {
+  //音频文件
+  audio("mp3"),
+  //视频文件(无声)
+  video("mp4"),
+  //导出音频和视频文件,合并音视频
+  all("mp4");
+
+  // 属性
+  final String extension;
+
+  // 构造函数
+  const OutputFileMode(this.extension);
+}
+
+class CacheDataManager {
+  //缓存平台
+  CachePlatform _cachePlatform = CachePlatform.win;
+
+  //设置缓存平台
+  void setCachePlatform(CachePlatform platform) {
+    _cachePlatform = platform;
+  }
+
+  //导出文件时是否需要添加序号
+  bool isAddIndex = true;
+
+  List<CacheGroup>? loadCacheData(String targetPath) {
+    //判断路径是否存在并且是否是文件夹
+    var rootDir = Directory(targetPath);
+    if (!rootDir.existsSync()) {
+      // 目录不存在
+      return null;
+    }
+
+    isAddIndex = SettingsRepository.getExportFileAddIndex();
+
+    return runPlatform<List<CacheGroup>?>(
+      orElse: () {
+        switch (_cachePlatform) {
+          case CachePlatform.win:
+            return loadWinCacheData(rootDir);
+          case CachePlatform.android:
+            return loadAndroidCacheData(rootDir);
+          case CachePlatform.mac:
+            return loadWinCacheData(rootDir);
+        }
+      },
+      onAndroid: () {
+        return loadAndroidCacheData(rootDir);
+      },
+    );
+  }
+
+  // 加载安卓缓存数据
+  List<CacheGroup>? loadAndroidCacheData(Directory rootDir) {
+    List<CacheItem> cacheItemList = [];
+    List<File> blvFiles = [];
+    //遍历获取子目录
+    var firstDirs = rootDir.listSync();
+    for (var firstDir in firstDirs) {
+      if (firstDir is Directory) {
+        for (var secondDir in firstDir.listSync()) {
+          blvFiles.clear();
+          if (secondDir is Directory) {
+            //创建缓存item
+            var cacheItem = CacheItemBuilder();
+            //缓存项父路径
+            cacheItem.parentPath = firstDir.path;
+            //缓存项路径
+            cacheItem.path = secondDir.path;
+            try {
+              //遍历缓存项
+              final entities = secondDir.listSync(recursive: true);
+              for (var file in entities) {
+                if (file is File) {
+                  if (file.path.endsWith("entry.json")) {
+                    //json信息文件
+                    // print(file.path);
+                    cacheItem.jsonPath = file.path;
+                    //解析json文件信息
+                    cacheItem = _parseAndroidJsonFile(cacheItem, file.path);
+                  } else if (file.path.endsWith("danmaku.xml")) {
+                    //弹幕文件
+                    cacheItem.danmakuPath = file.path;
+                  } else if (file.path.endsWith("audio.m4s")) {
+                    cacheItem.audioPath = file.path;
+                  } else if (file.path.endsWith("video.m4s")) {
+                    cacheItem.videoPath = file.path;
+                  } else if (file.path.endsWith("cover.jpg")) {
+                    cacheItem.coverPath = file.path;
+                  } else if (file.path.endsWith(".blv")) {
+                    blvFiles.add(file);
+                  }
+                }
+              }
+
+              if (blvFiles.isNotEmpty) {
+                cacheItem.blvPathList = blvFiles.map((it) {
+                  return it.path;
+                }).toList();
+              }
+              //判断是否可以合并音视频
+              if (cacheItem.canMergeAudioVideo()) {
+                cacheItem.groupId = firstDir.path;
+                cacheItemList.add(cacheItem.build());
+              }
+            } catch (e) {
+              print('递归遍历目录时出错: $e');
+            }
+          }
+        }
+      }
+    }
+
+    //缓存组列表
+    List<CacheGroupBuilder> cacheGroupList = [];
+
+    //遍历cacheItemList并按groupId进行分组
+    for (var item in cacheItemList) {
+      var groupIdList = cacheGroupList.map((group) {
+        return group.groupId;
+      });
+      if (groupIdList.contains(item.groupId)) {
+        //存在则添加到对应缓存组
+        for (var group in cacheGroupList) {
+          if (group.groupId == item.groupId) {
+            //更新缓存组的路径为它们的父目录
+            group.path = item.parentPath;
+            group.cacheItemList.add(item);
+            break;
+          }
+        }
+      } else {
+        //不存在则创建缓存组
+        var cacheGroup = CacheGroupBuilder();
+        cacheGroup.groupId = item.groupId;
+        cacheGroup.path = item.path;
+        cacheGroup.title = item.groupTitle;
+        cacheGroup.coverPath = item.groupCoverPath;
+        cacheGroup.coverUrl = item.groupCoverUrl;
+        cacheGroup.cacheItemList.add(item);
+        cacheGroupList.add(cacheGroup);
+      }
+    }
+
+    //最终的缓存组列表
+    List<CacheGroup> finalCacheGroupList = [];
+
+    //遍历缓存组列表并将每一个缓存组里的cacheItemList按item的p进行排序,如果其中有p为空的则往后排
+    for (var cacheGroup in cacheGroupList) {
+      cacheGroup.cacheItemList.sort((a, b) {
+        // 如果a的p为空，排在后面
+        if (a.p == null) return 1;
+        // 如果b的p为空，排在前面
+        if (b.p == null) return -1;
+        // 都不为空时，按p值升序排列
+        return a.p! - b.p!;
+      });
+
+      //判断是否需要添加序号
+      if (isAddIndex && 1 < cacheGroup.cacheItemList.length) {
+        for (var i = 0; i < cacheGroup.cacheItemList.length; i++) {
+          var item = cacheGroup.cacheItemList[i];
+          if (item.p != null) {
+            final newTitle = "${item.p}.${item.title}";
+            cacheGroup.cacheItemList[i] = item.copyWith(title: newTitle);
+          }
+        }
+      }
+
+      finalCacheGroupList.add(cacheGroup.build());
+    }
+
+    print(finalCacheGroupList);
+    return finalCacheGroupList;
+  }
+
+  // 加载Windows缓存数据
+  List<CacheGroup>? loadWinCacheData(Directory rootDir) {
+    List<CacheItem> cacheItemList = [];
+    List<File> m4sFiles = [];
+
+    //遍历获取子目录
+    var firstDirs = rootDir.listSync();
+    for (var firstDir in firstDirs) {
+      m4sFiles.clear();
+      if (firstDir is Directory) {
+        //创建缓存item
+        var cacheItem = CacheItemBuilder();
+        //缓存项父路径
+        cacheItem.parentPath = rootDir.path;
+        //缓存项路径
+        cacheItem.path = firstDir.path;
+        var files = firstDir.listSync();
+        for (var file in files) {
+          if (file is File) {
+            if (file.path.endsWith(".videoInfo")) {
+              //json信息文件
+              // print(file.path);
+              cacheItem.jsonPath = file.path;
+              //解析json文件信息
+              cacheItem = _parseWinJsonFile(cacheItem, file.path);
+            } else if (file.path.endsWith("dm1")) {
+              //弹幕文件
+              cacheItem.danmakuPath = file.path;
+            } else if (file.path.endsWith(".m4s")) {
+              //m4s文件
+              // print(file.path);
+              //收集m4s文件
+              m4sFiles.add(file);
+            } else if (file.path.endsWith("group.jpg")) {
+              cacheItem.groupCoverPath = file.path;
+            } else if (file.path.endsWith("image.jpg")) {
+              cacheItem.coverPath = file.path;
+            }
+          }
+        }
+        //判断并设置音频文件, 视频文件
+        var audioVideoM4s = _judgeM4sFile(m4sFiles);
+        if (audioVideoM4s != null) {
+          cacheItem.audioPath = audioVideoM4s.item1;
+          cacheItem.videoPath = audioVideoM4s.item2;
+          // print(cacheItem);
+          //添加缓存项
+          cacheItemList.add(cacheItem.build());
+        }
+      }
+    }
+
+    //缓存组列表
+    List<CacheGroupBuilder> cacheGroupList = [];
+
+    //遍历cacheItemList并按groupId进行分组
+    for (var item in cacheItemList) {
+      var groupIdList = cacheGroupList.map((group) {
+        return group.groupId;
+      });
+      if (groupIdList.contains(item.groupId)) {
+        //存在则添加到对应缓存组
+        for (var group in cacheGroupList) {
+          if (group.groupId == item.groupId) {
+            //更新缓存组的路径为它们的父目录
+            group.path = item.parentPath;
+            group.cacheItemList.add(item);
+            break;
+          }
+        }
+      } else {
+        //不存在则创建缓存组
+        var cacheGroup = CacheGroupBuilder();
+        cacheGroup.groupId = item.groupId;
+        cacheGroup.path = item.path;
+        cacheGroup.title = item.groupTitle;
+        cacheGroup.coverPath = item.groupCoverPath;
+        cacheGroup.coverUrl = item.groupCoverUrl;
+        cacheGroup.cacheItemList.add(item);
+        cacheGroupList.add(cacheGroup);
+      }
+    }
+
+    //最终的缓存组列表
+    List<CacheGroup> finalCacheGroupList = [];
+
+    //遍历缓存组列表并将每一个缓存组里的cacheItemList按item的p进行排序,如果其中有p为空的则往后排
+    for (var cacheGroup in cacheGroupList) {
+      cacheGroup.cacheItemList.sort((a, b) {
+        // 如果a的p为空，排在后面
+        if (a.p == null) return 1;
+        // 如果b的p为空，排在前面
+        if (b.p == null) return -1;
+        // 都不为空时，按p值升序排列
+        return a.p! - b.p!;
+      });
+
+      //判断是否需要添加序号
+      if (isAddIndex && 1 < cacheGroup.cacheItemList.length) {
+        for (var i = 0; i < cacheGroup.cacheItemList.length; i++) {
+          var item = cacheGroup.cacheItemList[i];
+          if (item.p != null) {
+            final newTitle = "${item.p}.${item.title}";
+            cacheGroup.cacheItemList[i] = item.copyWith(title: newTitle);
+          }
+        }
+      }
+
+      finalCacheGroupList.add(cacheGroup.build());
+    }
+
+    print(finalCacheGroupList);
+    return finalCacheGroupList;
+  }
+
+  //解析安卓json文件信息
+  CacheItemBuilder _parseAndroidJsonFile(
+    CacheItemBuilder item,
+    String jsonPath,
+  ) {
+    //判断json文件是否是正常的json格式
+    try {
+      // 读取文件
+      String content = File(jsonPath).readAsStringSync();
+      Map<String, dynamic> data;
+      try {
+        // 第一次直接尝试解析
+        data = json.decode(content);
+      } catch (e) {
+        print('json文件解析失败: $e');
+        // 如果失败，再尝试修复
+        data = JsonUtil.tryFixJson(content);
+      }
+
+      item.avId = _getMapString(data, 'avid');
+      item.bvId = _getMapString(data, 'bvid');
+
+      if (data.containsKey('page_data')) {
+        final pageData = data['page_data'];
+        if (pageData != null) {
+          item.title = _getMapString(pageData, 'part');
+          item.cId = _getMapString(pageData, 'cid');
+          //获取p
+          item.p = _getMapInt(pageData, 'page');
+        }
+      }
+
+      if (data.containsKey('ep')) {
+        final epData = data['ep'];
+        if (epData != null) {
+          item.title = _getFirstNonNull([
+            () => _getMapString(epData, 'index_title'),
+          ]);
+          //获取p
+          item.p = _getFirstNonNull([
+            () => _getMapInt(epData, 'index'),
+            () => _getMapInt(epData, 'page'),
+            () => _getMapInt(epData, 'sort_index'),
+          ]);
+        }
+      }
+
+      // 获取标题
+      item.title = _getFirstNonNull([
+        () => item.title,
+        () => _getMapString(data, 'title'),
+        () => item.bvId,
+        () => item.avId,
+        () => item.cId,
+      ]);
+
+      item.coverUrl = _getMapString(data, 'cover');
+
+      // item.groupId = _getMapString(data, 'groupId');
+      item.groupCoverPath = item.coverPath;
+
+      item.groupCoverUrl = item.coverUrl;
+      item.groupTitle = _getMapString(data, 'title');
+    } catch (e) {
+      print("解析${item.jsonPath} json文件错误:${e.toString()}");
+    }
+
+    return item;
+  }
+
+  //解析电脑json文件信息
+  CacheItemBuilder _parseWinJsonFile(CacheItemBuilder item, String jsonPath) {
+    //判断json文件是否是正常的json格式
+    try {
+      // 读取文件
+      String content = File(jsonPath).readAsStringSync();
+      final Map<String, dynamic> data = json.decode(content);
+
+      item.avId = _getMapString(data, 'aid');
+      item.bvId = _getMapString(data, 'bvid');
+      // 获取标题
+      item.title = _getFirstNonNull([
+        () => _getMapString(data, 'title'),
+        () => _getMapString(data, 'tabName'),
+        () => _getMapString(data, 'cid'),
+        () => item.bvId,
+        () => item.avId,
+        () => _getMapString(data, 'itemId'),
+        () => _getMapString(data, 'p'),
+      ]);
+
+      //获取p
+      item.p = _getMapInt(data, 'p');
+
+      item.coverPath = item.coverPath ?? _getMapString(data, 'coverPath');
+      item.coverUrl = _getMapString(data, 'coverUrl');
+
+      item.groupId = _getMapString(data, 'groupId');
+      item.groupCoverPath =
+          item.groupCoverPath ?? _getMapString(data, 'groupCoverPath');
+      item.groupCoverUrl = _getMapString(data, 'groupCoverUrl');
+      item.groupTitle = _getMapString(data, 'groupTitle');
+    } catch (e) {
+      print("解析${item.jsonPath} json文件错误:");
+    }
+
+    return item;
+  }
+
+  //获取Map中的字符串值
+  static String? _getMapString(dynamic data, String key) {
+    if (data is Map && data.containsKey(key)) {
+      final value = data[key];
+      return value is String ? value : value?.toString();
+    }
+    return null;
+  }
+
+  //获取map中的int值
+  static int? _getMapInt(dynamic data, String key) {
+    if (data is Map && data.containsKey(key)) {
+      final value = data[key];
+      return value is int ? value : int.tryParse(value?.toString() ?? "");
+    }
+    return null;
+  }
+
+  // 获取第一个非空的值
+  // static String? _getFirstNonNull(List<String? Function()> getters) {
+  //   for (var get in getters) {
+  //     final value = get();
+  //     if (value != null && value.trim().isNotEmpty) return value;
+  //   }
+  //   return null;
+  // }
+
+  // 获取第一个非空的值
+  static T? _getFirstNonNull<T>(List<T? Function()> getters) {
+    for (var get in getters) {
+      final value = get();
+      if (value != null) {
+        if (value is String) {
+          // 判断字符串是否为空
+          if (value.trim().isNotEmpty) {
+            return value;
+          }
+        } else {
+          return value;
+        }
+      }
+    }
+    return null;
+  }
+
+  //判断电脑缓存文件m4s文件
+  //返回的Pair<音频文件, 视频文件>
+  Tuple2<String, String>? _judgeM4sFile(List<File> m4sFiles) {
+    if (m4sFiles.length != 2) {
+      return null;
+    }
+    var file1 = m4sFiles[0];
+    var file2 = m4sFiles[1];
+
+    //根据文件名判断音频文件
+    if (file1.path.endsWith("30280.m4s")) {
+      return Tuple2(file1.path, file2.path);
+    }
+    if (file2.path.endsWith("30280.m4s")) {
+      return Tuple2(file2.path, file1.path);
+    }
+
+    //根据文件大小判断音频文件
+    if (file1.lengthSync() < file2.lengthSync()) {
+      return Tuple2(file1.path, file2.path);
+    } else {
+      return Tuple2(file2.path, file1.path);
+    }
+  }
+}

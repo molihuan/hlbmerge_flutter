@@ -4,11 +4,16 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
-  ffmpeg_hl
+  file_selector_windows
+  mmkv_win32
+  share_plus
   url_launcher_windows
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  cnativeapi
+  ffmpeg_hl
+  jni
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)
