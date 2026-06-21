@@ -1,0 +1,77 @@
+PODS:
+  - cnativeapi (0.1.3):
+    - FlutterMacOS
+  - desktop_drop (0.0.1):
+    - FlutterMacOS
+  - ffmpeg_hl (0.0.1):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+  - MMKV (2.4.0):
+    - MMKVCore (~> 2.4.0)
+  - mmkv_ios (2.4.0):
+    - Flutter
+    - FlutterMacOS
+    - MMKV (< 2.5, >= 2.4.0)
+  - MMKVCore (2.4.0)
+  - package_info_plus (0.0.1):
+    - FlutterMacOS
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - share_plus (0.0.1):
+    - FlutterMacOS
+  - url_launcher_macos (0.0.1):
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - cnativeapi (from `Flutter/ephemeral/.symlinks/plugins/cnativeapi/macos`)
+  - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
+  - ffmpeg_hl (from `Flutter/ephemeral/.symlinks/plugins/ffmpeg_hl/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - mmkv_ios (from `Flutter/ephemeral/.symlinks/plugins/mmkv_ios/darwin`)
+  - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
+  - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
+  - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
+  - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
+
+SPEC REPOS:
+  trunk:
+    - MMKV
+    - MMKVCore
+
+EXTERNAL SOURCES:
+  cnativeapi:
+    :path: Flutter/ephemeral/.symlinks/plugins/cnativeapi/macos
+  desktop_drop:
+    :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos
+  ffmpeg_hl:
+    :path: Flutter/ephemeral/.symlinks/plugins/ffmpeg_hl/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  mmkv_ios:
+    :path: Flutter/ephemeral/.symlinks/plugins/mmkv_ios/darwin
+  package_info_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
+  path_provider_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
+  share_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/share_plus/macos
+  url_launcher_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
+
+SPEC CHECKSUMS:
+  cnativeapi: 5bcc6f06653026ebefa0922d0cc7822e0b02d88c
+  desktop_drop: 1eeeb9484299585770b6461e4f3d60950e99efa2
+  ffmpeg_hl: 144161f1106d79a6deef0721e2163f14a3d88f2a
+  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+  MMKV: 86859fdfa2b0b21db1fd6e48788474a6416a2c77
+  mmkv_ios: 16fc2d9edbcf2d7ae8878918b130b12ec8337495
+  MMKVCore: 3d16ce9f7d411e135020915fde98a056859a1efa
+  package_info_plus: 12f1c5c2cfe8727ca46cbd0b26677728972d9a5b
+  path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
+  share_plus: fd717ef89a2801d3491e737630112b80c310640e
+  url_launcher_macos: 175a54c831f4375a6cf895875f716ee5af3888ce
+
+PODFILE CHECKSUM: 54d867c82ac51cbd61b565781b9fada492027009
+
+COCOAPODS: 1.16.2

@@ -8,11 +8,20 @@ import '../base_storage.dart';
 abstract class LocalStorage implements BaseStorage {
   //存储数据路径
   String? getDataStoragePath() {
-    return runPlatformGroup(
+    return runPlatform(
       orElse: () {
         return null;
       },
-      onDesktop: () {
+      onLinux: () {
+        final currExeDir = FileUtil.getCurrExeDir();
+        final dataDir = Directory('${currExeDir.path}/data/storage');
+        //如果不存在就创建
+        if (!dataDir.existsSync()) {
+          dataDir.createSync();
+        }
+        return dataDir.path;
+      },
+      onWindows: () {
         final currExeDir = FileUtil.getCurrExeDir();
         final dataDir = Directory('${currExeDir.path}/data/storage');
         //如果不存在就创建

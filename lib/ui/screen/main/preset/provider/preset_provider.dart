@@ -56,10 +56,10 @@ class PresetNotifier extends _$PresetNotifier {
     }
 
     //判断路径中是否有空格
-    if (StrUtil.containsAnySpace(dirPath)) {
-      ToastUtil.warning("路径中不能包含空格,请重新选择");
-      return;
-    }
+    // if (StrUtil.containsAnySpace(dirPath)) {
+    //   ToastUtil.warning("路径中不能包含空格,请重新选择");
+    //   return;
+    // }
     SettingsRepository.setInputCacheDirPath(dirPath);
   }
 

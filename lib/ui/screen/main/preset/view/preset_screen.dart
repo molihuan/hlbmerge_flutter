@@ -60,6 +60,16 @@ class PresetScreen extends ConsumerWidget {
                 ),
               ];
             },
+            onIOS: () {
+              return [
+                ListTile(
+                  title: const Text("缓存视频解析位置"),
+                  onTap: () {
+                    intent.pickInputCacheDirPath();
+                  },
+                ),
+              ];
+            },
           ),
 
           ListTile(
