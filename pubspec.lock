@@ -233,14 +233,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.2.0"
-  dbus:
-    dependency: transitive
-    description:
-      name: dbus
-      sha256: d0c98dcd4f5169878b6cf8f6e0a52403a9dff371a3e2f019697accbf6f44a270
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.7.12"
   desktop_drop:
     dependency: "direct main"
     description:
@@ -289,47 +281,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "7.0.1"
-  file_picker_ohos:
+  file_picker:
     dependency: "direct main"
     description:
       path: "."
-      ref: "br_v10.3.8_ohos"
-      resolved-ref: "433c8f6567ae6224e1446d001045499014a24461"
+      ref: "br_v8.0.7_ohos"
+      resolved-ref: "86ad5c767d94e01ad174eebae09931d651e64068"
       url: "https://gitcode.com/CPF-Flutter/fluttertpc_file_picker.git"
     source: git
-    version: "10.3.8"
-  file_selector_linux:
-    dependency: transitive
-    description:
-      name: file_selector_linux
-      sha256: "2567f398e06ac72dcf2e98a0c95df2a9edd03c2c2e0cacd4780f20cdf56263a0"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.9.4"
-  file_selector_macos:
-    dependency: transitive
-    description:
-      name: file_selector_macos
-      sha256: "5e0bbe9c312416f1787a68259ea1505b52f258c587f12920422671807c4d618a"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.9.5"
-  file_selector_platform_interface:
-    dependency: transitive
-    description:
-      name: file_selector_platform_interface
-      sha256: "35e0bd61ebcdb91a3505813b055b09b79dfdc7d0aee9c09a7ba59ae4bb13dc85"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.7.0"
-  file_selector_windows:
-    dependency: transitive
-    description:
-      name: file_selector_windows
-      sha256: "62197474ae75893a62df75939c777763d39c2bc5f73ce5b88497208bc269abfd"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.9.3+5"
+    version: "8.0.7"
   fixnum:
     dependency: transitive
     description:
@@ -510,70 +470,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "4.8.0"
-  image_picker:
-    dependency: transitive
-    description:
-      name: image_picker
-      sha256: "91c025426c2881c551100bce834e201c835a170151545f58d17da5180ca7d9ac"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "1.2.2"
-  image_picker_android:
-    dependency: transitive
-    description:
-      name: image_picker_android
-      sha256: d5b3e1774af29c9ab00103afb0d4614070f924d2e0057ac867ec98800114793f
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.8.13+17"
-  image_picker_for_web:
-    dependency: transitive
-    description:
-      name: image_picker_for_web
-      sha256: "66257a3191ab360d23a55c8241c91a6e329d31e94efa7be9cf7a212e65850214"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "3.1.1"
-  image_picker_ios:
-    dependency: transitive
-    description:
-      name: image_picker_ios
-      sha256: "956c16a42c0c708f914021666ffcd8265dde36e673c9fa68c81f7d085d9774ad"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.8.13+3"
-  image_picker_linux:
-    dependency: transitive
-    description:
-      name: image_picker_linux
-      sha256: "1f81c5f2046b9ab724f85523e4af65be1d47b038160a8c8deed909762c308ed4"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.2.2"
-  image_picker_macos:
-    dependency: transitive
-    description:
-      name: image_picker_macos
-      sha256: "86f0f15a309de7e1a552c12df9ce5b59fe927e71385329355aec4776c6a8ec91"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.2.2+1"
-  image_picker_platform_interface:
-    dependency: transitive
-    description:
-      name: image_picker_platform_interface
-      sha256: "567e056716333a1647c64bb6bd873cff7622233a5c3f694be28a583d4715690c"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.11.1"
-  image_picker_windows:
-    dependency: transitive
-    description:
-      name: image_picker_windows
-      sha256: d248c86554a72b5495a31c56f060cf73a41c7ff541689327b1a7dbccc33adfae
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.2.2"
   image_size_getter:
     dependency: transitive
     description:
