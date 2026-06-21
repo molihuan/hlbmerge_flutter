@@ -36,21 +36,22 @@ B站的"学习视频"经常失效/下架，此软件可以将缓存的"学习视
 
 ## 截图 (如果图片无法显示请前往国内镜像[Gitcode](https://gitcode.com/bigmolihuan/hlbmerge_flutter))
 
-| 平台截图                                                                                                           |
-|----------------------------------------------------------------------------------------------------------------|
-| Android                                                                                                        |
-| [![preview-android-01.jpg](https://i.postimg.cc/6qBFDvvJ/preview-android-01.jpg)](https://postimg.cc/47F8cnPB) |
-| Windows                                                                                                        |
-| [![preview-windows-01.png](https://i.postimg.cc/qqpW933H/preview-windows-01.png)](https://postimg.cc/k6hjSDsT) |
-| Linux                                                                                                          |
-| [![preview-linux-01.png](https://i.postimg.cc/fTvZ8M1V/preview-linux-01.png)](https://postimg.cc/fJk6LQzs)     |
-| ohos                                                                                                           |
-| 待补充                                                                                                            |
-| Mac                                                                                                            |
-| [![preview-mac-01.png](https://i.postimg.cc/kGYs9cnf/preview-mac-01.png)](https://postimg.cc/BPDHB2PK)    |
-| ios                                                                                                            |
-| 待补充                                                                                                            |
-
+| 平台截图                                                                                                                            |
+|---------------------------------------------------------------------------------------------------------------------------------|
+| Android                                                                                                                         |
+| ![https://i.postimg.cc/PJd5ncrN/hlbmerge-android-preview-01.jpg](https://i.postimg.cc/PJd5ncrN/hlbmerge-android-preview-01.jpg) |
+| Windows                                                                                                                         |
+| ![https://i.postimg.cc/HnTk1Ksy/hlbmerge-windows-preview-01.jpg](https://i.postimg.cc/HnTk1Ksy/hlbmerge-windows-preview-01.jpg) |
+| Linux                                                                                                                           |
+| ![https://i.postimg.cc/kG7gPZX4/hlbmerge-linux-preview-01.jpg](https://i.postimg.cc/kG7gPZX4/hlbmerge-linux-preview-01.jpg)     |
+| ohos                                                                                                                            |
+| ![https://i.postimg.cc/x891V7Tc/hlbmerge-harmony-preview-01.jpg](https://i.postimg.cc/x891V7Tc/hlbmerge-harmony-preview-01.jpg) |
+| Mac                                                                                                                             |
+| ![https://i.postimg.cc/QCjdZPxK/hlbmerge-mac-preview-01.png](https://i.postimg.cc/QCjdZPxK/hlbmerge-mac-preview-01.png)         |
+| ios                                                                                                                             |
+| ![https://i.postimg.cc/Kjm8hVvj/hlbmerge-ios-preview-01.png](https://i.postimg.cc/Kjm8hVvj/hlbmerge-ios-preview-01.png)         |
+| Web                                                                                                                             |
+| 待补充                                                                                                                             |
 
 
 # 注意 ! ! !
