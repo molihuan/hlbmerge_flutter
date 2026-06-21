@@ -104,6 +104,9 @@ flutter build macos
 # Linux打包
 flutter build linux --debug
 
+# 虚拟机ui倒置问题运行
+LIBGL_ALWAYS_SOFTWARE=1 flutter run -d linux
+
 # Android分割 ABI 构建，减小 apk 大小
 flutter build apk --release --split-per-abi
 
@@ -121,6 +124,10 @@ flutter pub run flutter_launcher_icons
 
 编译时需要搭建好ffmpeg编译环境,否则无法编译,或者自行修改[ffmpeg_xmake/src/CMakeLists.txt](ffmpeg_xmake/src/CMakeLists.txt),动态库已编译上传到仓库的[ffmpeg_xmake/src/xmake/build](ffmpeg_xmake/src/xmake/build)
 
+#### Linux编译特别注意
+```shell
+sudo apt install libayatana-appindicator3-dev
+```
 
 ## 特别鸣谢
 

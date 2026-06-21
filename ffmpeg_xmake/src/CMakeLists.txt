@@ -136,6 +136,20 @@ elseif (WIN32)
 
 elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
   message(WARNING "Compiling: Linux")
+  # 获取当前架构(去除换行)
+  execute_process(
+          COMMAND uname -m
+          OUTPUT_VARIABLE LINUX_ARCH
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  # 定义Linux标准的 so 存放路径
+  set(LINUX_DEFAULT_LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../linux/libs/${LINUX_ARCH})
+  # 根据架构选择不同的cmake
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/xmake/build/linux/${LINUX_ARCH})
+  # 将 core 库输出位置指定为构建目录
+  set_target_properties(${FFMPEG_CORE_LIB_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${LINUX_DEFAULT_LIBS_DIR})
+
+  install(FILES "${LINUX_DEFAULT_LIBS_DIR}/lib${FFMPEG_CORE_LIB_NAME}.so" DESTINATION "lib")
 
 elseif (APPLE)
   if (CMAKE_SYSTEM_NAME MATCHES "iOS")
@@ -151,6 +165,8 @@ endif ()
 set_target_properties(${PROJECT_NAME} PROPERTIES
   PUBLIC_HEADER ffmpeg_hl.h
   OUTPUT_NAME "ffmpeg_hl"
+  BUILD_WITH_INSTALL_RPATH TRUE
+  INSTALL_RPATH "$ORIGIN"
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC DART_SHARED_LIB)

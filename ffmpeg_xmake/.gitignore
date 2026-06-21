@@ -41,12 +41,14 @@ migrate_working_dir/
 !/src/xmake/build/harmony/
 !/src/xmake/build/windows/
 !/src/xmake/build/wasm/
+!/src/xmake/build/linux/
 
 # 先忽略目录中的所有内容
 /src/xmake/build/*/*/*
 
 # 再放行特定后缀
 !/src/xmake/build/android/**/*.so
+!/src/xmake/build/linux/**/*.so
 !/src/xmake/build/harmony/**/*.so
 !/src/xmake/build/windows/**/*.dll
 !/src/xmake/build/windows/**/*.lib
@@ -61,3 +63,4 @@ src/cmake-build-*
 
 android/src/main/jniLibs
 ohos/libs
+linux/libs
