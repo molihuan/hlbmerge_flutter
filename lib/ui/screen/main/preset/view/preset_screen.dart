@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hlbmerge/ui/base/widgets/common_widget.dart';
 import '../../../../../utils/platform_util.dart';
 import '../provider/preset_provider.dart';
 import '../provider/sync_preset_provider.dart';
@@ -33,9 +34,34 @@ class PresetScreen extends ConsumerWidget {
               intent.goTutorialUrlPage();
             },
           ),
-          _buildInputCacheItem("缓存视频解析位置", () {
-            intent.goPathSelectScreen();
-          }),
+
+          //输入缓存项设置
+          ...runPlatform<List<Widget>>(
+            orElse: () {
+              return [];
+            },
+            onAndroid: () {
+              return [
+                ListTile(
+                  title: const Text("缓存视频解析位置"),
+                  onTap: () {
+                    intent.goPathSelectScreen();
+                  },
+                ),
+              ];
+            },
+            onOhos: () {
+              return [
+                ListTile(
+                  title: const Text("缓存视频解析位置"),
+                  onTap: () {
+                    intent.pickInputCacheDirPath();
+                  },
+                ),
+              ];
+            },
+          ),
+
           ListTile(
             title: const Text("导出路径"),
             subtitle: Text(uiState.value?.outputDirPath ?? "未设置"),
@@ -84,18 +110,6 @@ class PresetScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  //输入缓存项设置
-  Widget _buildInputCacheItem(String title, void Function() onTap) {
-    return runPlatform<Widget>(
-      orElse: () {
-        return const SizedBox.shrink();
-      },
-      onAndroid: () {
-        return ListTile(title: Text(title), onTap: onTap);
-      },
     );
   }
 }

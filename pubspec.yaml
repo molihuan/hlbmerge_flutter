@@ -94,6 +94,7 @@ dev_dependencies:
   riverpod_generator: ^4.0.3
   # 生成平台代码,通过git的方式拉取有问题:https://gitcode.com/openharmony-tpc/flutter_packages/tree/br_pigeon-v26.1.5_ohos
   # 所以暂时使用本地的pigeon
+  # dart run pigeon --input pigeons/api.dart
   pigeon:
     path: ./third_party/pigeon26.1.5
   # 资源强类型

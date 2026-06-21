@@ -47,6 +47,22 @@ class PresetNotifier extends _$PresetNotifier {
     nativeApis.goNativePage("", null);
   }
 
+  void pickInputCacheDirPath() async {
+    String? dirPath = await FilePicker.platform.getDirectoryPath();
+    Log.e("dirPath: $dirPath");
+    if (dirPath == null) {
+      ToastUtil.warning("您未选择路径");
+      return;
+    }
+
+    //判断路径中是否有空格
+    if (StrUtil.containsAnySpace(dirPath)) {
+      ToastUtil.warning("路径中不能包含空格,请重新选择");
+      return;
+    }
+    SettingsRepository.setInputCacheDirPath(dirPath);
+  }
+
   void selectOutputPath() async {
     String? dirPath = await FilePicker.platform.getDirectoryPath();
 

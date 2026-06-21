@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:path_provider/path_provider.dart';
 import '../features/export/cache_data_manager.dart';
 import '../generate/pigeon/flutter_native_api.g.dart';
 import '../storage/impl/local/mmkv/mmkv_storage.dart';
@@ -55,10 +55,12 @@ class SettingsRepository {
 
   //获取默认的输出路径
   static Future<String?> _getDefaultOutputDirPath() async {
-    var outputDir = await runPlatformAsync<Directory?>(
+    final outputDirName = "outputDir";
+
+    final outputDir = await runPlatformAsync<Directory?>(
       orElse: () {
         final currExeDir = FileUtil.getCurrExeDir();
-        return Directory('${currExeDir.path}/outputDir');
+        return Directory('${currExeDir.path}/${outputDirName}');
       },
       onAndroid: () async {
         final nativeApis = NativeApis();
@@ -73,11 +75,13 @@ class SettingsRepository {
         }
         return Directory(path);
       },
-      onOhos: () {
-        return null;
+      onOhos: () async {
+        final appDocDir = await getApplicationDocumentsDirectory();
+        return Directory('${appDocDir.path}/${outputDirName}');
       },
-      onMacOS: () {
-        return null;
+      onMacOS: () async {
+        final appDocDir = await getApplicationDocumentsDirectory();
+        return Directory('${appDocDir.path}/${outputDirName}');
       },
       onWeb: () {
         return null;
