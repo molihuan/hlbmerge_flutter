@@ -38,17 +38,17 @@ B站的"学习视频"经常失效/下架，此软件可以将缓存的"学习视
 | 平台截图                                                                                                                            |
 |---------------------------------------------------------------------------------------------------------------------------------|
 | Android                                                                                                                         |
-| <a href="https://postimg.cc/621XdMZN" target="_blank"><img src="https://i.postimg.cc/PJd5ncrN/hlbmerge-android-preview-01.jpg" alt="hlbmerge-android-preview-01"></a> |
+| ![hlbmerge_android_preview_01.jpg](ReadmeRes/hlbmerge_android_preview_01.jpg) |
 | Windows                                                                                                                         |
-| <a href="https://postimg.cc/34bTgtG8" target="_blank"><img src="https://i.postimg.cc/HnTk1Ksy/hlbmerge-windows-preview-01.jpg" alt="hlbmerge-windows-preview-01"></a> |
+| ![hlbmerge_windows_preview_01.jpg](ReadmeRes/hlbmerge_windows_preview_01.jpg) |
 | Linux                                                                                                                           |
-| <a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/kG7gPZX4/hlbmerge-linux-preview-01.jpg" alt="hlbmerge-linux-preview-01"></a>     |
+| ![hlbmerge_linux_preview_01.jpg](ReadmeRes/hlbmerge_linux_preview_01.jpg)     |
 | ohos                                                                                                                            |
-| <a href="https://postimg.cc/vgSsW0ns" target="_blank"><img src="https://i.postimg.cc/x891V7Tc/hlbmerge-harmony-preview-01.jpg" alt="hlbmerge-harmony-preview-01"></a> |
+| ![hlbmerge_harmony_preview_01.jpg](ReadmeRes/hlbmerge_harmony_preview_01.jpg) |
 | Mac                                                                                                                             |
-| <a href="https://postimg.cc/mz6sQm9T" target="_blank"><img src="https://i.postimg.cc/QCjdZPxK/hlbmerge-mac-preview-01.png" alt="hlbmerge-mac-preview-01"></a>         |
+| ![hlbmerge_mac_preview_01.png](ReadmeRes/hlbmerge_mac_preview_01.png)         |
 | ios                                                                                                                             |
-| <a href="https://postimg.cc/sQ0rpTWC" target="_blank"><img src="https://i.postimg.cc/Kjm8hVvj/hlbmerge-ios-preview-01.png" alt="hlbmerge-ios-preview-01"></a>         |
+| ![hlbmerge_ios_preview_01.png](ReadmeRes/hlbmerge_ios_preview_01.png)         |
 | Web                                                                                                                             |
 | 待补充                                                                                                                             |
 
