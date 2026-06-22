@@ -30,8 +30,7 @@ B站的"学习视频"经常失效/下架，此软件可以将缓存的"学习视
 
 ## 前言
 
-#### 在开始之前可以给项目一个Star吗？非常感谢，你的支持是我唯一的动力。欢迎Star和Issues!
-#### 我们需要你的Pr
+#### 在开始之前可以给项目一个Star吗？非常感谢，你的支持是我唯一的动力
 #### 项目地址： [Github地址](https://github.com/molihuan/hlbmerge_flutter)     [Gitcode地址](https://gitcode.com/bigmolihuan/hlbmerge_flutter)
 
 ## 截图 (如果图片无法显示请前往国内镜像[Gitcode](https://gitcode.com/bigmolihuan/hlbmerge_flutter))
@@ -39,17 +38,17 @@ B站的"学习视频"经常失效/下架，此软件可以将缓存的"学习视
 | 平台截图                                                                                                                            |
 |---------------------------------------------------------------------------------------------------------------------------------|
 | Android                                                                                                                         |
-| ![https://i.postimg.cc/PJd5ncrN/hlbmerge-android-preview-01.jpg](https://i.postimg.cc/PJd5ncrN/hlbmerge-android-preview-01.jpg) |
+| <a href="https://postimg.cc/621XdMZN" target="_blank"><img src="https://i.postimg.cc/PJd5ncrN/hlbmerge-android-preview-01.jpg" alt="hlbmerge-android-preview-01"></a> |
 | Windows                                                                                                                         |
-| ![https://i.postimg.cc/HnTk1Ksy/hlbmerge-windows-preview-01.jpg](https://i.postimg.cc/HnTk1Ksy/hlbmerge-windows-preview-01.jpg) |
+| <a href="https://postimg.cc/34bTgtG8" target="_blank"><img src="https://i.postimg.cc/HnTk1Ksy/hlbmerge-windows-preview-01.jpg" alt="hlbmerge-windows-preview-01"></a> |
 | Linux                                                                                                                           |
-| ![https://i.postimg.cc/kG7gPZX4/hlbmerge-linux-preview-01.jpg](https://i.postimg.cc/kG7gPZX4/hlbmerge-linux-preview-01.jpg)     |
+| <a href="https://postimages.org/" target="_blank"><img src="https://i.postimg.cc/kG7gPZX4/hlbmerge-linux-preview-01.jpg" alt="hlbmerge-linux-preview-01"></a>     |
 | ohos                                                                                                                            |
-| ![https://i.postimg.cc/x891V7Tc/hlbmerge-harmony-preview-01.jpg](https://i.postimg.cc/x891V7Tc/hlbmerge-harmony-preview-01.jpg) |
+| <a href="https://postimg.cc/vgSsW0ns" target="_blank"><img src="https://i.postimg.cc/x891V7Tc/hlbmerge-harmony-preview-01.jpg" alt="hlbmerge-harmony-preview-01"></a> |
 | Mac                                                                                                                             |
-| ![https://i.postimg.cc/QCjdZPxK/hlbmerge-mac-preview-01.png](https://i.postimg.cc/QCjdZPxK/hlbmerge-mac-preview-01.png)         |
+| <a href="https://postimg.cc/mz6sQm9T" target="_blank"><img src="https://i.postimg.cc/QCjdZPxK/hlbmerge-mac-preview-01.png" alt="hlbmerge-mac-preview-01"></a>         |
 | ios                                                                                                                             |
-| ![https://i.postimg.cc/Kjm8hVvj/hlbmerge-ios-preview-01.png](https://i.postimg.cc/Kjm8hVvj/hlbmerge-ios-preview-01.png)         |
+| <a href="https://postimg.cc/sQ0rpTWC" target="_blank"><img src="https://i.postimg.cc/Kjm8hVvj/hlbmerge-ios-preview-01.png" alt="hlbmerge-ios-preview-01"></a>         |
 | Web                                                                                                                             |
 | 待补充                                                                                                                             |
 
@@ -123,10 +122,12 @@ flutter pub run flutter_launcher_icons
 - flutter 3.35.7
 - xmake 3.0.9
 
-编译时需要搭建好ffmpeg编译环境,否则无法编译,或者自行修改[ffmpeg_xmake/src/CMakeLists.txt](ffmpeg_xmake/src/CMakeLists.txt),动态库已编译上传到仓库的[ffmpeg_xmake/src/xmake/build](ffmpeg_xmake/src/xmake/build)
+- 首先需要编译ffmpeg_core,编译脚本在[ffmpeg_xmake/src/xmake](ffmpeg_xmake/src/xmake), 编译时需要搭建好ffmpeg编译环境,否则无法编译
+- 如果不想编译ffmpeg_core那么需要自行修改[ffmpeg_xmake/src/CMakeLists.txt](ffmpeg_xmake/src/CMakeLists.txt),处理好动态库链接和拷贝问题,ffmpeg_core动态库已编译上传到仓库的[ffmpeg_xmake/src/xmake/build](ffmpeg_xmake/src/xmake/build)
 
 #### Linux编译特别注意
 ```shell
+# 需要安装
 sudo apt install libayatana-appindicator3-dev
 ```
 
