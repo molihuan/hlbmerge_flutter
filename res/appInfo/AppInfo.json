@@ -4,7 +4,7 @@
     {
       "platform": "android",
       "enableUpdateCheck": true,
-      "versionCode" : 300,
+      "versionCode" : 3000,
       "versionName" : "3.0.0",
       "updateTime": "2026-06-23",
       "updateContent": "1. 重构项目",
@@ -16,7 +16,7 @@
     {
       "platform": "windows",
       "enableUpdateCheck": true,
-      "versionCode" : 300,
+      "versionCode" : 3000,
       "versionName" : "3.0.0",
       "updateTime": "2026-06-23",
       "updateContent": "1. 重构项目",
@@ -28,7 +28,7 @@
     {
       "platform": "linux",
       "enableUpdateCheck": true,
-      "versionCode" : 300,
+      "versionCode" : 3000,
       "versionName" : "3.0.0",
       "updateTime": "2026-06-23",
       "updateContent": "1. 重构项目",
@@ -40,7 +40,7 @@
     {
       "platform": "ohos",
       "enableUpdateCheck": true,
-      "versionCode" : 300,
+      "versionCode" : 3000,
       "versionName" : "3.0.0",
       "updateTime": "2026-06-23",
       "updateContent": "1. 重构项目",
@@ -52,7 +52,7 @@
     {
       "platform": "mac",
       "enableUpdateCheck": true,
-      "versionCode" : 300,
+      "versionCode" : 3000,
       "versionName" : "3.0.0",
       "updateTime": "2026-06-23",
       "updateContent": "1. 重构项目",
