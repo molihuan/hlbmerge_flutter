@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.molihuan.hlbmerge.App
-import com.molihuan.hlbmerge.NavRoute
 import com.molihuan.hlbmerge.R
 import com.molihuan.hlbmerge.ui.components.BackCenterTopAppBar
 import com.molihuan.hlbmerge.ui.screen.path.select.component.FolderChooserDialog
@@ -53,7 +52,6 @@ import timber.log.Timber
 
 @Composable
 fun PathSelectScreen(
-    args: NavRoute.PathSelect.Args? = null,
     vm: PathSelectViewModel = viewModel()
 ) {
     val activity = LocalActivity.current

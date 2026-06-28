@@ -141,8 +141,10 @@ android {
 
         // compose约束布局
         implementation(libs.androidx.constraintlayout.compose)
-        // https://mvnrepository.com/artifact/androidx.navigation/navigation-compose
-        implementation(libs.androidx.navigation.compose)
+        // compose导航
+        implementation(libs.androidx.navigation3.runtime)
+        implementation(libs.androidx.navigation3.ui)
+        implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
         //测试相关
         testImplementation(libs.junit)

@@ -32,10 +32,6 @@ class App : Application() {
         FlutterEngineCache
             .getInstance()
             .put(packageName, flutterEngine)
-
-        //注册监听
-//        MainMethodChannel.register(flutterEngine.dartExecutor.binaryMessenger, this)
-//        registerActivityLifecycleCallbacks(MainMethodChannel)
     }
 
     /**

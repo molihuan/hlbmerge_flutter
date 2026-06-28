@@ -378,7 +378,7 @@ class PathSelectViewModel : ViewModel() {
             //.unchecked()
             .request(object : OnPermissionCallback {
 
-                override fun onResult(
+                override fun onPermissionResult(
                     grantedList: MutableList<IPermission>,
                     deniedList: MutableList<IPermission>
                 ) {

@@ -1,5 +1,6 @@
 package com.molihuan.hlbmerge.ui.components
 
+import android.R.attr.onClick
 import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -23,18 +24,20 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.navigation.NavController
-import com.molihuan.hlbmerge.LocalNavController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import com.molihuan.hlbmerge.ui.screen.app.LocalNavBackStack
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackCenterTopAppBar(
     title: String = "",
     activity: Activity? = null,
-    navController: NavController? = LocalNavController.current,
+    navController : NavBackStack<NavKey>? = LocalNavBackStack.current,
     onClick: () -> Unit = {
         if (activity == null) {
-            navController?.popBackStack()
+            navController?.removeLastOrNull()
         } else {
             activity.finish()
         }
@@ -64,10 +67,10 @@ fun BackCenterTopAppBar(
 fun BackCenterTitle(
     title: String = "标题",
     activity: Activity? = null,
-    navController: NavController? = LocalNavController.current,
+    navController: NavBackStack<NavKey>? = LocalNavBackStack.current,
     onClick: () -> Unit = {
         if (activity == null) {
-            navController?.popBackStack()
+            navController?.removeLastOrNull()
         } else {
             activity.finish()
         }

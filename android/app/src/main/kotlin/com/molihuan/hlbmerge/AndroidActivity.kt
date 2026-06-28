@@ -2,24 +2,13 @@ package com.molihuan.hlbmerge
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.molihuan.hlbmerge.ui.screen.path.select.PathSelectScreen
+import com.molihuan.hlbmerge.ui.screen.app.AppScreen
+import com.molihuan.hlbmerge.ui.screen.app.NavRoute
 import com.molihuan.hlbmerge.ui.theme.AndroidTheme
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 class AndroidActivity : ComponentActivity() {
@@ -30,9 +19,10 @@ class AndroidActivity : ComponentActivity() {
         if (route != null) {
             Json.decodeFromString<NavRoute>(route)
         } else {
-            NavRoute.PathSelect(NavRoute.PathSelect.Args())
+            NavRoute.PathSelect()
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -45,69 +35,11 @@ class AndroidActivity : ComponentActivity() {
 
     companion object {
         const val ROUTE_KEY = "route"
-        fun go(context: Context, to: NavRoute = NavRoute.PathSelect(NavRoute.PathSelect.Args())) {
+        fun go(context: Context, to: NavRoute = NavRoute.PathSelect()) {
             context.startActivity(Intent(context, AndroidActivity::class.java).apply {
                 putExtra(ROUTE_KEY, Json.encodeToString(to))
             })
         }
     }
 
-}
-
-// 创建LocalNavController,用于快速跳转
-val LocalNavController = staticCompositionLocalOf<NavController?> { null }
-@Composable
-fun AppScreen(initRoute: NavRoute = NavRoute.PathSelect(NavRoute.PathSelect.Args())) {
-    val navController = rememberNavController()
-    CompositionLocalProvider(
-        LocalNavController provides navController,
-    ) {
-        NavHost(
-            navController,
-            startDestination = initRoute.route,
-        ) {
-            composable(
-                route = NavRoute.PathSelect.routeWithArgs,
-                arguments = listOf(
-                    navArgument(NavRoute.PathSelect.argsKey) {
-                        type = NavType.StringType
-                    },
-                )
-            ) {
-                val argsJson =
-                    it.arguments?.getString(NavRoute.PathSelect.argsKey)
-                val args = argsJson?.let {
-                    Json.decodeFromString<NavRoute.PathSelect.Args>(
-                        Uri.decode(it)
-                    )
-                }
-                PathSelectScreen(args = args)
-            }
-
-        }
-
-    }
-}
-
-@Serializable
-sealed class NavRoute(val route: String, val title: String? = null) {
-
-    @Serializable
-    data class PathSelect(val args: Args) :
-        NavRoute("PathSelect/${Uri.encode(Json.encodeToString(args))}") {
-        @Serializable
-        data class Args(val from: NavRoute? = null)
-        companion object {
-            const val argsKey = "args"
-            const val routeWithArgs = "PathSelect/{${argsKey}}"
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AppScreenPreview() {
-    AndroidTheme {
-        AppScreen()
-    }
 }

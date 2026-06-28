@@ -2,7 +2,7 @@
 agp = "8.13.0"
 coilCompose = "3.3.0"
 constraintlayoutCompose = "1.1.1"
-devicecompat = "1.6"
+devicecompat = "2.6"
 documentfile = "1.1.0"
 kotlin = "2.2.20"
 coreKtx = "1.17.0"
@@ -20,10 +20,11 @@ material = "1.13.0"
 
 ksp = "2.2.20-2.0.3"
 
-navigationCompose = "2.9.4"
+lifecycleViewmodelNavigation3 = "2.11.0-beta01"
+navigation3 = "1.2.0-alpha02"
 
 timber = "5.0.1"
-xxpermissions = "26.5"
+xxpermissions = "28.3"
 
 shizuku = "13.1.5"
 
@@ -53,7 +54,9 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref =
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNavigation3" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 xxpermissions = { module = "com.github.getActivity:XXPermissions", version.ref = "xxpermissions" }

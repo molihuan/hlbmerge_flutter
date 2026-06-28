@@ -53,7 +53,7 @@ class NativeApisImpl(
             // 设置不触发错误检测机制（局部设置）
             //.unchecked()
             .request(object : OnPermissionCallback {
-                override fun onResult(
+                override fun onPermissionResult(
                     grantedList: MutableList<IPermission>,
                     deniedList: MutableList<IPermission>
                 ) {
