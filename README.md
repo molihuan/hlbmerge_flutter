@@ -5,7 +5,7 @@
 </p>
 <h1 align="center">HLB站缓存合并</h1>
 
-[![license: Apache-2.0 (shields.io)](https://img.shields.io/badge/license-Apache--2.0-brightgreen)](https://github.com/molihuan/mlhfileselectorlib/blob/master/LICENSE)[![Star](https://img.shields.io/github/stars/molihuan/hlbmerge_flutter.svg)](https://github.com/molihuan/hlbmerge_flutter)[![bilibili: 玲莫利 (shields.io)](https://img.shields.io/badge/bilibili-玲莫利-orange)](https://space.bilibili.com/454222981)[![CSDN: molihuan (shields.io)](https://img.shields.io/badge/CSDN-molihuan-blue)](https://blog.csdn.net/molihuan)
+[![license: Apache-2.0 (shields.io)](https://img.shields.io/badge/license-Apache--2.0-brightgreen)](https://github.com/molihuan/mlhfileselectorlib/blob/master/LICENSE)[![Star](https://img.shields.io/github/stars/molihuan/hlbmerge_flutter.svg)](https://github.com/molihuan/hlbmerge_flutter)[![bilibili: 玲莫利 (shields.io)](https://img.shields.io/badge/bilibili-玲莫利-orange)](https://space.bilibili.com/454222981)[![CSDN: molihuan (shields.io)](https://img.shields.io/badge/CSDN-molihuan-blue)](https://blog.csdn.net/molihuan) [![AtomGit Download](https://gitcode.com/bigmolihuan/hlbmerge_flutter/download/badge.svg)](https://gitcode.com/bigmolihuan/hlbmerge_flutter)
 
 <h3 align="center">把Bilibili缓存视频导出为MP4格式</h3>
 <p align="center">将Bilibili缓存视频合并导出为MP4，支持android、windows(10以上)、linux、mac、harmony(仅2in1和PC)、ios，支持B站Android客户端缓存，支持B站Windows客户端缓存，支持B站Mac客户端缓存</p>
