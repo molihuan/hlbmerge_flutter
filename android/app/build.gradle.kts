@@ -90,6 +90,9 @@ android {
     packaging {
         jniLibs {
             useLegacyPackaging = true
+            excludes += setOf(
+                "**/libcnativeapi.so",
+            )
         }
     }
 

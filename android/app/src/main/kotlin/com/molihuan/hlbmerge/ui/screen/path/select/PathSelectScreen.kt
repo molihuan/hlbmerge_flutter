@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -35,7 +37,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -395,13 +400,23 @@ private fun PermissionTipsSection(
                 .background(Color.Gray.copy(alpha = 0.1f))
                 .padding(vertical = 15.dp, horizontal = 15.dp)
         ) {
-            Text(text = "提示:由于安卓高版本系统限制,安卓11及以上需要通过以下任意一种方法授予权限才可读取缓存文件:")
-            Text("1、通过DocumentUri授权,点击下方对应Bilibili版本后的读取开关即可开始授权(本地必须要有缓存文件),适用于安卓11~安卓13,如果无法授权请使用其他方式。")
-            Text("2、使用文件管理器将B站本地缓存文件移动出Android/data目录,然后选择\"自定义路径\"，弹窗中选择你移动出来的文件路径即可。")
-            Text(
-                "3、通过Shizuku授权,适用于安卓11及以上系统,点击下方按钮即可开始授权,授权后打开对应Bilibili版本读取开关即可(注意:使用Shizuku授权方式导出缓存文件的方式极其不稳定,很有可能失败,建议将Shizuku软件以小窗的形式保持在前台运行,这样的成功率高)。",
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            Text("温馨提示", fontWeight = FontWeight.Bold)
+
+            Spacer(Modifier.height(5.dp))
+
+            Text(buildAnnotatedString {
+                append("由于安卓高版本系统限制,安卓11及以上需要通过以下")
+                withStyle(style = SpanStyle(color = Color.Blue, fontWeight = FontWeight.SemiBold)){
+                    append("任意一种方法")
+                }
+                append("授予权限才可读取缓存文件:\n")
+                append("1、通过DocumentUri授权,点击下方对应Bilibili版本后的读取开关即可开始授权(本地必须要有缓存文件),适用于安卓11~安卓13,如果无法授权请使用其他方式。\n")
+                append("2、使用文件管理器将B站本地缓存文件移动出Android/data目录,然后选择\"自定义路径\"，弹窗中选择你移动出来的文件路径即可。\n")
+                append("3、通过Shizuku授权,适用于安卓11及以上系统,点击下方按钮即可开始授权,授权后打开对应Bilibili版本读取开关即可(注意:使用Shizuku授权方式导出缓存文件的方式极其不稳定,很有可能失败,建议将Shizuku软件以小窗的形式保持在前台运行,这样的成功率高)。")
+            })
+
+            Spacer(Modifier.height(8.dp))
+
             if (hasShizukuPermission) {
                 Text(
                     "Shizuku已授权",
