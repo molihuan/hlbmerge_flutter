@@ -57,10 +57,7 @@ dependencies:
       path: packages/package_info_plus/package_info_plus
       ref: br_package_info_plus-v9.0.0_ohos
   # 拖拽
-  desktop_drop:
-    git:
-      url: https://gitee.com/molihuan/flutter-plugins.git
-      path: packages/desktop_drop
+  desktop_drop: ^0.8.4
   # 日志
   logger: ^2.7.0
   # 吐司

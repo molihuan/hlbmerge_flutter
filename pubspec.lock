@@ -233,15 +233,22 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.2.0"
+  dbus:
+    dependency: transitive
+    description:
+      name: dbus
+      sha256: a48d5da28e89bd02196e80d81ed8d7954923d00a0f4a68cc20b575038f023383
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.7.15"
   desktop_drop:
     dependency: "direct main"
     description:
-      path: "packages/desktop_drop"
-      ref: HEAD
-      resolved-ref: dad32377a6495de8e2de4bc7ee2bfee76fa5b38a
-      url: "https://gitee.com/molihuan/flutter-plugins.git"
-    source: git
-    version: "0.7.0"
+      name: desktop_drop
+      sha256: "47ded09c85909edfed644fd4cbb5051b040d0aed5c79e7e062ea4b3b7156dbe4"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.8.4"
   equatable:
     dependency: transitive
     description:
