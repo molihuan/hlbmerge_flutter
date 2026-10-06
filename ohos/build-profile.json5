@@ -5,13 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "C:\\Users\\moli\\.ohos\\config\\default_ohos_bhuJI4RUjqlmtd4pE8u00YDe-2EO1qbWwdnnr25UZ5w=.cer",
+          "certpath": "C:\\Users\\moli\\.ohos\\config\\default_ohos_ivFy4sObMNtaxkBHkk754oN-yr04-_JehV_dyzq7zLw=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001B0DFA7D486F0BD61CA9ED7EAA4D090DEDED1DEE265EEEB1B6B238B0C18DCA93BE655362AED90973",
-          "profile": "C:\\Users\\moli\\.ohos\\config\\default_ohos_bhuJI4RUjqlmtd4pE8u00YDe-2EO1qbWwdnnr25UZ5w=.p7b",
+          "keyPassword": "0000001B446018864AA9A847038818E2A45ED6398AEC0C8C02BEB7BED53F7DB0362B172CC24736D2B7A3FD",
+          "profile": "C:\\Users\\moli\\.ohos\\config\\default_ohos_ivFy4sObMNtaxkBHkk754oN-yr04-_JehV_dyzq7zLw=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\moli\\.ohos\\config\\default_ohos_bhuJI4RUjqlmtd4pE8u00YDe-2EO1qbWwdnnr25UZ5w=.p12",
-          "storePassword": "0000001B00FDAC0D8C45C7474E446AB284F2E4F5A5C3D47647836D80EE10DD222825BCD0D6208B327A1495"
+          "storeFile": "C:\\Users\\moli\\.ohos\\config\\default_ohos_ivFy4sObMNtaxkBHkk754oN-yr04-_JehV_dyzq7zLw=.p12",
+          "storePassword": "0000001BF366262F2B8FA015B3F34C00D50251B37BD654FFBD71724D73201E88F24840A14EC2B4763D737C"
         }
       }
     ],

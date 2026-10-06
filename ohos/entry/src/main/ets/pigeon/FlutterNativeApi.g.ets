@@ -1,6 +1,6 @@
 import StandardMessageCodec from '@ohos/flutter_ohos/src/main/ets/plugin/common/StandardMessageCodec';
 import BasicMessageChannel, { Reply } from '@ohos/flutter_ohos/src/main/ets/plugin/common/BasicMessageChannel';
-import { BinaryMessenger,TaskQueue } from '@ohos/flutter_ohos/src/main/ets/plugin/common/BinaryMessenger';
+import { BinaryMessenger } from '@ohos/flutter_ohos/src/main/ets/plugin/common/BinaryMessenger';
 import MessageCodec from '@ohos/flutter_ohos/src/main/ets/plugin/common/MessageCodec';
 import { ByteBuffer } from '@ohos/flutter_ohos/src/main/ets/util/ByteBuffer';
 
@@ -28,8 +28,8 @@ export class FlutterError implements Error {
   }
 }
 
-function wrapError(error: Error): Array<Object> {
-  let errorList: Array<Object> = new Array<Object>(3);
+function wrapError(error: Error): Array<Object | null> {
+  let errorList: Array<Object | null> = new Array<Object | null>(3);
   if (error instanceof FlutterError) {
     let err: FlutterError = error as FlutterError;
     errorList[0] = err.code;
@@ -43,128 +43,133 @@ function wrapError(error: Error): Array<Object> {
   return errorList;
 }
 
-
 /* Generated class from Pigeon that represents data sent in messages.*/
 export class NativePageParams {
-  private fromFlutter?: boolean;
+  private fromFlutter: boolean;
 
-  public setFromFlutter(fromFlutter:boolean):void {
+  public setFromFlutter(fromFlutter: boolean): void {
     this.fromFlutter = fromFlutter;
   }
 
-  getFromFlutter(): boolean | undefined{
+  getFromFlutter(): boolean{
     return this.fromFlutter;
   }
 
-  constructor(fromFlutter?: boolean) {
+  constructor(fromFlutter: boolean) {
     this.fromFlutter = fromFlutter;
   }
 
-  toList(): Object[] {
-    let arr: Object[] = new Array();
-    if(this.fromFlutter !==undefined){
+  toList(): Array<Object | null> {
+    let arr: Array<Object | null> = new Array<Object | null>();
+    if (this.fromFlutter === undefined || this.fromFlutter === null) {
+      arr.push(null);
+    } else {
       arr.push(this.fromFlutter);
     }
     return arr;
   }
 
   static fromList(arr: Object[]): NativePageParams {
-    let pigeonResult: NativePageParams = new NativePageParams();
-    let fromFlutter: Object = arr[0];
-    pigeonResult.setFromFlutter(fromFlutter as boolean);
-    return pigeonResult;
+    let fromFlutterObject: Object = arr[0];
+    const fromFlutter: boolean = fromFlutterObject as boolean;
+    return new NativePageParams(fromFlutter);
   }
 }
 
 /* Generated class from Pigeon that represents data sent in messages.*/
 export class TupleBool {
-  private code?: number;
+  private code: number;
 
-  public setCode(code:number):void {
+  public setCode(code: number): void {
     this.code = code;
   }
 
-  getCode(): number | undefined{
+  getCode(): number{
     return this.code;
   }
 
-  private msg?: string;
+  private msg: string;
 
-  public setMsg(msg:string):void {
+  public setMsg(msg: string): void {
     this.msg = msg;
   }
 
-  getMsg(): string | undefined{
+  getMsg(): string{
     return this.msg;
   }
 
-  private data?: boolean;
+  private data: boolean;
 
-  public setData(data:boolean):void {
+  public setData(data: boolean): void {
     this.data = data;
   }
 
-  getData(): boolean | undefined{
+  getData(): boolean{
     return this.data;
   }
 
-  constructor(code?: number, msg?: string, data?: boolean) {
+  constructor(code: number, msg: string, data: boolean) {
     this.code = code;
     this.msg = msg;
     this.data = data;
   }
 
-  toList(): Object[] {
-    let arr: Object[] = new Array();
-    if(this.code !==undefined){
+  toList(): Array<Object | null> {
+    let arr: Array<Object | null> = new Array<Object | null>();
+    if (this.code === undefined || this.code === null) {
+      arr.push(null);
+    } else {
       arr.push(this.code);
     }
-    if(this.msg !==undefined){
+    if (this.msg === undefined || this.msg === null) {
+      arr.push(null);
+    } else {
       arr.push(this.msg);
     }
-    if(this.data !==undefined){
+    if (this.data === undefined || this.data === null) {
+      arr.push(null);
+    } else {
       arr.push(this.data);
     }
     return arr;
   }
 
   static fromList(arr: Object[]): TupleBool {
-    let pigeonResult: TupleBool = new TupleBool();
-    let code: Object = arr[0];
-    pigeonResult.setCode(code as number);
-    let msg: Object = arr[1];
-    pigeonResult.setMsg(msg as string);
-    let data: Object = arr[2];
-    pigeonResult.setData(data as boolean);
-    return pigeonResult;
+    let codeObject: Object = arr[0];
+    const code: number = codeObject as number;
+    let msgObject: Object = arr[1];
+    const msg: string = msgObject as string;
+    let dataObject: Object = arr[2];
+    const data: boolean = dataObject as boolean;
+    return new TupleBool(code, msg, data);
   }
 }
 
 /* Generated class from Pigeon that represents data sent in messages.*/
 export class TupleStr {
-  private code?: number;
+  private code: number;
 
-  public setCode(code:number):void {
+  public setCode(code: number): void {
     this.code = code;
   }
 
-  getCode(): number | undefined{
+  getCode(): number{
     return this.code;
   }
 
-  private msg?: string;
+  private msg: string;
 
-  public setMsg(msg:string):void {
+  public setMsg(msg: string): void {
     this.msg = msg;
   }
 
-  getMsg(): string | undefined{
+  getMsg(): string{
     return this.msg;
   }
 
   private data?: string;
 
-  public setData(data:string):void {
+  public setData(data: string | undefined): void {
     this.data = data;
   }
 
@@ -172,71 +177,80 @@ export class TupleStr {
     return this.data;
   }
 
-  constructor(code?: number, msg?: string, data?: string) {
+  constructor(code: number, msg: string, data?: string) {
     this.code = code;
     this.msg = msg;
     this.data = data;
   }
 
-  toList(): Object[] {
-    let arr: Object[] = new Array();
-    if(this.code !==undefined){
+  toList(): Array<Object | null> {
+    let arr: Array<Object | null> = new Array<Object | null>();
+    if (this.code === undefined || this.code === null) {
+      arr.push(null);
+    } else {
       arr.push(this.code);
     }
-    if(this.msg !==undefined){
+    if (this.msg === undefined || this.msg === null) {
+      arr.push(null);
+    } else {
       arr.push(this.msg);
     }
-    if(this.data !==undefined){
+    if (this.data === undefined || this.data === null) {
+      arr.push(null);
+    } else {
       arr.push(this.data);
     }
     return arr;
   }
 
   static fromList(arr: Object[]): TupleStr {
-    let pigeonResult: TupleStr = new TupleStr();
-    let code: Object = arr[0];
-    pigeonResult.setCode(code as number);
-    let msg: Object = arr[1];
-    pigeonResult.setMsg(msg as string);
-    let data: Object = arr[2];
-    pigeonResult.setData(data as string);
-    return pigeonResult;
+    let codeObject: Object = arr[0];
+    const code: number = codeObject as number;
+    let msgObject: Object = arr[1];
+    const msg: string = msgObject as string;
+    let data: string | undefined = undefined;
+    if (arr[2] !== null && arr[2] !== undefined) {
+      let dataObject: Object = arr[2];
+      data = dataObject as string | undefined;
+    }
+    return new TupleStr(code, msg, data);
   }
 }
 
 /* Generated class from Pigeon that represents data sent in messages.*/
 export class FlutterPageParams {
-  private fromNative?: boolean;
+  private fromNative: boolean;
 
-  public setFromNative(fromNative:boolean):void {
+  public setFromNative(fromNative: boolean): void {
     this.fromNative = fromNative;
   }
 
-  getFromNative(): boolean | undefined{
+  getFromNative(): boolean{
     return this.fromNative;
   }
 
-  constructor(fromNative?: boolean) {
+  constructor(fromNative: boolean) {
     this.fromNative = fromNative;
   }
 
-  toList(): Object[] {
-    let arr: Object[] = new Array();
-    if(this.fromNative !==undefined){
+  toList(): Array<Object | null> {
+    let arr: Array<Object | null> = new Array<Object | null>();
+    if (this.fromNative === undefined || this.fromNative === null) {
+      arr.push(null);
+    } else {
       arr.push(this.fromNative);
     }
     return arr;
   }
 
   static fromList(arr: Object[]): FlutterPageParams {
-    let pigeonResult: FlutterPageParams = new FlutterPageParams();
-    let fromNative: Object = arr[0];
-    pigeonResult.setFromNative(fromNative as boolean);
-    return pigeonResult;
+    let fromNativeObject: Object = arr[0];
+    const fromNative: boolean = fromNativeObject as boolean;
+    return new FlutterPageParams(fromNative);
   }
 }
 
-class PigeonCodec extends StandardMessageCodec {
+export class PigeonCodec extends StandardMessageCodec {
   static readonly INSTANCE: PigeonCodec  = new PigeonCodec();
 
   getByte(n: number): number {
@@ -291,7 +305,7 @@ export interface Result<T> {
 /* Generated abstract class from Pigeon that represents a handler of messages from Flutter.*/
 export abstract class NativeApis {
   /* 跳转原生页面*/
-  abstract goNativePage(router: string , params: NativePageParams ): TupleBool;
+  abstract goNativePage(router: string , params: NativePageParams | undefined ): TupleBool;
   /* 是否有读写权限*/
   abstract hasReadWritePermission(): TupleBool;
   /* 请求读写权限,需要异步*/
@@ -311,22 +325,31 @@ export abstract class NativeApis {
     return PigeonCodec.INSTANCE;
   }
   /*Sets up an instance of `NativeApis` to handle messages through the `binaryMessenger`.*/
-  static setup(binaryMessenger: BinaryMessenger, api: NativeApis | null): void {
+  static setup(binaryMessenger: BinaryMessenger, api: NativeApis | null, messageChannelSuffix: string = ''): void {
+    const separatedMessageChannelSuffix: string = messageChannelSuffix !== '' ? '.' + messageChannelSuffix : '';
     {
       let channel: BasicMessageChannel<Object> =
           new BasicMessageChannel(
-              binaryMessenger, "dev.flutter.pigeon.hlbmerge.NativeApis.goNativePage", NativeApis.getCodec());
+              binaryMessenger, 'dev.flutter.pigeon.hlbmerge.NativeApis.goNativePage' + separatedMessageChannelSuffix, NativeApis.getCodec());
       if (api != null) {
         channel.setMessageHandler({
             onMessage(message: Object ,reply: Reply<Object> ) {
+              if (!(Array.isArray(message))) {
+                  reply.reply(wrapError(new Error('Invalid Pigeon message: expected List.')));
+                  return;
+              }
               let args: Array<Object> = message as Array<Object>;
-              let res: Array<Object> = [];
+              if (args.length < 2) {
+                  reply.reply(wrapError(new Error('Invalid Pigeon message: expected at least 2 argument(s).')));
+                  return;
+              }
+              let res: Array<Object | null> = [];
               try {
-                let output: TupleBool = api!.goNativePage(args[0] as string, args[1] as NativePageParams);
+                let output: TupleBool = api!.goNativePage(args[0] as string, args[1] as NativePageParams | undefined);
                 res.push(output);
               }
  catch (error) {
-                let wrappedError: Array<Object> = wrapError(error);
+                let wrappedError: Array<Object | null> = wrapError(error);
                 res = wrappedError;
               }
               reply.reply(res);
@@ -338,17 +361,17 @@ export abstract class NativeApis {
     {
       let channel: BasicMessageChannel<Object> =
           new BasicMessageChannel(
-              binaryMessenger, "dev.flutter.pigeon.hlbmerge.NativeApis.hasReadWritePermission", NativeApis.getCodec());
+              binaryMessenger, 'dev.flutter.pigeon.hlbmerge.NativeApis.hasReadWritePermission' + separatedMessageChannelSuffix, NativeApis.getCodec());
       if (api != null) {
         channel.setMessageHandler({
             onMessage(message: Object ,reply: Reply<Object> ) {
-              let res: Array<Object> = [];
+              let res: Array<Object | null> = [];
               try {
                 let output: TupleBool = api!.hasReadWritePermission();
                 res.push(output);
               }
  catch (error) {
-                let wrappedError: Array<Object> = wrapError(error);
+                let wrappedError: Array<Object | null> = wrapError(error);
                 res = wrappedError;
               }
               reply.reply(res);
@@ -360,19 +383,19 @@ export abstract class NativeApis {
     {
       let channel: BasicMessageChannel<Object> =
           new BasicMessageChannel(
-              binaryMessenger, "dev.flutter.pigeon.hlbmerge.NativeApis.grantReadWritePermission", NativeApis.getCodec());
+              binaryMessenger, 'dev.flutter.pigeon.hlbmerge.NativeApis.grantReadWritePermission' + separatedMessageChannelSuffix, NativeApis.getCodec());
       if (api != null) {
         channel.setMessageHandler({
             onMessage(message: Object ,reply: Reply<Object> ) {
               class ResultImp implements Result<TupleBool>{
                     success(result: TupleBool): void {
-                      let res: Array<Object> = [];
+                      let res: Array<Object | null> = [];
                       res.push(result);
                       reply.reply(res);
                     }
 
                     error(error: Error): void {
-                      let wrappedError: Array<Object> = wrapError(error);
+                      let wrappedError: Array<Object | null> = wrapError(error);
                       reply.reply(wrappedError);
                     }
               }
@@ -387,17 +410,17 @@ export abstract class NativeApis {
     {
       let channel: BasicMessageChannel<Object> =
           new BasicMessageChannel(
-              binaryMessenger, "dev.flutter.pigeon.hlbmerge.NativeApis.getExternalStorageRootPath", NativeApis.getCodec());
+              binaryMessenger, 'dev.flutter.pigeon.hlbmerge.NativeApis.getExternalStorageRootPath' + separatedMessageChannelSuffix, NativeApis.getCodec());
       if (api != null) {
         channel.setMessageHandler({
             onMessage(message: Object ,reply: Reply<Object> ) {
-              let res: Array<Object> = [];
+              let res: Array<Object | null> = [];
               try {
                 let output: TupleStr = api!.getExternalStorageRootPath();
                 res.push(output);
               }
  catch (error) {
-                let wrappedError: Array<Object> = wrapError(error);
+                let wrappedError: Array<Object | null> = wrapError(error);
                 res = wrappedError;
               }
               reply.reply(res);
@@ -409,17 +432,17 @@ export abstract class NativeApis {
     {
       let channel: BasicMessageChannel<Object> =
           new BasicMessageChannel(
-              binaryMessenger, "dev.flutter.pigeon.hlbmerge.NativeApis.getDefaultOutputDirPath", NativeApis.getCodec());
+              binaryMessenger, 'dev.flutter.pigeon.hlbmerge.NativeApis.getDefaultOutputDirPath' + separatedMessageChannelSuffix, NativeApis.getCodec());
       if (api != null) {
         channel.setMessageHandler({
             onMessage(message: Object ,reply: Reply<Object> ) {
-              let res: Array<Object> = [];
+              let res: Array<Object | null> = [];
               try {
                 let output: TupleStr = api!.getDefaultOutputDirPath();
                 res.push(output);
               }
  catch (error) {
-                let wrappedError: Array<Object> = wrapError(error);
+                let wrappedError: Array<Object | null> = wrapError(error);
                 res = wrappedError;
               }
               reply.reply(res);
@@ -431,20 +454,28 @@ export abstract class NativeApis {
     {
       let channel: BasicMessageChannel<Object> =
           new BasicMessageChannel(
-              binaryMessenger, "dev.flutter.pigeon.hlbmerge.NativeApis.copyCacheAudioVideoFile", NativeApis.getCodec());
+              binaryMessenger, 'dev.flutter.pigeon.hlbmerge.NativeApis.copyCacheAudioVideoFile' + separatedMessageChannelSuffix, NativeApis.getCodec());
       if (api != null) {
         channel.setMessageHandler({
             onMessage(message: Object ,reply: Reply<Object> ) {
+              if (!(Array.isArray(message))) {
+                  reply.reply(wrapError(new Error('Invalid Pigeon message: expected List.')));
+                  return;
+              }
               let args: Array<Object> = message as Array<Object>;
+              if (args.length < 1) {
+                  reply.reply(wrapError(new Error('Invalid Pigeon message: expected at least 1 argument(s).')));
+                  return;
+              }
               class ResultImp implements Result<TupleBool>{
                     success(result: TupleBool): void {
-                      let res: Array<Object> = [];
+                      let res: Array<Object | null> = [];
                       res.push(result);
                       reply.reply(res);
                     }
 
                     error(error: Error): void {
-                      let wrappedError: Array<Object> = wrapError(error);
+                      let wrappedError: Array<Object | null> = wrapError(error);
                       reply.reply(wrappedError);
                     }
               }
@@ -459,19 +490,19 @@ export abstract class NativeApis {
     {
       let channel: BasicMessageChannel<Object> =
           new BasicMessageChannel(
-              binaryMessenger, "dev.flutter.pigeon.hlbmerge.NativeApis.copyCacheStructureFile", NativeApis.getCodec());
+              binaryMessenger, 'dev.flutter.pigeon.hlbmerge.NativeApis.copyCacheStructureFile' + separatedMessageChannelSuffix, NativeApis.getCodec());
       if (api != null) {
         channel.setMessageHandler({
             onMessage(message: Object ,reply: Reply<Object> ) {
               class ResultImp implements Result<TupleBool>{
                     success(result: TupleBool): void {
-                      let res: Array<Object> = [];
+                      let res: Array<Object | null> = [];
                       res.push(result);
                       reply.reply(res);
                     }
 
                     error(error: Error): void {
-                      let wrappedError: Array<Object> = wrapError(error);
+                      let wrappedError: Array<Object | null> = wrapError(error);
                       reply.reply(wrappedError);
                     }
               }
@@ -486,19 +517,19 @@ export abstract class NativeApis {
     {
       let channel: BasicMessageChannel<Object> =
           new BasicMessageChannel(
-              binaryMessenger, "dev.flutter.pigeon.hlbmerge.NativeApis.notifyExportComplete", NativeApis.getCodec());
+              binaryMessenger, 'dev.flutter.pigeon.hlbmerge.NativeApis.notifyExportComplete' + separatedMessageChannelSuffix, NativeApis.getCodec());
       if (api != null) {
         channel.setMessageHandler({
             onMessage(message: Object ,reply: Reply<Object> ) {
               class ResultImp implements Result<TupleBool>{
                     success(result: TupleBool): void {
-                      let res: Array<Object> = [];
+                      let res: Array<Object | null> = [];
                       res.push(result);
                       reply.reply(res);
                     }
 
                     error(error: Error): void {
-                      let wrappedError: Array<Object> = wrapError(error);
+                      let wrappedError: Array<Object | null> = wrapError(error);
                       reply.reply(wrappedError);
                     }
               }
@@ -515,9 +546,11 @@ export abstract class NativeApis {
 /* Generated class from Pigeon that represents Flutter messages that can be called from ArkTS.*/
 export class FlutterApis {
   binaryMessenger: BinaryMessenger;
+  private messageChannelSuffix: string;
 
-  constructor(binaryMessenger: BinaryMessenger) {
+  constructor(binaryMessenger: BinaryMessenger, messageChannelSuffix: string = '') {
     this.binaryMessenger = binaryMessenger;
+    this.messageChannelSuffix = messageChannelSuffix !== '' ? '.' + messageChannelSuffix : '';
   }
 
   /** The codec used by FlutterApis. */
@@ -525,8 +558,8 @@ export class FlutterApis {
     return PigeonCodec.INSTANCE;
   }
 
-  backFlutterPageFromNativePage(paramsArg: FlutterPageParams, callback: Reply<void>) {
-    const channelName: string = 'dev.flutter.pigeon.hlbmerge.FlutterApis.backFlutterPageFromNativePage';
+  backFlutterPageFromNativePage(paramsArg: FlutterPageParams | undefined, callback: Reply<void>) {
+    const channelName: string = 'dev.flutter.pigeon.hlbmerge.FlutterApis.backFlutterPageFromNativePage' + this.messageChannelSuffix;
     let channel: BasicMessageChannel<Object> = 
         new BasicMessageChannel<Object>(
             this.binaryMessenger, channelName, FlutterApis.getCodec());
@@ -539,13 +572,13 @@ export class FlutterApis {
               let arrFirst:string = listReply[0] as string;
               let arrSecond:string = listReply[1] as string;
               let arrThird:string = listReply[2] as string;
-              let replyArr:ESObject = new FlutterError(arrFirst, arrSecond, arrThird)
+              let replyArr: ESObject = new FlutterError(arrFirst, arrSecond, arrThird);
               callback.reply(replyArr);
             } else {
               callback.reply();
             }
           }  else {
-            let connErr:ESObject = new FlutterError('channel-error', "Unable to establish connection on channel: " + channelName + ".", "")
+            let connErr: ESObject = new FlutterError('channel-error', 'Unable to establish connection on channel: ' + channelName + '.', '');
             callback.reply(connErr);
           } 
         });
