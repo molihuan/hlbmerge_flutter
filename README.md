@@ -66,22 +66,7 @@ B站的"学习视频"经常失效/下架，此软件可以将缓存的"学习视
 > 为了照顾国内网友,现在releases安装包仅在国内镜像仓库上传,望理解。
 
 
-## 使用教程：[跳转](https://github.com/molihuan/hlbmerge_flutter/blob/master/res/tutorial/README.md) 
-
-
-## 问题反馈
-
-##### 因为有你软件才更加完善
-
-请使用模板反馈问题，这样可以帮助开发者快速定位和解决问题，谢谢配合，爱你萌萌哒~^o^~
-
-##### 反馈模板:
-
-设备信息：(必填)
-
-描述,怎样触发bug：(必填，越详细越好)
-
-视频链接：(必填，如果视频已经下架则把本地缓存文件打包压缩发我邮箱)
+## 使用教程：[跳转](https://github.com/molihuan/hlbmerge_flutter/blob/master/res/tutorial/README.md)
 
 
 ## 常用命令:
@@ -113,13 +98,10 @@ flutter build apk --release --split-per-abi
 # 鸿蒙打包
 flutter build hap
 
-# 生成图标
-flutter pub run flutter_launcher_icons
-
 ```
 
 ## 源码编译事项
-- flutter 3.35.7
+- flutter 3.44.9
 - xmake 3.0.9
 
 - 首先需要编译ffmpeg_core,编译脚本在[ffmpeg_xmake/src/xmake](ffmpeg_xmake/src/xmake), 编译时需要搭建好ffmpeg编译环境,否则无法编译
